@@ -1,4 +1,4 @@
-const NFTPurchase = () => {
+const NFT = () => {
     return (
       <div className="container text-center mt-5">
         <h1>Achat de NFT</h1>
@@ -7,4 +7,4 @@ const NFTPurchase = () => {
     );
   };
   
-  export default NFTPurchase;
+  export default NFT;

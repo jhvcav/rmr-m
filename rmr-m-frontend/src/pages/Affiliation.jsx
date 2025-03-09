@@ -1,10 +1,12 @@
-const NFTPurchase = () => {
-    return (
-      <div className="container text-center mt-5">
-        <h1>Achat de NFT</h1>
-        <p>Accédez à des services exclusifs grâce aux NFT.</p>
-      </div>
-    );
-  };
-  
-  export default NFTPurchase;
+import React from "react";
+
+const Affiliation = () => {
+  return (
+    <div>
+      <h1>Programme d'Affiliation</h1>
+      <p>Gagnez des récompenses en invitant d'autres utilisateurs.</p>
+    </div>
+  );
+};
+
+export default Affiliation;
