@@ -3,7 +3,7 @@
     max-width: 800px;
     margin: 120px auto 0;
     padding: 20px;
-    text-align: center;
+    text-align: center !important;
 }
 
 /* Styles du titre */

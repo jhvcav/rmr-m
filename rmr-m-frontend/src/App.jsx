@@ -8,6 +8,7 @@ import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import WalletConnect from "./pages/WalletConnect";
 import Dashboard from "./pages/Dashboard";
+import "./App.css";
 
 const App = () => {
   const wallets = [new PhantomWalletAdapter()];

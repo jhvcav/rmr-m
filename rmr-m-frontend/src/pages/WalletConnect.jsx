@@ -8,17 +8,40 @@ const WalletConnect = () => {
 
   // Connexion Metamask
   const connectMetamask = async () => {
-    if (typeof window !== "undefined" && window.ethereum) {
-      try {
-        const accounts = await window.ethereum.request({
-          method: "eth_requestAccounts",
-        });
-        setMetamaskAccount(accounts[0]); // Stocke l'adresse du compte
-      } catch (error) {
-        console.error("Erreur de connexion Metamask", error);
+    if (typeof window !== "undefined") {
+      if (window.ethereum) {
+        try {
+          const accounts = await window.ethereum.request({
+            method: "eth_requestAccounts",
+          });
+          setMetamaskAccount(accounts[0]); // Stocker le compte Metamask
+        } catch (error) {
+          console.error("Erreur de connexion Metamask", error);
+        }
+      } else {
+        // 📌 Rediriger vers Metamask Mobile si sur mobile
+        window.location.href = "https://metamask.app.link/dapp/github.jhvcav";
       }
     } else {
       alert("Metamask non détecté !");
+    }
+  };
+
+  const connectPhantom = async () => {
+    if (typeof window !== "undefined") {
+      if (window.solana && window.solana.isPhantom) {
+        try {
+          const response = await window.solana.connect();
+          setSolanaAccount(response.publicKey.toBase58()); // Stocker l'adresse Solana
+        } catch (error) {
+          console.error("Erreur de connexion Phantom", error);
+        }
+      } else {
+        // 📌 Rediriger vers l’application Phantom si sur mobile
+        window.location.href = "https://phantom.app/ul/browse/jhvcav.github.io/rmr-m-frontend/";
+      }
+    } else {
+      alert("Phantom Wallet non détecté !");
     }
   };
 
