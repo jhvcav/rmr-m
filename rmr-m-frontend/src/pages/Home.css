@@ -4,6 +4,7 @@
     margin: 120px auto 0;
     padding: 20px;
     text-align: center !important;
+    overflow: hidden; /* Évite tout dépassement */
 }
 
 /* 🏷️ Styles du titre */
@@ -89,9 +90,55 @@
     color: #ddd;
 }
 
-/* 📱💡🔹 RESPONSIVITÉ (Adaptation aux écrans mobiles et tablettes) */
+/* 📌 Barre de navigation défilable */
+.navbar {
+    background-color: #222;
+    padding: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1000;
+    overflow-x: auto; /* Permet le glissement horizontal */
+    white-space: nowrap; /* Évite le retour à la ligne */
+}
+
+/* 📌 Conteneur du menu */
+.nav-menu {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    gap: 15px;
+}
+
+/* 📌 Style des éléments du menu */
+.nav-item {
+    display: inline-block;
+    padding: 10px 15px;
+    text-align: center;
+    font-size: 1rem;
+    font-weight: bold;
+}
+
+.nav-item a {
+    text-decoration: none;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 5px;
+    transition: background 0.3s ease-in-out;
+}
+
+.nav-item a:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* 📱💡🔹 RESPONSIVITÉ */
 @media (max-width: 1024px) {
-    /* 📌 Ajustements pour tablettes */
     .home-container {
         max-width: 90%;
         margin: 80px auto 0;
@@ -117,7 +164,6 @@
 }
 
 @media (max-width: 768px) {
-    /* 📱 Ajustements pour smartphones */
     .home-container {
         max-width: 95%;
         margin: 60px auto 0;
@@ -125,7 +171,7 @@
     }
 
     .home-container h1 {
-        font-size: 2rem; /* Réduction du titre */
+        font-size: 2rem;
     }
 
     .home-container p {
@@ -135,7 +181,7 @@
     .home-container .btn-dark {
         font-size: 1rem;
         padding: 12px 24px;
-        width: 100%; /* Largeur max sur mobile */
+        width: 100%;
     }
 
     .solutions {
@@ -149,6 +195,25 @@
     }
 
     .solution-card {
-        width: 100%; /* Largeur max pour éviter tout écrasement */
+        width: 100%;
+    }
+
+    /* 📌 Barre de navigation scrollable */
+    .navbar {
+        display: flex;
+        overflow-x: auto;
+        white-space: nowrap;
+        padding: 5px;
+    }
+
+    .nav-menu {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+
+    .nav-item {
+        display: inline-block;
+        padding: 8px 12px;
     }
 }
