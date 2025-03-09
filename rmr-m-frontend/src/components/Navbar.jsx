@@ -1,31 +1,32 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import "./Navbar.css"; // Assurez-vous d'avoir ce fichier CSS
+import "./Navbar.css"; // Assurez-vous d'avoir un fichier CSS
 
 const Navbar = () => {
+  const [menuOpen, setMenuOpen] = useState(false);
+
   return (
     <nav className="navbar">
       <div className="container">
         {/* Logo */}
-        <Link to="/" className="navbar-brand">
-          RMR-M
-        </Link>
+        <Link to="/" className="navbar-brand">RMR-M</Link>
+
+        {/* Bouton hamburger pour mobile */}
+        <button className="menu-toggle" onClick={() => setMenuOpen(!menuOpen)}>
+          ☰
+        </button>
 
         {/* Liste des menus */}
-        <ul className="nav-menu">
-          <li className="nav-item"><Link to="/">Accueil</Link></li>
-          <li className="nav-item"><Link to="/dashboard">Tableau de bord</Link></li>
-          <li className="nav-item"><Link to="/nft">Achat de NFT</Link></li>
-          <li className="nav-item"><Link to="/affiliation">Programme d'affiliation</Link></li>
-          <li className="nav-item"><Link to="/historique">Historique des investissements</Link></li>
-          <li className="nav-item"><Link to="/contact">Contact</Link></li>
-          <li className="nav-item"><Link to="/a-propos">À propos</Link></li>
+        <ul className={`nav-menu ${menuOpen ? "open" : ""}`}>
+          <li className="nav-item"><Link to="/" onClick={() => setMenuOpen(false)}>Accueil</Link></li>
+          <li className="nav-item"><Link to="/wallet-connect" onClick={() => setMenuOpen(false)}>Connexion Wallet</Link></li>
+          <li className="nav-item"><Link to="/dashboard" onClick={() => setMenuOpen(false)}>Tableau de bord</Link></li>
+          <li className="nav-item"><Link to="/nft" onClick={() => setMenuOpen(false)}>Achat de NFT</Link></li>
+          <li className="nav-item"><Link to="/affiliation" onClick={() => setMenuOpen(false)}>Programme d'affiliation</Link></li>
+          <li className="nav-item"><Link to="/historique" onClick={() => setMenuOpen(false)}>Historique des investissements</Link></li>
+          <li className="nav-item"><Link to="/contact" onClick={() => setMenuOpen(false)}>Contact</Link></li>
+          <li className="nav-item"><Link to="/a-propos" onClick={() => setMenuOpen(false)}>À propos</Link></li>
         </ul>
-
-        {/* Bouton pour accéder à la connexion Wallet */}
-        <Link to="/wallet-connect" className="btn btn-primary">
-          Connexion Wallet
-        </Link>
       </div>
     </nav>
   );

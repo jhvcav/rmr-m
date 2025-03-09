@@ -20,7 +20,7 @@ const WalletConnect = () => {
         }
       } else {
         // 📌 Rediriger vers Metamask Mobile si sur mobile
-        window.location.href = "https://metamask.app.link/dapp/github.jhvcav";
+        window.location.href = "https://metamask.app.link/dapp/jhvcav.github.io/rmr-m/";
       }
     } else {
       alert("Metamask non détecté !");
@@ -38,7 +38,7 @@ const WalletConnect = () => {
         }
       } else {
         // 📌 Rediriger vers l’application Phantom si sur mobile
-        window.location.href = "https://phantom.app/ul/browse/jhvcav.github.io/rmr-m-frontend/";
+        window.location.href = "https://phantom.app/ul/browse/jhvcav.github.io/rmr-m/";
       }
     } else {
       alert("Phantom Wallet non détecté !");
