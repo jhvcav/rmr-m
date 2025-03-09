@@ -13,10 +13,10 @@ const Navbar = () => {
 
         {/* Bouton hamburger pour mobile */}
         <button className="menu-toggle" onClick={() => setMenuOpen(!menuOpen)}>
-          ☰
+          {menuOpen ? "✖" : "☰"}
         </button>
 
-        {/* Liste des menus */}
+        {/* Liste des menus - Menu latéral en mode mobile */}
         <ul className={`nav-menu ${menuOpen ? "open" : ""}`}>
           <li className="nav-item"><Link to="/" onClick={() => setMenuOpen(false)}>Accueil</Link></li>
           <li className="nav-item"><Link to="/wallet-connect" onClick={() => setMenuOpen(false)}>Connexion Wallet</Link></li>

@@ -1,72 +1,90 @@
-/* Style de base */
+/* Styles généraux de la barre de navigation */
 .navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background-color: white;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #222;
   padding: 15px 20px;
 }
 
+/* Logo */
 .navbar-brand {
-  color: white;
   font-size: 1.5rem;
+  font-weight: bold;
   text-decoration: none;
+  color: black;
 }
 
-/* Masquer le menu par défaut sur mobile */
+/* Menu desktop */
 .nav-menu {
   list-style: none;
   display: flex;
   gap: 20px;
 }
 
-/* Style des liens */
-.nav-menu .nav-item a {
-  color: white;
+/* Liens de la barre de navigation */
+.nav-item a {
   text-decoration: none;
+  color: black;
   font-size: 1rem;
-  padding: 8px 12px;
+  font-weight: bold;
+  padding: 10px 15px;
+  transition: 0.3s;
+}
+
+.nav-item a:hover {
+  background-color: #007bff;
+  color: white;
   border-radius: 5px;
-  transition: background 0.3s;
 }
 
-.nav-menu .nav-item a:hover {
-  background: #444;
-}
-
-/* Style du bouton hamburger (caché en mode desktop) */
+/* Bouton hamburger */
 .menu-toggle {
-  display: none;
+  display: none; /* Caché en mode desktop */
+  font-size: 24px;
   background: none;
   border: none;
-  font-size: 2rem;
-  color: white;
   cursor: pointer;
 }
 
-/* Responsive : Mode smartphone */
+/* Menu mobile */
 @media (max-width: 768px) {
   .menu-toggle {
-    display: block;
+      display: block; /* Afficher le bouton hamburger */
+      z-index: 1200;
   }
 
   .nav-menu {
-    display: none;
-    flex-direction: column;
-    position: absolute;
-    top: 60px;
-    left: 0;
-    width: 100%;
-    background-color: #222;
-    padding: 10px 0;
+      position: fixed;
+      top: 0;
+      left: -100%; /* Caché par défaut */
+      width: 250px;
+      height: 100vh;
+      background-color: rgba(0, 0, 0, 0.9);
+      color: white;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      padding-top: 60px;
+      transition: left 0.3s ease-in-out;
+      z-index: 1100;
   }
 
   .nav-menu.open {
-    display: flex;
+      left: 0; /* Affichage du menu */
   }
 
-  .nav-menu .nav-item {
-    text-align: center;
-    padding: 10px 0;
+  .nav-item a {
+      color: white;
+      font-size: 18px;
+      display: block;
+      padding: 10px;
   }
 }
