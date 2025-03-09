@@ -30,13 +30,13 @@ const App = () => {
               <Route path="/rmr-m" element={<Home />} />
 
               {/* Les autres routes */}
-              <Route path="/wallet-connect" element={<WalletConnect />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/nft" element={<NFT />} />
-              <Route path="/affiliation" element={<Affiliation />} />
-              <Route path="/historique" element={<Historique />} />
-              <Route path="/contact" element={<Contact />} />
-              <Route path="/a-propos" element={<APropos />} />
+              <Route path="/rmr-m/wallet-connect" element={<WalletConnect />} />
+              <Route path="/rmr-m/dashboard" element={<Dashboard />} />
+              <Route path="/rmr-m/nft" element={<NFT />} />
+              <Route path="/rmr-m/affiliation" element={<Affiliation />} />
+              <Route path="/rmr-m/historique" element={<Historique />} />
+              <Route path="/rmr-m/contact" element={<Contact />} />
+              <Route path="/rmr-m/a-propos" element={<APropos />} />
             </Routes>
           </Router>
         </WalletModalProvider>
