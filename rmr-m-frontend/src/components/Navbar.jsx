@@ -1,3 +1,9 @@
+/**
+ * Copyright (c) 2025 Jean Hugues CAVALIE
+ * Tous droits réservés.
+ * Ce code ne peut pas être utilisé ou redistribué sans autorisation.
+ */
+
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import "./Navbar.css"; // Assurez-vous d'avoir un fichier CSS

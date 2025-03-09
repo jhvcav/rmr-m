@@ -1,3 +1,9 @@
+/**
+ * Copyright (c) 2025 Jean Hugues CAVALIE
+ * Tous droits réservés.
+ * Ce code ne peut pas être utilisé ou redistribué sans autorisation.
+ */
+
 import React from "react";
 import { Link } from "react-router-dom";
 import "./Home.css";
@@ -30,8 +36,8 @@ const Home = () => {
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5, delay: 1 }}
       >
-        <Link to="/dashboard" className="btn btn-dark">Je fais mon choix</Link>
-        <Link to="/wallet-connect" className="btn btn-dark">Commencer</Link>
+        <Link to="rmr-m/dashboard" className="btn btn-dark">Je fais mon choix</Link>
+        <Link to="rmr-m/wallet-connect" className="btn btn-dark">Commencer</Link>
       </motion.div>
 
       {/* Section des solutions de gains */}

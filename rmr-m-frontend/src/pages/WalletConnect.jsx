@@ -1,47 +1,63 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
+import metamaskLogo from "../assets/metamask.png"; 
+import phantomLogo from "../assets/phantom.png"; 
+import "./WalletConnect.css"; 
 
 const WalletConnect = () => {
   const [metamaskAccount, setMetamaskAccount] = useState(null);
+  const [solanaAccount, setSolanaAccount] = useState(null);
   const { publicKey } = useWallet();
 
-  // Connexion Metamask
-  const connectMetamask = async () => {
-    if (typeof window !== "undefined") {
+  useEffect(() => {
+    const checkWalletConnection = async () => {
       if (window.ethereum) {
-        try {
-          const accounts = await window.ethereum.request({
-            method: "eth_requestAccounts",
-          });
-          setMetamaskAccount(accounts[0]); // Stocker le compte Metamask
-        } catch (error) {
-          console.error("Erreur de connexion Metamask", error);
+        const accounts = await window.ethereum.request({ method: "eth_accounts" });
+        if (accounts.length > 0) {
+          setMetamaskAccount(accounts[0]);
         }
-      } else {
-        // 📌 Rediriger vers Metamask Mobile si sur mobile
-        window.location.href = "https://metamask.app.link/dapp/jhvcav.github.io/rmr-m/";
+      }
+      if (window.solana && window.solana.isPhantom) {
+        try {
+          const response = await window.solana.connect({ onlyIfTrusted: true });
+          setSolanaAccount(response.publicKey.toBase58());
+        } catch (error) {
+          console.error("Erreur de connexion Phantom", error);
+        }
+      }
+    };
+    checkWalletConnection();
+  }, []);
+
+  const connectMetamask = async () => {
+    if (window.ethereum) {
+      try {
+        const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+        setMetamaskAccount(accounts[0]);
+      } catch (error) {
+        console.error("Erreur de connexion Metamask", error);
       }
     } else {
-      alert("Metamask non détecté !");
+      window.location.href = "https://metamask.app.link/dapp/jhvcav.github.io/rmr-m/";
     }
   };
 
   const connectPhantom = async () => {
-    if (typeof window !== "undefined") {
-      if (window.solana && window.solana.isPhantom) {
-        try {
-          const response = await window.solana.connect();
-          setSolanaAccount(response.publicKey.toBase58()); // Stocker l'adresse Solana
-        } catch (error) {
-          console.error("Erreur de connexion Phantom", error);
-        }
-      } else {
-        // 📌 Rediriger vers l’application Phantom si sur mobile
-        window.location.href = "https://phantom.app/ul/browse/jhvcav.github.io/rmr-m/";
+    if (window.solana && window.solana.isPhantom) {
+      try {
+        const response = await window.solana.connect();
+        setSolanaAccount(response.publicKey.toBase58());
+
+        // 📌 **Rediriger vers le DApp après connexion**
+        setTimeout(() => {
+          window.location.href = "https://jhvcav.github.io/rmr-m/";
+        }, 1000); // Petit délai pour garantir que la connexion est bien établie
+      } catch (error) {
+        console.error("Erreur de connexion Phantom", error);
       }
     } else {
-      alert("Phantom Wallet non détecté !");
+      window.location.href = "https://phantom.app/ul/browse/jhvcav.github.io/rmr-m/";
     }
   };
 
@@ -52,24 +68,16 @@ const WalletConnect = () => {
 
       <div className="wallet-buttons">
         {/* Bouton Metamask */}
-        {metamaskAccount ? (
-          <button className="btn btn-success">
-            {metamaskAccount.substring(0, 6)}...{metamaskAccount.slice(-4)}
-          </button>
-        ) : (
-          <button className="btn btn-primary" onClick={connectMetamask}>
-            Connecter Metamask
-          </button>
-        )}
+        <button className="wallet-button btn btn-light" onClick={connectMetamask}>
+          <img src={metamaskLogo} alt="Metamask" className="wallet-logo" />
+          {metamaskAccount ? `✅ ${metamaskAccount.substring(0, 6)}...${metamaskAccount.slice(-4)}` : "Connecter Metamask"}
+        </button>
 
-        {/* Bouton Solana */}
-        {publicKey ? (
-          <button className="btn btn-success">
-            {publicKey.toBase58().substring(0, 6)}...{publicKey.toBase58().slice(-4)}
-          </button>
-        ) : (
-          <WalletMultiButton />
-        )}
+        {/* Bouton Solana (Phantom) */}
+        <button className="wallet-button btn btn-light" onClick={connectPhantom}>
+          <img src={phantomLogo} alt="Phantom" className="wallet-logo" />
+          {solanaAccount ? `✅ ${solanaAccount.substring(0, 6)}...${solanaAccount.slice(-4)}` : "Connecter Phantom"}
+        </button>
       </div>
     </div>
   );

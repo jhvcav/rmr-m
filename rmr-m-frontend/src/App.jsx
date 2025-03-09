@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) 2025 Jean Hugues CAVALIE
+ * Tous droits réservés.
+ * Ce code ne peut pas être utilisé ou redistribué sans autorisation.
+ */
+
+
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { ConnectionProvider, WalletProvider } from "@solana/wallet-adapter-react";
