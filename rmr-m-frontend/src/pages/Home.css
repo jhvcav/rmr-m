@@ -1,0 +1,89 @@
+/* Centrer le contenu */
+.home-container {
+    max-width: 800px;
+    margin: 120px auto 0;
+    padding: 20px;
+    text-align: center;
+}
+
+/* Styles du titre */
+.home-container h1 {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #007bff;
+    margin-bottom: 1rem;
+}
+
+.home-container .highlight {
+    color: #ffcc00; /* Mettre en valeur le nom */
+}
+
+/* Styles du texte */
+.home-container p {
+    font-size: 1.2rem;
+    color: #ffffff;
+    margin-bottom: 1.5rem;
+}
+
+/* Bouton */
+.home-container .btn-dark {
+    background-color: black;
+    color: white;
+    font-size: 1rem;
+    padding: 12px 24px;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: background 0.3s;
+}
+
+.home-container .btn-dark:hover {
+    background-color: #333;
+}
+
+/* Section des solutions de gains */
+.solutions {
+    margin-top: 50px;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.solutions h2 {
+    font-size: 2rem;
+    color: #ffcc00;
+    margin-bottom: 20px;
+}
+
+/* Liste des solutions */
+.solution-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+/* Cartes de solution */
+.solution-card {
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 15px;
+    border-radius: 10px;
+    width: 45%;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease-in-out;
+}
+
+.solution-card:hover {
+    transform: translateY(-5px);
+}
+
+.solution-card h3 {
+    font-size: 1.5rem;
+    color: #ffcc00;
+}
+
+.solution-card p {
+    font-size: 1rem;
+    color: #ddd;
+}

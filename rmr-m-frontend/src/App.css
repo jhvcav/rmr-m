@@ -1,0 +1,101 @@
+/* Reset global */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Arial", sans-serif;
+}
+
+/* Fond de la page */
+body {
+  background: linear-gradient(to right, #141e30, #243b55);
+  color: #ffffff;
+  padding-top: 80px; /* Ajuste la hauteur de la navbar */
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Centre le contenu horizontalement */
+  justify-content: flex-start; /* Aligne en haut de la page */
+  height: 100vh;
+  width: 100%;
+}
+
+/* Navbar */
+.navbar {
+  width: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  background: #1e1e1e; /* Fond sombre */
+  padding: 15px 0;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  display: flex;
+  justify-content: center; /* Centre les éléments horizontalement */
+  align-items: center;
+  z-index: 1000;
+}
+
+/* Conteneur de la navbar */
+.navbar .container {
+  display: flex;
+  justify-content: space-between; /* Espace entre le logo et les liens */
+  align-items: center;
+  width: 90%;
+  max-width: 1200px;
+}
+
+/* Conteneur principal de la page d'accueil */
+.home-container {
+  width: 100%;
+  max-width: 800px;
+  text-align: center;
+  margin-top: 20px; /* Espace sous la navbar */
+}
+
+/* Titre */
+h1 {
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+/* Paragraphe */
+p {
+  font-size: 1.3rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+/* Bouton */
+.btn-dark {
+  background-color: black !important;
+  color: white !important;
+  padding: 12px 24px;
+  font-size: 1.2rem;
+  border-radius: 8px;
+  text-decoration: none;
+  display: inline-block;
+  margin-top: 20px;
+}
+
+.btn-dark:hover {
+  background-color: #222 !important;
+}
+
+/* Logo */
+.navbar-brand {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: white !important;
+  text-decoration: none;
+}
+
+/* Liens */
+.nav-item a {
+  color: white;
+  text-decoration: none;
+  font-size: 1.2rem;
+  padding: 8px 12px;
+  transition: all 0.3s ease-in-out;
+}
+

@@ -1,0 +1,58 @@
+.wallet-container {
+  max-width: 400px;
+  margin: 100px auto;
+  padding: 20px;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.wallet-container h1 {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #007bff; /* Bleu Bootstrap */
+  margin-bottom: 1rem;
+}
+
+.wallet-container p {
+  font-size: 1.2rem;
+  color: #ffffff;
+  margin-bottom: 1.5rem;
+}
+
+.wallet-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+}
+
+.wallet-buttons .btn {
+  width: 100%;
+  max-width: 250px;
+  font-size: 1rem;
+  padding: 10px 20px;
+  border-radius: 8px;
+  text-decoration: none;
+  display: inline-block;
+  transition: background 0.3s ease-in-out;
+}
+
+.wallet-buttons .btn-primary {
+  background-color: #007bff;
+  color: white;
+}
+
+.wallet-buttons .btn-primary:hover {
+  background-color: #0056b3;
+}
+
+.wallet-buttons .btn-success {
+  background-color: #28a745;
+  color: white;
+}
+
+.wallet-buttons .btn-success:hover {
+  background-color: #218838;
+}
