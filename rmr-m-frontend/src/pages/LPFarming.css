@@ -9,9 +9,9 @@
 }
 
 /* 📌 Ajustement pour les smartphones */
-@media screen and (max-width: 768px) {
+@media screen and (max-width: 500px) {
   .lp-container {
-    padding: 10px;
+    padding: 1px;
   }
 }
 
@@ -98,6 +98,6 @@
     bottom: auto;
     width: 100%;
     background: none;
-    padding: 10px;
+    padding: 1px;
   }
 }
