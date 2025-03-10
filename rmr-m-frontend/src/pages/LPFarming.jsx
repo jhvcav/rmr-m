@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { Connection, PublicKey, Transaction, SystemProgram } from "@solana/web3.js";
-import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import phantomLogo from "../assets/phantom.png"; // Icône du wallet Phantom
 import "./LPFarming.css";
 import "./LPFarming.css"; // Fichier CSS
@@ -71,15 +70,15 @@ const LPFarming = () => {
         </button>
       ) : (
         <button className="wallet-button btn btn-primary" 
-          onClick={() => window.open("https://solflare.com/open", "_blank")}>
-          <img src={phantomLogo} alt="Phantom" className="wallet-logo" />  
+          onClick={() => window.open("https://solflare.com/connect", "_blank")}>
+          <img src={phantomLogo} alt="Soflare" className="wallet-logo" />  
           Connecter Soflare (Solana)
         </button>
       )}
     </div>
 
       <h2>Simulateur de Gains</h2>
-      <div className="simulator">
+      <div className="simulator">ière
         <label>Capital à investir ($) :</label>
         <input
           type="number"
