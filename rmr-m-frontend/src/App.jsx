@@ -36,7 +36,6 @@ const App = () => {
             <Routes>
               {/* Route de l apage d'accueil */}
               <Route path="/rmr-m" element={<Home />} />
-
               {/* Les autres routes */}
               <Route path="/rmr-m/wallet-connect" element={<WalletConnect />} />
               <Route path="/rmr-m/dashboard" element={<Dashboard />} />
@@ -45,7 +44,7 @@ const App = () => {
               <Route path="/rmr-m/historique" element={<Historique />} />
               <Route path="/rmr-m/contact" element={<Contact />} />
               <Route path="/rmr-m/a-propos" element={<APropos />} />
-              <Route path="/lp-farming" element={<LPFarming />} />
+              <Route path="/rmr-mlp-farming" element={<LPFarming />} />
             </Routes>
           </Router>
         </WalletModalProvider>
