@@ -57,7 +57,7 @@ const WalletConnect = () => {
         console.error("Erreur de connexion Phantom", error);
       }
     } else {
-      window.location.href = "https://phantom.app/ul/browse/jhvcav.github.io/rmr-m/";
+      window.location.href = "https://phantom.app/ul/browse/jhvcav.github.io/rmr-m";
     }
   };
 

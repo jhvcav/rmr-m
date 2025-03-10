@@ -44,10 +44,10 @@ const Home = () => {
       <section className="solutions">
         <h2>Nos solutions pour générer des gains</h2>
         <div className="solution-list">
-          <div className="solution-card">
+          <Link to="/lp-farming" className="solution-card">
             <h3>📈 Investissements</h3>
-            <p>Placez vos fonds dans nos pools et obtenez un rendement stable.</p>
-          </div>
+            <p>Placer des fonds dans des pools et obtenir un rendement stable.</p>
+          </Link>
           <div className="solution-card">
             <h3>💹 Arbitrage</h3>
             <p>Profitez des variations de prix sur différentes plateformes.</p>

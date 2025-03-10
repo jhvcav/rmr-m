@@ -20,6 +20,7 @@ import Affiliation from "./pages/Affiliation";
 import Historique from "./pages/Historique";
 import Contact from "./pages/Contact";
 import APropos from "./pages/APropos";
+import LPFarming from "./pages/LPFarming";
 
 import "./App.css";
 
@@ -44,6 +45,7 @@ const App = () => {
               <Route path="/rmr-m/historique" element={<Historique />} />
               <Route path="/rmr-m/contact" element={<Contact />} />
               <Route path="/rmr-m/a-propos" element={<APropos />} />
+              <Route path="/lp-farming" element={<LPFarming />} />
             </Routes>
           </Router>
         </WalletModalProvider>
