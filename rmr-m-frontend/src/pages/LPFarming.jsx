@@ -71,7 +71,7 @@ const LPFarming = () => {
         const transaction = new Transaction().add(
           SystemProgram.transfer({
             fromPubkey: publicKey,
-            toPubkey: new PublicKey("4MBDZ1vB2g77AshqzwL4WxrhWQzv9QUz1JaMWmUXzANy"), // Adresse du smart contract Solana
+            toPubkey: new PublicKey("CiMWv7EXEHUhGKtAdVyZ4JJJ8KCBkUVvUq1KiaTELLF2"), // Adresse du smart contract Solana
             lamports: capital * 10 ** 9, // Conversion en lamports
           })
         );
