@@ -1,54 +1,61 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { Connection, PublicKey, Transaction, SystemProgram } from "@solana/web3.js";
-import "./LPFarming.css"; // Fichier CSS pour le style
+import "./LPFarming.css"; 
 
 const LPFarming = () => {
   const [capital, setCapital] = useState(250);
   const [duration, setDuration] = useState(1);
   const [profit, setProfit] = useState(0);
   const [loading, setLoading] = useState(false);
-  const { publicKey, sendTransaction } = useWallet();
+  const { publicKey, sendTransaction, connecting } = useWallet();
+
+  useEffect(() => {
+    if (publicKey) {
+      console.log("Wallet détecté :", publicKey.toBase58());
+    }
+  }, [publicKey]);
 
   const calculateProfit = () => {
-    const monthlyRate = 0.10; // Rendement mensuel de 10%
-    const totalProfit = capital * Math.pow(1 + monthlyRate, duration) - capital;
+    const monthlyRate = 0.10;
+    const capitalNum = parseFloat(capital);
+    const totalProfit = capitalNum * Math.pow(1 + monthlyRate, duration) - capitalNum;
     setProfit(totalProfit.toFixed(2));
-  };
+   };
 
-  // Fonction pour valider l'investissement
   const handleInvest = async () => {
     if (!publicKey) {
       alert("Veuillez connecter votre wallet avant d'investir !");
       return;
     }
-
+   
     const connection = new Connection("https://api.devnet.solana.com", "confirmed");
     const investorPubKey = new PublicKey(publicKey);
-
-    const transaction = new Transaction().add(
-      SystemProgram.transfer({
-        fromPubkey: investorPubKey,
-        toPubkey: new PublicKey("CiMWv7EXEHUhGKtAdVyZ4JJJ8KCBkUVvUq1KiaTELLF2"), // Adresse du smart contract
-        lamports: capital * 10 ** 9, // Conversion en lamports
-      })
-    );
-
+    const contractAddress = new PublicKey("CiMWv7EXEHUhGKtAdVyZ4JJJ8KCBkUVvUq1KiaTELLF2"); // Remplace par l’adresse du smart contract LP Farming
+   
     try {
+      const transaction = new Transaction().add(
+        SystemProgram.transfer({
+          fromPubkey: investorPubKey,
+          toPubkey: contractAddress,
+          lamports: parseInt(capital, 10) * 10 ** 9, // Conversion correcte en lamports
+        })
+      );
+   
       setLoading(true);
       const signature = await sendTransaction(transaction, connection);
       alert(`✅ Investissement réussi ! Transaction : ${signature}`);
     } catch (error) {
       console.error("Erreur d'investissement :", error);
-      alert("❌ Échec de l'investissement. Veuillez réessayer.");
+      alert("❌ Échec de l'investissement. Vérifiez votre solde ou réessayez.");
     } finally {
       setLoading(false);
     }
-  };
+   };
 
   return (
     <div className="lp-container">
-      <h1>LP Farming - Génération de Rendement</h1>
+      <h1>LP Farming - Génération de Rendement!!</h1>
       <p>
         <b>Liquidity Provider (LP) Farming</b> vous permet d’investir des fonds dans des pools de liquidités 
         et d'obtenir un rendement stable de <b>10% par mois</b>. Grâce à l’optimisation automatique, votre 
@@ -93,9 +100,15 @@ const LPFarming = () => {
           <li>Utiliser des pools fiables avec une bonne liquidité.</li>
         </ul>
 
-        <button className="validate-btn" onClick={handleInvest} disabled={loading}>
+        <button className="validate-btn" onClick={handleInvest} disabled={loading || connecting}>
           {loading ? "Transaction en cours..." : "Valider mon choix"}
         </button>
+
+        {publicKey && (
+            <p style={{ color: "green", fontWeight: "bold", marginTop: "10px" }}>
+                ✅ Wallet connecté : {publicKey.toBase58().substring(0, 6)}...{publicKey.toBase58().slice(-4)}
+            </p>
+        )}
       </div>
     </div>
   );
