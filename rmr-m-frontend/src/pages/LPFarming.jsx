@@ -21,37 +21,33 @@ const LPFarming = () => {
 
   // Fonction pour valider l'investissement
   const handleInvest = async () => {
-    alert("Bouton cliqué"); // Vérifier si le bouton est bien actif
-  
     if (!publicKey) {
-      alert("❌ Aucun wallet détecté. Veuillez connecter votre wallet avant d'investir !");
-      return;
+        alert("🚨 Alerte : Wallet non détecté. Connectez d'abord votre wallet !");
+        return;
     }
-  
-    alert(`✅ Wallet détecté : ${publicKey.toBase58()}`);
-  
+
+    alert("✅ Wallet détecté : " + publicKey.toBase58());
+
     const connection = new Connection("https://api.devnet.solana.com", "confirmed");
     const investorPubKey = new PublicKey(publicKey);
-  
+
     const transaction = new Transaction().add(
-      SystemProgram.transfer({
-        fromPubkey: investorPubKey,
-        toPubkey: new PublicKey("CiMWv7EXEHUhGKtAdVyZ4JJJ8KCBkUVvUq1KiaTELLF2"), // Vérifier cette adresse
-        lamports: capital * 10 ** 9, // Conversion en lamports
-      })
+        SystemProgram.transfer({
+            fromPubkey: investorPubKey,
+            toPubkey: new PublicKey("ADRESSE_DU_CONTRAT_LP_FARMING"), // Remplace par l'adresse réelle
+            lamports: capital * 10 ** 9, // Conversion en lamports
+        })
     );
-  
+
+    alert("📌 Transaction créée, en attente d'envoi...");
+
     try {
-      setLoading(true);
-      alert("🚀 Transaction en cours...");
-      const signature = await sendTransaction(transaction, connection);
-      alert(`✅ Investissement réussi ! Transaction : ${signature}`);
+        const signature = await sendTransaction(transaction, connection);
+        alert(`🎉 Transaction envoyée avec succès ! Signature : ${signature}`);
     } catch (error) {
-      alert("❌ Échec de l'investissement. Veuillez réessayer.");
-    } finally {
-      setLoading(false);
+        alert("❌ Erreur d'investissement : " + error.message);
     }
-  };
+};
 
   return (
     <div className="lp-container">
