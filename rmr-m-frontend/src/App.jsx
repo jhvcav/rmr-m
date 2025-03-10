@@ -44,7 +44,7 @@ const App = () => {
               <Route path="/rmr-m/historique" element={<Historique />} />
               <Route path="/rmr-m/contact" element={<Contact />} />
               <Route path="/rmr-m/a-propos" element={<APropos />} />
-              <Route path="/rmr-mlp-farming" element={<LPFarming />} />
+              <Route path="/rmr-m/lp-farming" element={<LPFarming />} />
             </Routes>
           </Router>
         </WalletModalProvider>

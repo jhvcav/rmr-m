@@ -1,22 +1,27 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { Connection, PublicKey, Transaction, SystemProgram } from "@solana/web3.js";
-import "./LPFarming.css"; // Fichier CSS pour le style
+import "./LPFarming.css"; 
 
 const LPFarming = () => {
   const [capital, setCapital] = useState(250);
   const [duration, setDuration] = useState(1);
   const [profit, setProfit] = useState(0);
   const [loading, setLoading] = useState(false);
-  const { publicKey, sendTransaction } = useWallet();
+  const { publicKey, sendTransaction, connecting } = useWallet();
+
+  useEffect(() => {
+    if (publicKey) {
+      console.log("Wallet détecté :", publicKey.toBase58());
+    }
+  }, [publicKey]);
 
   const calculateProfit = () => {
-    const monthlyRate = 0.10; // Rendement mensuel de 10%
+    const monthlyRate = 0.10; 
     const totalProfit = capital * Math.pow(1 + monthlyRate, duration) - capital;
     setProfit(totalProfit.toFixed(2));
   };
 
-  // Fonction pour valider l'investissement
   const handleInvest = async () => {
     if (!publicKey) {
       alert("Veuillez connecter votre wallet avant d'investir !");
@@ -29,8 +34,8 @@ const LPFarming = () => {
     const transaction = new Transaction().add(
       SystemProgram.transfer({
         fromPubkey: investorPubKey,
-        toPubkey: new PublicKey("ADRESSE_DU_CONTRAT_LP_FARMING"), // Adresse du smart contract
-        lamports: capital * 10 ** 9, // Conversion en lamports
+        toPubkey: new PublicKey("ADRESSE_DU_CONTRAT_LP_FARMING"),
+        lamports: capital * 10 ** 9,
       })
     );
 
@@ -93,9 +98,15 @@ const LPFarming = () => {
           <li>Utiliser des pools fiables avec une bonne liquidité.</li>
         </ul>
 
-        <button className="validate-btn" onClick={handleInvest} disabled={loading}>
+        <button className="validate-btn" onClick={handleInvest} disabled={loading || connecting}>
           {loading ? "Transaction en cours..." : "Valider mon choix"}
         </button>
+
+        {publicKey && (
+          <p style={{ color: "green", fontWeight: "bold" }}>
+            ✅ Wallet détecté : {publicKey.toBase58().substring(0, 6)}...
+          </p>
+        )}
       </div>
     </div>
   );
