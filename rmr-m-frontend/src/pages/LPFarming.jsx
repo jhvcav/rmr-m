@@ -29,6 +29,7 @@ const LPFarming = () => {
     );
 
     try {
+      alert(`Vous allez envoyer ${amount} SOL à l'adresse de test.`);
       const signature = await sendTransaction(transaction, connection);
       alert(`✅ Transaction réussie ! ID : ${signature}`);
     } catch (error) {
