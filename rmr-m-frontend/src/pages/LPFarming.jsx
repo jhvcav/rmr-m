@@ -1,6 +1,9 @@
 import React, { useState } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { Connection, PublicKey, Transaction, SystemProgram } from "@solana/web3.js";
+import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
+import phantomLogo from "../assets/phantom.png"; // Icône du wallet Phantom
+import "./LPFarming.css";
 import "./LPFarming.css"; // Fichier CSS
 
 const LPFarming = () => {
@@ -60,6 +63,20 @@ const LPFarming = () => {
         <b>10% par mois</b>. Grâce à l’optimisation automatique, votre capital 
         est réinvesti pour maximiser les gains.
       </p>
+
+    <div className="solana-connect">
+      {publicKey ? (
+        <button className="wallet-button btn btn-success">
+          ✅ {publicKey.toBase58().substring(0, 6)}...{publicKey.toBase58().slice(-4)}
+        </button>
+      ) : (
+        <button className="wallet-button btn btn-primary" 
+          onClick={() => window.open("https://solflare.com/open", "_blank")}>
+          <img src={phantomLogo} alt="Phantom" className="wallet-logo" />  
+          Connecter Soflare (Solana)
+        </button>
+      )}
+    </div>
 
       <h2>Simulateur de Gains</h2>
       <div className="simulator">
