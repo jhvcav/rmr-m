@@ -23,39 +23,28 @@ const LPFarming = () => {
     setProfit(totalProfit.toFixed(2));
    };
 
-  const handleInvest = async () => {
-    if (!publicKey) {
+   const handleInvest = async () => {
+    const savedMetamaskAccount = localStorage.getItem("metamaskAccount");
+  
+    if (!publicKey && !savedMetamaskAccount) {
       alert("Veuillez connecter votre wallet avant d'investir !");
       return;
     }
-   
-    const connection = new Connection("https://api.devnet.solana.com", "confirmed");
-    const investorPubKey = new PublicKey(publicKey);
-    const contractAddress = new PublicKey("CiMWv7EXEHUhGKtAdVyZ4JJJ8KCBkUVvUq1KiaTELLF2"); // Remplace par l’adresse du smart contract LP Farming
-   
-    try {
-      const transaction = new Transaction().add(
-        SystemProgram.transfer({
-          fromPubkey: investorPubKey,
-          toPubkey: contractAddress,
-          lamports: parseInt(capital, 10) * 10 ** 9, // Conversion correcte en lamports
-        })
-      );
-   
-      setLoading(true);
-      const signature = await sendTransaction(transaction, connection);
-      alert(`✅ Investissement réussi ! Transaction : ${signature}`);
-    } catch (error) {
-      console.error("Erreur d'investissement :", error);
-      alert("❌ Échec de l'investissement. Vérifiez votre solde ou réessayez.");
-    } finally {
-      setLoading(false);
+  
+    if (savedMetamaskAccount) {
+      alert(`✅ Metamask connecté avec succès : ${savedMetamaskAccount}`);
+      return;
     }
-   };
+  
+    if (publicKey) {
+      alert(`✅ Phantom Wallet détecté : ${publicKey.toBase58()}`);
+      return;
+    }
+  };
 
   return (
     <div className="lp-container">
-      <h1>LP Farming - Génération de Rendement!!</h1>
+      <h1>LP Farming - Génération de Rendement</h1>
       <p>
         <b>Liquidity Provider (LP) Farming</b> vous permet d’investir des fonds dans des pools de liquidités 
         et d'obtenir un rendement stable de <b>10% par mois</b>. Grâce à l’optimisation automatique, votre 

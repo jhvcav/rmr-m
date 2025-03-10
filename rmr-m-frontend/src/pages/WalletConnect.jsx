@@ -35,11 +35,14 @@ const WalletConnect = () => {
       try {
         const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
         setMetamaskAccount(accounts[0]);
+  
+        // ✅ Stocker l'adresse dans localStorage pour la récupérer plus tard
+        localStorage.setItem("metamaskAccount", accounts[0]);
       } catch (error) {
         console.error("Erreur de connexion Metamask", error);
       }
     } else {
-      window.location.href = "https://metamask.app.link/dapp/jhvcav.github.io/rmr-m/";
+      alert("Metamask non détecté !");
     }
   };
 
