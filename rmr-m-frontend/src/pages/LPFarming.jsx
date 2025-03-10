@@ -5,38 +5,12 @@ import { Connection, PublicKey, Transaction, SystemProgram, LAMPORTS_PER_SOL } f
 import "./LPFarming.css"; // Fichier CSS
 
 const LPFarming = () => {
-  const { publicKey, sendTransaction } = useWallet();
   const [amount, setAmount] = useState("");
+  const { publicKey } = useWallet();
 
   const handleTransaction = async () => {
     alert(`Vous allez envoyer ${amount} SOL à l'adresse de test.`);
     alert(`Bouton cliqué`);
-    if (!publicKey) {
-      alert("Veuillez connecter votre wallet avant d'envoyer des SOL.");
-      return;
-    }
-
-    if (isNaN(amount) || amount <= 0) {
-      alert("Veuillez entrer un montant valide.");
-      return;
-    }
-
-    const connection = new Connection("https://api.devnet.solana.com", "confirmed");
-    const transaction = new Transaction().add(
-      SystemProgram.transfer({
-        fromPubkey: publicKey,
-        toPubkey: new PublicKey("F2YAAoN6GX9fJmHjtB28ausHJMWjZdKZR7Kw718q2wn4"), // Adresse de test
-        lamports: parseFloat(amount) * LAMPORTS_PER_SOL, // Conversion SOL → Lamports
-      })
-    );
-
-    try {
-      const signature = await sendTransaction(transaction, connection);
-      alert(`✅ Transaction réussie ! ID : ${signature}`);
-    } catch (error) {
-      console.error("Erreur lors de la transaction :", error);
-      alert("❌ Échec de la transaction.");
-    }
   };
 
   return (
