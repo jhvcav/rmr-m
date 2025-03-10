@@ -19,31 +19,32 @@ const LPFarming = () => {
 
   // Fonction pour valider l'investissement
   const handleInvest = async () => {
+    alert("Bouton cliqué"); // Vérifier si le bouton est bien actif
+  
     if (!publicKey) {
-      alert("❌ Veuillez connecter votre wallet avant d'investir !");
+      alert("❌ Aucun wallet détecté. Veuillez connecter votre wallet avant d'investir !");
       return;
     }
-
+  
+    alert(`✅ Wallet détecté : ${publicKey.toBase58()}`);
+  
     const connection = new Connection("https://api.devnet.solana.com", "confirmed");
     const investorPubKey = new PublicKey(publicKey);
-    
-    // Adresse du Smart Contract LP Farming (Mettre la bonne adresse ici)
-    const contractAddress = new PublicKey("4MBDZ1vB2g77AshqzwL4WxrhWQzv9QUz1JaMWmUXzANy"); 
-
+  
     const transaction = new Transaction().add(
       SystemProgram.transfer({
         fromPubkey: investorPubKey,
-        toPubkey: contractAddress,
+        toPubkey: new PublicKey("CiMWv7EXEHUhGKtAdVyZ4JJJ8KCBkUVvUq1KiaTELLF2"), // Vérifier cette adresse
         lamports: capital * 10 ** 9, // Conversion en lamports
       })
     );
-
+  
     try {
       setLoading(true);
+      alert("🚀 Transaction en cours...");
       const signature = await sendTransaction(transaction, connection);
-      alert(`✅ Investissement réussi !\nTransaction : ${signature}`);
+      alert(`✅ Investissement réussi ! Transaction : ${signature}`);
     } catch (error) {
-      console.error("Erreur d'investissement :", error);
       alert("❌ Échec de l'investissement. Veuillez réessayer.");
     } finally {
       setLoading(false);
