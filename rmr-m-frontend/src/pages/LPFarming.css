@@ -1,102 +1,60 @@
+/* 📌 Styles généraux */
 .lp-container {
-    max-width: 800px;
-    margin: 30px auto 0;
-    padding: 20px;
-    text-align: center;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-  }
-  
-  .lp-container h1, h2 {
-    color: #ffcc00;
-  }
-  
-  .simulator {
-    margin-top: 20px;
-  }
-  
-  .simulator label {
-    display: block;
-    font-weight: bold;
-    margin-top: 10px;
-  }
-  
-  .simulator input {
-    width: 100%;
-    padding: 8px;
-    margin-top: 5px;
-    border-radius: 5px;
-    border: 1px solid #ddd;
-  }
-  
-  .simulator button {
-    background: #4caf50;
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    margin-top: 15px;
-    cursor: pointer;
-    transition: background 0.3s ease-in-out;
-  }
-  
-  .simulator button:hover {
-    background: #45a049;
-  }
-  
-  .simulator h3 span {
-    color: #ffcc00;
-  }
-  
-  .risks {
-    text-align: left;
-    margin-top: 20px;
-  }
-  
-  .validate-btn {
-    background: black;
-    color: white;
-    padding: 12px 24px;
-    border-radius: 8px;
-    margin-top: 20px;
-    font-size: 1.2rem;
-    cursor: pointer;
-  }
-  
-  .validate-btn:hover {
-    background: #333;
-  }
-
-  /* Augmenter la taille du texte des champs */
-.lpfarming-container input,
-.lpfarming-container select,
-.lpfarming-container button {
-    font-size: 18px; /* Augmente la taille de la police */
-    padding: 12px; /* Augmente la hauteur des champs */
-    border-radius: 8px; /* Arrondi les bords */
-    width: 100%; /* Ajuste la largeur */
-    margin-bottom: 15px; /* Ajoute un espace entre les champs */
+  max-width: 100%;
+  padding: 20px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-/* Augmenter la taille des labels */
-.lpfarming-container label {
-    font-size: 20px;
-    font-weight: bold;
-    display: block; /* Place le label au-dessus du champ */
-    margin-bottom: 5px;
+/* 📌 Ajustement pour les smartphones */
+@media screen and (max-width: 768px) {
+  .lp-container {
+    padding: 10px;
+  }
 }
 
-/* Augmenter la taille des titres */
-.lpfarming-container h1 {
-    font-size: 28px;
+/* 📌 Styles des boutons */
+.wallet-buttons, .simulator {
+  width: 100%;
+  max-width: 400px;
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
 }
 
-.lpfarming-container p {
-    font-size: 18px;
+/* 📌 Boutons améliorés */
+.btn {
+  width: 100%;
+  padding: 15px;
+  font-size: 16px;
+  border-radius: 8px;
 }
 
-ul {
-    list-style-type: none; /* Supprime les puces */
-    padding: 0; /* Supprime le padding par défaut */
+/* 📌 Champs de saisie */
+.simulator input {
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+/* 📌 Validation */
+.validate-btn {
+  width: 100%;
+  padding: 15px;
+  font-size: 18px;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.validate-btn:disabled {
+  background-color: gray;
+  cursor: not-allowed;
 }
