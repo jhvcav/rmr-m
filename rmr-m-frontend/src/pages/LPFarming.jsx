@@ -9,6 +9,8 @@ const LPFarming = () => {
   const [amount, setAmount] = useState("");
 
   const handleTransaction = async () => {
+    alert(`Vous allez envoyer ${amount} SOL à l'adresse de test.`);
+    alert(`Bouton cliqué`);
     if (!publicKey) {
       alert("Veuillez connecter votre wallet avant d'envoyer des SOL.");
       return;
@@ -29,7 +31,6 @@ const LPFarming = () => {
     );
 
     try {
-      alert(`Vous allez envoyer ${amount} SOL à l'adresse de test.`);
       const signature = await sendTransaction(transaction, connection);
       alert(`✅ Transaction réussie ! ID : ${signature}`);
     } catch (error) {
