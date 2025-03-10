@@ -8,12 +8,12 @@ const DepotForm = () => {
     const [status, setStatus] = useState('');
     const [isConnected, setIsConnected] = useState(false);
     const [publicKey, setPublicKey] = useState(null);
+    const [balance, setBalance] = useState(null);
 
     // Vérifier la connexion au wallet
     useEffect(() => {
         checkWalletConnection();
 
-        // Écouter les événements de connexion/déconnexion
         if (window.solflare) {
             window.solflare.on('connect', () => {
                 console.log('Wallet connecté !');
@@ -24,6 +24,7 @@ const DepotForm = () => {
                 console.log('Wallet déconnecté.');
                 setIsConnected(false);
                 setPublicKey(null);
+                setBalance(null);
             });
         }
 
@@ -46,11 +47,24 @@ const DepotForm = () => {
             return;
         }
 
-        // Récupérer l'adresse publique de l'utilisateur
         const publicKey = window.solflare.publicKey;
         setIsConnected(true);
         setPublicKey(publicKey.toString());
     };
+
+    const fetchBalance = async () => {
+        if (publicKey) {
+            const connection = new Connection('https://api.mainnet-beta.solana.com', 'confirmed');
+            const balance = await connection.getBalance(new PublicKey(publicKey));
+            setBalance(balance / 1000000000); // Convertir en SOL
+        }
+    };
+
+    useEffect(() => {
+        if (isConnected) {
+            fetchBalance();
+        }
+    }, [isConnected, publicKey]);
 
     const handleConnect = async () => {
         if (!window.solflare) {
@@ -72,14 +86,20 @@ const DepotForm = () => {
             return;
         }
 
+        if (!destinationAddress || !PublicKey.isOnCurve(destinationAddress)) {
+            setStatus('Adresse de destination invalide.');
+            return;
+        }
+
+        if (amount <= 0 || isNaN(amount)) {
+            setStatus('Veuillez entrer un montant valide.');
+            return;
+        }
+
         try {
-            // Configurer la connexion au réseau Solana
             const connection = new Connection('https://api.mainnet-beta.solana.com', 'confirmed');
+            const lamports = Math.round(amount * 1000000000); // Convertir en lamports avec arrondi
 
-            // Convertir le montant en lamports (1 SOL = 1000000000 lamports)
-            const lamports = amount * 1000000000;
-
-            // Créer la transaction
             const transaction = new Transaction().add(
                 SystemProgram.transfer({
                     fromPubkey: new PublicKey(publicKey),
@@ -88,29 +108,31 @@ const DepotForm = () => {
                 })
             );
 
-            // Configurer la transaction
             const { blockhash } = await connection.getRecentBlockhash();
             transaction.recentBlockhash = blockhash;
             transaction.feePayer = new PublicKey(publicKey);
 
-            // Signer la transaction
             const signedTransaction = await window.solflare.signTransaction(transaction);
-
-            // Envoyer la transaction
             const signature = await connection.sendRawTransaction(signedTransaction.serialize());
             setStatus(`Transaction envoyée avec succès. Signature: ${signature}`);
 
-            // Confirmer la transaction
             await connection.confirmTransaction(signature, 'confirmed');
             setStatus('Transaction confirmée avec succès !');
+            fetchBalance(); // Mettre à jour le solde après la transaction
         } catch (error) {
             console.error('Erreur lors du dépôt de fonds:', error);
-            setStatus('Une erreur est survenue. Veuillez réessayer.');
+            if (error.message.includes('User rejected the request')) {
+                setStatus('Vous avez refusé la transaction.');
+            } else if (error.message.includes('Insufficient funds')) {
+                setStatus('Fonds insuffisants pour effectuer la transaction.');
+            } else {
+                setStatus('Une erreur est survenue. Veuillez réessayer.');
+            }
         }
     };
 
     return (
-        <div>
+        <div className="depot-form">
             <h1>Dépôt de fonds vers Solana</h1>
             <div>
                 <h2>État du wallet :</h2>
@@ -118,6 +140,9 @@ const DepotForm = () => {
                     <p>Connecté avec l'adresse : <strong>{publicKey}</strong></p>
                 ) : (
                     <p>Non connecté.</p>
+                )}
+                {isConnected && (
+                    <p>Solde disponible : <strong>{balance} SOL</strong></p>
                 )}
                 <button onClick={handleConnect} disabled={isConnected}>
                     {isConnected ? 'Déjà connecté' : 'Se connecter à Solflare'}
@@ -144,7 +169,7 @@ const DepotForm = () => {
             <button onClick={handleDepot} disabled={!isConnected}>
                 Déposer
             </button>
-            <p>{status}</p>
+            <p className="status">{status}</p>
         </div>
     );
 };
