@@ -4,12 +4,11 @@
  * Ce code ne peut pas être utilisé ou redistribué sans autorisation.
  */
 
-
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { ConnectionProvider, WalletProvider } from "@solana/wallet-adapter-react";
 import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
-import { PhantomWalletAdapter } from "@solana/wallet-adapter-wallets";
+import { PhantomWalletAdapter, SolflareWalletAdapter } from "@solana/wallet-adapter-wallets";
 
 import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
@@ -25,7 +24,7 @@ import LPFarming from "./pages/LPFarming";
 import "./App.css";
 
 const App = () => {
-  const wallets = [new PhantomWalletAdapter()];
+  const wallets = [new PhantomWalletAdapter(), new SolflareWalletAdapter()];
 
   return (
     <ConnectionProvider endpoint="https://api.devnet.solana.com">
