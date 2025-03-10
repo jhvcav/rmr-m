@@ -1,44 +1,94 @@
 import React, { useState, useEffect } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { Connection, PublicKey, Transaction, SystemProgram } from "@solana/web3.js";
-import "./LPFarming.css"; 
+import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 
 const LPFarming = () => {
   const [capital, setCapital] = useState(250);
   const [duration, setDuration] = useState(1);
   const [profit, setProfit] = useState(0);
   const [loading, setLoading] = useState(false);
-  const { publicKey, sendTransaction, connecting } = useWallet();
+  const [metamaskAccount, setMetamaskAccount] = useState(null);
+  const { publicKey, sendTransaction } = useWallet();
 
   useEffect(() => {
-    if (publicKey) {
-      console.log("Wallet détecté :", publicKey.toBase58());
-    }
-  }, [publicKey]);
-
-  const calculateProfit = () => {
-    const monthlyRate = 0.10;
-    const capitalNum = parseFloat(capital);
-    const totalProfit = capitalNum * Math.pow(1 + monthlyRate, duration) - capitalNum;
-    setProfit(totalProfit.toFixed(2));
-   };
-
-   const handleInvest = async () => {
+    // Vérifier si Metamask est déjà connecté
     const savedMetamaskAccount = localStorage.getItem("metamaskAccount");
-  
-    if (!publicKey && !savedMetamaskAccount) {
+    if (savedMetamaskAccount) {
+      setMetamaskAccount(savedMetamaskAccount);
+    }
+  }, []);
+
+  // Fonction pour connecter Metamask
+  const connectMetamask = async () => {
+    if (window.ethereum) {
+      try {
+        const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+        setMetamaskAccount(accounts[0]);
+        localStorage.setItem("metamaskAccount", accounts[0]);
+      } catch (error) {
+        console.error("Erreur de connexion Metamask", error);
+      }
+    } else {
+      // 📌 Si sur mobile, ouvrir l'application Metamask
+      window.location.href = "https://metamask.app.link/dapp/jhvcav.github.io/rmr-m/lp-farming";
+    }
+  };
+
+  // Fonction pour connecter Phantom Wallet
+  const connectPhantom = async () => {
+    if (window.solana && window.solana.isPhantom) {
+      try {
+        const response = await window.solana.connect();
+        localStorage.setItem("phantomAccount", response.publicKey.toBase58());
+      } catch (error) {
+        console.error("Erreur de connexion Phantom", error);
+      }
+    } else {
+      // 📌 Si sur mobile, ouvrir l'application Phantom
+      window.location.href = "https://phantom.app/ul/browse/jhvcav.github.io/rmr-m/lp-farming";
+    }
+  };
+
+  // Calcul du profit
+  const calculateProfit = () => {
+    const monthlyRate = 0.10; // Rendement mensuel de 10%
+    const totalProfit = capital * Math.pow(1 + monthlyRate, duration) - capital;
+    setProfit(totalProfit.toFixed(2));
+  };
+
+  // Exécuter la transaction
+  const handleInvest = async () => {
+    if (!publicKey && !metamaskAccount) {
       alert("Veuillez connecter votre wallet avant d'investir !");
       return;
     }
-  
-    if (savedMetamaskAccount) {
-      alert(`✅ Metamask connecté avec succès : ${savedMetamaskAccount}`);
-      return;
-    }
-  
+
     if (publicKey) {
-      alert(`✅ Phantom Wallet détecté : ${publicKey.toBase58()}`);
-      return;
+      try {
+        setLoading(true);
+        const connection = new Connection("https://api.devnet.solana.com", "confirmed");
+        const transaction = new Transaction().add(
+          SystemProgram.transfer({
+            fromPubkey: publicKey,
+            toPubkey: new PublicKey("4MBDZ1vB2g77AshqzwL4WxrhWQzv9QUz1JaMWmUXzANy"), // Adresse du smart contract Solana
+            lamports: capital * 10 ** 9, // Conversion en lamports
+          })
+        );
+
+        const signature = await sendTransaction(transaction, connection);
+        alert(`✅ Investissement réussi ! Transaction : ${signature}`);
+      } catch (error) {
+        console.error("Erreur d'investissement Solana :", error);
+        alert("❌ Échec de l'investissement.");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    if (metamaskAccount) {
+      alert(`✅ Prêt pour une transaction Ethereum avec Metamask (${metamaskAccount})`);
+      // Ici, on pourra ajouter la transaction Ethereum quand le smart contract sera prêt
     }
   };
 
@@ -46,59 +96,55 @@ const LPFarming = () => {
     <div className="lp-container">
       <h1>LP Farming - Génération de Rendement</h1>
       <p>
-        <b>Liquidity Provider (LP) Farming</b> vous permet d’investir des fonds dans des pools de liquidités 
-        et d'obtenir un rendement stable de <b>10% par mois</b>. Grâce à l’optimisation automatique, votre 
-        capital est réinvesti pour maximiser les gains.
+        <b>Liquidity Provider (LP) Farming</b> permet d’investir des fonds dans des pools de liquidités 
+        et d'obtenir un rendement stable de <b>10% par mois</b>.
       </p>
 
-      <h2>Comment ça fonctionne ?</h2>
-      <ul>
-        <li>Vous déposez des fonds dans un pool de liquidité.</li>
-        <li>Le protocole optimise votre rendement automatiquement.</li>
-        <li>Vous générez des intérêts composés chaque mois.</li>
-        <li>Vous pouvez retirer vos fonds à tout moment.</li>
-      </ul>
-
-      <div className="lpfarming-container">
-        <h2>Simulateur de Gains</h2>
-        <div className="simulator">
-          <label>Capital à investir ($) :</label>
-          <input
-            type="number"
-            min="250"
-            value={capital}
-            onChange={(e) => setCapital(e.target.value)}
-          />
-
-          <label>Durée (mois) :</label>
-          <input
-            type="number"
-            min="1"
-            value={duration}
-            onChange={(e) => setDuration(e.target.value)}
-          />
-
-          <button onClick={calculateProfit}>Calculer</button>
-          <h3>Gains estimés : <span>${profit}</span></h3>
-        </div>
-
-        <h2>Risques et Recommandations</h2>
-        <ul className="risks">
-          <li>La valeur des LP tokens peut varier en fonction du marché.</li>
-          <li>Un impermanent loss peut affecter vos gains si le pool est instable.</li>
-          <li>Utiliser des pools fiables avec une bonne liquidité.</li>
-        </ul>
-
-        <button className="validate-btn" onClick={handleInvest} disabled={loading || connecting}>
-          {loading ? "Transaction en cours..." : "Valider mon choix"}
+      <h2>Connexion au Wallet</h2>
+      <div className="wallet-buttons">
+        {/* Bouton Metamask */}
+        <button className="wallet-button btn btn-light" onClick={connectMetamask}>
+          {metamaskAccount ? `✅ ${metamaskAccount.substring(0, 6)}...${metamaskAccount.slice(-4)}` : "Connecter Metamask"}
         </button>
 
-        {publicKey && (
-            <p style={{ color: "green", fontWeight: "bold", marginTop: "10px" }}>
-                ✅ Wallet connecté : {publicKey.toBase58().substring(0, 6)}...{publicKey.toBase58().slice(-4)}
-            </p>
-        )}
+        {/* Bouton Phantom */}
+        <button className="wallet-button btn btn-light" onClick={connectPhantom}>
+          {publicKey ? `✅ ${publicKey.toBase58().substring(0, 6)}...${publicKey.toBase58().slice(-4)}` : "Connecter Phantom"}
+        </button>
       </div>
+
+      <h2>Simulateur de Gains</h2>
+      <div className="simulator">
+        <label>Capital à investir ($) :</label>
+        <input
+          type="number"
+          min="250"
+          value={capital}
+          onChange={(e) => setCapital(e.target.value)}
+        />
+
+        <label>Durée (mois) :</label>
+        <input
+          type="number"
+          min="1"
+          value={duration}
+          onChange={(e) => setDuration(e.target.value)}
+        />
+
+        <button onClick={calculateProfit}>Calculer</button>
+        <h3>Gains estimés : <span>${profit}</span></h3>
+      </div>
+
+      <h2>Risques et Recommandations</h2>
+      <ul>
+        <li>La valeur des LP tokens peut varier en fonction du marché.</li>
+        <li>Un impermanent loss peut affecter vos gains si le pool est instable.</li>
+        <li>Utiliser des pools fiables avec une bonne liquidité.</li>
+      </ul>
+
+      <button className="validate-btn" onClick={handleInvest} disabled={loading}>
+        {loading ? "Transaction en cours..." : "Valider mon choix"}
+      </button>
     </div>
   );
 };
