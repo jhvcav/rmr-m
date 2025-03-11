@@ -55,6 +55,7 @@ const DepotForm = () => {
     const fetchBalance = async () => {
         if (publicKey) {
             try {
+                console.log('Fetching balance for publicKey:', publicKey);
                 const connection = new Connection('https://api.mainnet-beta.solana.com', 'confirmed');
                 const balance = await connection.getBalance(new PublicKey(publicKey));
                 console.log('Balance en lamports:', balance);
@@ -71,6 +72,12 @@ const DepotForm = () => {
             fetchBalance();
         }
     }, [isConnected, publicKey]);
+
+    useEffect(() => {
+        if (balance !== null) {
+            console.log('Balance mis à jour:', balance);
+        }
+    }, [balance]);
 
     const handleConnect = async () => {
         if (!window.solflare) {
@@ -127,7 +134,7 @@ const DepotForm = () => {
             const signature = await connection.sendRawTransaction(signedTransaction.serialize());
             setStatus(`Transaction envoyée avec succès. Signature: ${signature}`);
 
-            await connection.confirmTransaction(signature, 'confirmed');
+            await connection.confirmTransaction(signature);
             setStatus('Transaction confirmée avec succès !');
             fetchBalance(); // Mettre à jour le solde après la transaction
         } catch (error) {
@@ -154,7 +161,7 @@ const DepotForm = () => {
                 ) : (
                     <p>Non connecté.</p>
                 )}
-                {isConnected && (
+                {isConnected && balance !== null && (
                     <p>Solde disponible : <strong>{balance} SOL</strong></p>
                 )}
                 <button onClick={handleConnect} disabled={isConnected}>
