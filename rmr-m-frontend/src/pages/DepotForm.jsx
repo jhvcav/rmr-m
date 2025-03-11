@@ -54,14 +54,20 @@ const DepotForm = () => {
 
     const fetchBalance = async () => {
         if (publicKey) {
-            const connection = new Connection('https://api.mainnet-beta.solana.com', 'confirmed');
-            const balance = await connection.getBalance(new PublicKey(publicKey));
-            setBalance(balance / 1000000000); // Convertir en SOL
+            try {
+                const connection = new Connection('https://api.mainnet-beta.solana.com', 'confirmed');
+                const balance = await connection.getBalance(new PublicKey(publicKey));
+                console.log('Balance en lamports:', balance);
+                setBalance(balance / 1000000000); // Convertir en SOL
+            } catch (error) {
+                console.error('Erreur lors de la récupération du solde:', error);
+            }
         }
     };
 
     useEffect(() => {
-        if (isConnected) {
+        if (isConnected && publicKey) {
+            console.log('PublicKey:', publicKey);
             fetchBalance();
         }
     }, [isConnected, publicKey]);
@@ -96,6 +102,11 @@ const DepotForm = () => {
             return;
         }
 
+        if (balance < amount) {
+            setStatus('Fonds insuffisants pour effectuer la transaction.');
+            return;
+        }
+
         try {
             const connection = new Connection('https://api.mainnet-beta.solana.com', 'confirmed');
             const lamports = Math.round(amount * 1000000000); // Convertir en lamports avec arrondi
@@ -125,6 +136,8 @@ const DepotForm = () => {
                 setStatus('Vous avez refusé la transaction.');
             } else if (error.message.includes('Insufficient funds')) {
                 setStatus('Fonds insuffisants pour effectuer la transaction.');
+            } else if (error.message.includes('Invalid public key')) {
+                setStatus('Adresse de destination invalide.');
             } else {
                 setStatus('Une erreur est survenue. Veuillez réessayer.');
             }
