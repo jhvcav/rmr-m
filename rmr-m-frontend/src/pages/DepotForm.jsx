@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Connection, PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
+import './DepotForm.css';
+import * as web3 from '@solana/web3.js';
 
 const DepotForm = () => {
     const [amount, setAmount] = useState(0.05); // Montant par défaut 0.05 SOL
@@ -10,7 +12,7 @@ const DepotForm = () => {
     const [balance, setBalance] = useState(null);
 
     // Initialisation de la connexion à QuickNode
-    const connection = new Connection("https://restless-wandering-resonance.solana-mainnet.quiknode.pro/a93a0707e1de0c3c12802f06ea68750872c92beb/");
+    const connection = new web3.Connection("https://restless-wandering-resonance.solana-mainnet.quiknode.pro/a93a0707e1de0c3c12802f06ea68750872c92beb/");
 
     // Vérifier la connexion au wallet
     useEffect(() => {
