@@ -57,12 +57,18 @@ const DepotForm = () => {
         fetchBalance(publicKey);
     };
 
-    const fetchBalance = async (walletPublicKey) => {
-        try {
-            const balance = await connection.getBalance(new PublicKey(walletPublicKey));
-            setBalance(balance / 1_000_000_000); // Convertir en SOL
-        } catch (error) {
-            console.error('❌ Erreur lors de la récupération du solde:', error);
+    const fetchBalance = async () => {
+        if (publicKey) {
+            try {
+                console.log("Fetching balance for:", publicKey.toString()); // Test
+                const connection = new Connection("https://api.mainnet-beta.solana.com", "confirmed");
+                const balance = await connection.getBalance(new PublicKey(publicKey));
+                console.log("Balance récupérée (lamports) :", balance); // Test
+                setBalance(balance / 1000000000); // Conversion en SOL
+            } catch (error) {
+                console.error("Erreur lors de la récupération du solde:", error);
+                setBalance(null); // Remettre à zéro si erreur
+            }
         }
     };
 
