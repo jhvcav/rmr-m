@@ -55,6 +55,12 @@ const DepotForm = () => {
 
         // Récupérer le solde du wallet connecté
         fetchBalance(publicKey);
+        <div className="debug-section">
+            <h3>🛠️ Debug Info</h3>
+            <p><b>Adresse du wallet connecté :</b> {publicKey || "Non détectée"}</p>
+            <p><b>Solde récupéré :</b> {balance !== null ? balance + " SOL" : "Solde non récupéré"}</p>
+            <p><b>Statut :</b> {status}</p>
+        </div>
     };
 
     const fetchBalance = async () => {
