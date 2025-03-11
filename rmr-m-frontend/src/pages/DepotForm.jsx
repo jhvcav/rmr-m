@@ -3,7 +3,7 @@ import { Connection, PublicKey, SystemProgram, Transaction } from '@solana/web3.
 import './DepotForm.css';
 
 const DepotForm = () => {
-    const [amount, setAmount] = useState(0.05); // Valeur par défaut 0.05 SOL
+    const [amount, setAmount] = useState(0.05);
     const [destinationAddress, setDestinationAddress] = useState('');
     const [status, setStatus] = useState('');
     const [isConnected, setIsConnected] = useState(false);
@@ -15,13 +15,11 @@ const DepotForm = () => {
     // Vérifier la connexion au wallet
     useEffect(() => {
         checkWalletConnection();
-
         if (window.solflare) {
             window.solflare.on('connect', () => {
                 console.log('✅ Wallet connecté !');
                 checkWalletConnection();
             });
-
             window.solflare.on('disconnect', () => {
                 console.log('❌ Wallet déconnecté.');
                 setIsConnected(false);
@@ -29,7 +27,6 @@ const DepotForm = () => {
                 setBalance(null);
             });
         }
-
         return () => {
             if (window.solflare) {
                 window.solflare.off('connect');
@@ -54,33 +51,26 @@ const DepotForm = () => {
         setPublicKey(publicKey.toString());
 
         // Récupérer le solde du wallet connecté
-        fetchBalance(publicKey);
-        <div className="debug-section">
-            <h3>🛠️ Debug Info</h3>
-            <p><b>Adresse du wallet connecté :</b> {publicKey || "Non détectée"}</p>
-            <p><b>Solde récupéré :</b> {balance !== null ? balance + " SOL" : "Solde non récupéré"}</p>
-            <p><b>Statut :</b> {status}</p>
-        </div>
+        fetchBalance();
     };
 
     const fetchBalance = async () => {
         if (publicKey) {
             try {
-                console.log("Fetching balance for:", publicKey.toString()); // Test
-                const connection = new Connection("https://api.mainnet-beta.solana.com", "confirmed");
+                console.log("Fetching balance for:", publicKey.toString());
                 const balance = await connection.getBalance(new PublicKey(publicKey));
-                console.log("Balance récupérée (lamports) :", balance); // Test
-                setBalance(balance / 1000000000); // Conversion en SOL
+                console.log("Balance récupérée (lamports) :", balance);
+                setBalance(balance / 1000000000);
             } catch (error) {
                 console.error("Erreur lors de la récupération du solde:", error);
-                setBalance(null); // Remettre à zéro si erreur
+                setBalance(null);
             }
         }
     };
 
     useEffect(() => {
         if (isConnected && publicKey) {
-            fetchBalance(publicKey);
+            fetchBalance();
         }
     }, [isConnected, publicKey]);
 
@@ -114,13 +104,13 @@ const DepotForm = () => {
             return;
         }
 
-        if (balance < amount + 0.000005) { // Vérifie que le solde couvre aussi les frais
+        if (balance < amount + 0.000005) {
             setStatus('⚠️ Fonds insuffisants pour effectuer la transaction.');
             return;
         }
 
         try {
-            const lamports = Math.round(amount * 1_000_000_000); // Convertir en lamports
+            const lamports = Math.round(amount * 1_000_000_000);
 
             const transaction = new Transaction().add(
                 SystemProgram.transfer({
@@ -141,7 +131,7 @@ const DepotForm = () => {
 
             await connection.confirmTransaction(signature);
             setStatus('✅ Transaction confirmée avec succès !');
-            fetchBalance(publicKey); // Mettre à jour le solde après la transaction
+            fetchBalance();
         } catch (error) {
             console.error('❌ Erreur lors du dépôt de fonds:', error);
             setStatus('❌ Une erreur est survenue. Veuillez réessayer.');
@@ -156,7 +146,7 @@ const DepotForm = () => {
                 {isConnected ? (
                     <>
                         <p>✅ Connecté avec l'adresse : <strong>{publicKey}</strong></p>
-                        <p>💰 Solde disponible : <strong>{balance} SOL</strong></p>
+                        <p>💰 Solde disponible : <strong>{balance !== null ? balance + " SOL" : "Solde non récupéré"}</strong></p>
                     </>
                 ) : (
                     <p>⚠️ Non connecté.</p>
@@ -165,6 +155,7 @@ const DepotForm = () => {
                     {isConnected ? '✅ Déjà connecté' : '🔗 Se connecter à Solflare'}
                 </button>
             </div>
+
             <div>
                 <label>🔹 Adresse de destination :</label>
                 <input
@@ -174,6 +165,7 @@ const DepotForm = () => {
                     placeholder="Entrez l'adresse Solana"
                 />
             </div>
+
             <div>
                 <label>💸 Montant (en SOL) :</label>
                 <input
@@ -183,10 +175,20 @@ const DepotForm = () => {
                     placeholder="Entrez le montant"
                 />
             </div>
+
             <button onClick={handleDepot} disabled={!isConnected}>
                 🚀 Envoyer {amount} SOL
             </button>
+
             <p className="status">{status}</p>
+
+            {/* 🔍 Section de debug pour voir les infos directement sur la page */}
+            <div className="debug-section">
+                <h3>🛠️ Debug Info</h3>
+                <p><b>Adresse du wallet connecté :</b> {publicKey || "Non détectée"}</p>
+                <p><b>Solde récupéré :</b> {balance !== null ? balance + " SOL" : "Solde non récupéré"}</p>
+                <p><b>Statut :</b> {status}</p>
+            </div>
         </div>
     );
 };
