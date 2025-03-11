@@ -1,17 +1,23 @@
 import React, { useState, useEffect } from "react";
 import { Connection, PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
-import "./DepotForm.css"; // Assure-toi d'avoir un fichier CSS adapté
+import "./DepotForm.css";
 import * as web3 from '@solana/web3.js';
+import { Buffer } from "buffer";
+import { useCallback } from "react";
+import { useMemo } from "react";
 
 const DepotForm = () => {
-    const [amount, setAmount] = useState(0.05); // Valeur par défaut 0.05 SOL
+    const [amount, setAmount] = useState(0.05);
     const [destinationAddress, setDestinationAddress] = useState("");
     const [status, setStatus] = useState("");
     const [isConnected, setIsConnected] = useState(false);
     const [publicKey, setPublicKey] = useState(null);
     const [balance, setBalance] = useState(null);
 
-    const connection = new web3.Connection("https://restless-wandering-resonance.solana-mainnet.quiknode.pro/a93a0707e1de0c3c12802f06ea68750872c92beb/");
+    // Connexion Solana Mainnet
+    const connection = useMemo(() => 
+    new web3.Connection("https://restless-wandering-resonance.solana-mainnet.quiknode.pro/a93a0707e1de0c3c12802f06ea68750872c92beb/"),
+[]); // Aucune dépendance = Ne change jamais
 
     // Vérifier la connexion au wallet
     useEffect(() => {
@@ -48,31 +54,33 @@ const DepotForm = () => {
             return;
         }
 
-        const publicKey = window.solflare.publicKey;
+        const pubKey = window.solflare.publicKey;
         setIsConnected(true);
-        setPublicKey(publicKey.toString());
+        setPublicKey(pubKey.toString());
 
         // Récupérer le solde du wallet connecté
-        fetchBalance(publicKey);
+        fetchBalance(pubKey);
     };
 
-    const fetchBalance = async () => {
-        if (publicKey) {
+    
+
+    const fetchBalance = useCallback(async (pubKey) => {
+        if (pubKey) {
             try {
-                const balance = await connection.getBalance(new PublicKey(publicKey));
-                setBalance(balance / 1000000000); // Conversion en SOL
+                const balanceLamports = await connection.getBalance(new PublicKey(pubKey));
+                setBalance(balanceLamports / web3.LAMPORTS_PER_SOL);
             } catch (error) {
                 console.error("Erreur lors de la récupération du solde:", error);
                 setBalance(null);
             }
         }
-    };
+    }, [connection]); // connection reste stable
 
     useEffect(() => {
         if (isConnected && publicKey) {
             fetchBalance(publicKey);
         }
-    }, [isConnected, publicKey]);
+    }, [isConnected, publicKey, fetchBalance]); // Ajout de fetchBalance comme dépendance
 
     const handleConnect = async () => {
         if (!window.solflare) {
@@ -93,29 +101,32 @@ const DepotForm = () => {
             setStatus("⚠️ Veuillez vous connecter à Solflare.");
             return;
         }
-    
-        if (!destinationAddress || !PublicKey.isOnCurve(destinationAddress)) {
+
+        // Validation de l'adresse de destination
+        try {
+            new PublicKey(destinationAddress);
+        } catch (error) {
             setStatus("⚠️ Adresse de destination invalide.");
             return;
         }
-    
+
         if (amount <= 0 || isNaN(amount)) {
             setStatus("⚠️ Veuillez entrer un montant valide.");
             return;
         }
-    
-        if (balance < amount + 0.000005) { // Vérifie que le solde couvre aussi les frais
+
+        if (balance < amount + 0.000005) {
             setStatus("⚠️ Fonds insuffisants pour effectuer la transaction.");
             return;
         }
-    
+
         try {
             console.log("🔹 Début de la transaction...");
             console.log("➡️ Destination :", destinationAddress);
             console.log("💸 Montant :", amount, "SOL");
-    
-            const lamports = Math.round(amount * 1_000_000_000); // Convertir en lamports
-    
+
+            const lamports = Math.round(amount * web3.LAMPORTS_PER_SOL);
+
             const transaction = new Transaction().add(
                 SystemProgram.transfer({
                     fromPubkey: new PublicKey(publicKey),
@@ -123,23 +134,26 @@ const DepotForm = () => {
                     lamports,
                 })
             );
-    
+
             console.log("🔹 Génération du blockhash...");
             const { blockhash } = await connection.getLatestBlockhash();
             transaction.recentBlockhash = blockhash;
             transaction.feePayer = new PublicKey(publicKey);
-    
+
             console.log("🔹 Signature de la transaction...");
             const signedTransaction = await window.solflare.signTransaction(transaction);
-            console.log("🔹 Transaction signée :", signedTransaction);
-    
+            const serializedTransaction = Buffer.from(signedTransaction.serialize());
+
             console.log("🔹 Envoi de la transaction...");
-            const signature = await connection.sendRawTransaction(signedTransaction.serialize());
-    
+            const signature = await connection.sendRawTransaction(serializedTransaction, {
+                skipPreflight: false,
+                preflightCommitment: "confirmed",
+            });
+
             console.log("✅ Transaction envoyée avec succès ! Signature :", signature);
             setStatus(`✅ Transaction envoyée avec succès ! ID : ${signature}`);
-    
-            await connection.confirmTransaction(signature);
+
+            await connection.confirmTransaction(signature, "confirmed");
             setStatus("✅ Transaction confirmée avec succès !");
             fetchBalance(publicKey);
         } catch (error) {
@@ -184,7 +198,7 @@ const DepotForm = () => {
                 <input
                     type="number"
                     value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
+                    onChange={(e) => setAmount(parseFloat(e.target.value))}
                     placeholder="Entrez le montant"
                     min="0.0001"
                     step="0.0001"
