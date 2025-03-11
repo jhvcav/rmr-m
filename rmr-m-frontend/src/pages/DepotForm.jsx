@@ -48,29 +48,33 @@ const DepotForm = () => {
 
         const publicKey = window.solflare.publicKey;
         setIsConnected(true);
-        setPublicKey(publicKey.toString());
+        setPublicKey(publicKey.toBase58()); // 🔹 Utiliser toBase58() pour éviter les erreurs
 
-        // Récupérer le solde du wallet connecté
-        fetchBalance();
+        // Récupérer le solde après connexion
+        fetchBalance(publicKey.toBase58());
     };
 
-    const fetchBalance = async () => {
-        if (publicKey) {
-            try {
-                console.log("Fetching balance for:", publicKey.toString());
-                const balance = await connection.getBalance(new PublicKey(publicKey));
-                console.log("Balance récupérée (lamports) :", balance);
-                setBalance(balance / 1000000000);
-            } catch (error) {
-                console.error("Erreur lors de la récupération du solde:", error);
-                setBalance(null);
-            }
+    const fetchBalance = async (walletAddress) => {
+        if (!walletAddress) {
+            console.error("🚨 fetchBalance : Adresse du wallet non fournie !");
+            setBalance(null);
+            return;
+        }
+
+        try {
+            console.log(`🔍 Récupération du solde pour ${walletAddress}`);
+            const balanceLamports = await connection.getBalance(new PublicKey(walletAddress));
+            console.log(`💰 Balance récupérée (lamports) : ${balanceLamports}`);
+            setBalance(balanceLamports / 1_000_000_000); // Convertir en SOL
+        } catch (error) {
+            console.error("❌ Erreur lors de la récupération du solde :", error);
+            setBalance(null);
         }
     };
 
     useEffect(() => {
         if (isConnected && publicKey) {
-            fetchBalance();
+            fetchBalance(publicKey);
         }
     }, [isConnected, publicKey]);
 
@@ -131,7 +135,7 @@ const DepotForm = () => {
 
             await connection.confirmTransaction(signature);
             setStatus('✅ Transaction confirmée avec succès !');
-            fetchBalance();
+            fetchBalance(publicKey);
         } catch (error) {
             console.error('❌ Erreur lors du dépôt de fonds:', error);
             setStatus('❌ Une erreur est survenue. Veuillez réessayer.');
@@ -182,7 +186,7 @@ const DepotForm = () => {
 
             <p className="status">{status}</p>
 
-            {/* 🔍 Section de debug pour voir les infos directement sur la page */}
+            {/* 🔍 Section Debug */}
             <div className="debug-section">
                 <h3>🛠️ Debug Info</h3>
                 <p><b>Adresse du wallet connecté :</b> {publicKey || "Non détectée"}</p>
