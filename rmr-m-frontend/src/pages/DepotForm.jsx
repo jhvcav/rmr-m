@@ -9,8 +9,7 @@ const DepotForm = () => {
     const [errorMessage, setErrorMessage] = useState('');
 
     // Connexion Solana Mainnet
-    const connection = new Connection('https://solana-mainnet.rpc.extrnode.com', 'confirmed'); // RPC alternatif
-
+    const connection = new Connection('https://restless-wandering-resonance.solana-mainnet.quiknode.pro/a93a0707e1de0c3c12802f06ea68750872c92beb', 'confirmed');
     useEffect(() => {
         checkWalletConnection();
 
@@ -88,7 +87,7 @@ const DepotForm = () => {
 
     return (
         <div className="depot-form">
-            <h1>💰 Dépôt de fonds sur Solana</h1>
+            <h1>💰 Dépôt de fonds sur Solana!</h1>
 
             <div>
                 <h2>État du wallet :</h2>
