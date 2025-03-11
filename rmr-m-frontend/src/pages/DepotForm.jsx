@@ -1,23 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { Connection, PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
-import "./DepotForm.css";
-import * as web3 from '@solana/web3.js';
-import { Buffer } from "buffer";
-import { useCallback } from "react";
-import { useMemo } from "react";
 
 const DepotForm = () => {
-    const [amount, setAmount] = useState(0.05);
+    const [amount, setAmount] = useState(0.05); // Montant par défaut 0.05 SOL
     const [destinationAddress, setDestinationAddress] = useState("");
     const [status, setStatus] = useState("");
     const [isConnected, setIsConnected] = useState(false);
     const [publicKey, setPublicKey] = useState(null);
     const [balance, setBalance] = useState(null);
 
-    // Connexion Solana Mainnet
-    const connection = useMemo(() => 
-    new web3.Connection("https://restless-wandering-resonance.solana-mainnet.quiknode.pro/a93a0707e1de0c3c12802f06ea68750872c92beb/"),
-[]); // Aucune dépendance = Ne change jamais
+    // Initialisation de la connexion à QuickNode
+    const connection = new Connection("https://restless-wandering-resonance.solana-mainnet.quiknode.pro/a93a0707e1de0c3c12802f06ea68750872c92beb/");
 
     // Vérifier la connexion au wallet
     useEffect(() => {
@@ -54,33 +47,31 @@ const DepotForm = () => {
             return;
         }
 
-        const pubKey = window.solflare.publicKey;
+        const walletPublicKey = window.solflare.publicKey;
         setIsConnected(true);
-        setPublicKey(pubKey.toString());
+        setPublicKey(walletPublicKey.toString());
 
         // Récupérer le solde du wallet connecté
-        fetchBalance(pubKey);
+        fetchBalance(walletPublicKey);
     };
 
-    
-
-    const fetchBalance = useCallback(async (pubKey) => {
-        if (pubKey) {
+    const fetchBalance = async (walletPublicKey) => {
+        if (walletPublicKey) {
             try {
-                const balanceLamports = await connection.getBalance(new PublicKey(pubKey));
-                setBalance(balanceLamports / web3.LAMPORTS_PER_SOL);
+                const balanceLamports = await connection.getBalance(new PublicKey(walletPublicKey));
+                setBalance(balanceLamports / 1_000_000_000); // Conversion en SOL
             } catch (error) {
                 console.error("Erreur lors de la récupération du solde:", error);
                 setBalance(null);
             }
         }
-    }, [connection]); // connection reste stable
+    };
 
     useEffect(() => {
         if (isConnected && publicKey) {
             fetchBalance(publicKey);
         }
-    }, [isConnected, publicKey, fetchBalance]); // Ajout de fetchBalance comme dépendance
+    }, [isConnected, publicKey]);
 
     const handleConnect = async () => {
         if (!window.solflare) {
@@ -101,32 +92,29 @@ const DepotForm = () => {
             setStatus("⚠️ Veuillez vous connecter à Solflare.");
             return;
         }
-
-        // Validation de l'adresse de destination
-        try {
-            new PublicKey(destinationAddress);
-        } catch (error) {
+    
+        if (!destinationAddress || !PublicKey.isOnCurve(destinationAddress)) {
             setStatus("⚠️ Adresse de destination invalide.");
             return;
         }
-
+    
         if (amount <= 0 || isNaN(amount)) {
             setStatus("⚠️ Veuillez entrer un montant valide.");
             return;
         }
-
+    
         if (balance < amount + 0.000005) {
             setStatus("⚠️ Fonds insuffisants pour effectuer la transaction.");
             return;
         }
-
+    
         try {
             console.log("🔹 Début de la transaction...");
             console.log("➡️ Destination :", destinationAddress);
             console.log("💸 Montant :", amount, "SOL");
-
-            const lamports = Math.round(amount * web3.LAMPORTS_PER_SOL);
-
+    
+            const lamports = Math.round(amount * 1_000_000_000); // Convertir en lamports
+    
             const transaction = new Transaction().add(
                 SystemProgram.transfer({
                     fromPubkey: new PublicKey(publicKey),
@@ -134,26 +122,26 @@ const DepotForm = () => {
                     lamports,
                 })
             );
-
+    
             console.log("🔹 Génération du blockhash...");
-            const { blockhash } = await connection.getLatestBlockhash();
-            transaction.recentBlockhash = blockhash;
+            const latestBlockInfo = await connection.getLatestBlockhash();
+            transaction.recentBlockhash = latestBlockInfo.blockhash;
             transaction.feePayer = new PublicKey(publicKey);
-
+    
             console.log("🔹 Signature de la transaction...");
             const signedTransaction = await window.solflare.signTransaction(transaction);
-            const serializedTransaction = Buffer.from(signedTransaction.serialize());
-
-            console.log("🔹 Envoi de la transaction...");
-            const signature = await connection.sendRawTransaction(serializedTransaction, {
-                skipPreflight: false,
-                preflightCommitment: "confirmed",
-            });
-
+            const signature = await connection.sendRawTransaction(signedTransaction.serialize());
+    
             console.log("✅ Transaction envoyée avec succès ! Signature :", signature);
             setStatus(`✅ Transaction envoyée avec succès ! ID : ${signature}`);
-
-            await connection.confirmTransaction(signature, "confirmed");
+    
+            console.log("🔹 Confirmation de la transaction...");
+            await connection.confirmTransaction({
+                signature,
+                blockhash: latestBlockInfo.blockhash,
+                lastValidBlockHeight: latestBlockInfo.lastValidBlockHeight
+            });
+    
             setStatus("✅ Transaction confirmée avec succès !");
             fetchBalance(publicKey);
         } catch (error) {
@@ -198,7 +186,7 @@ const DepotForm = () => {
                 <input
                     type="number"
                     value={amount}
-                    onChange={(e) => setAmount(parseFloat(e.target.value))}
+                    onChange={(e) => setAmount(e.target.value)}
                     placeholder="Entrez le montant"
                     min="0.0001"
                     step="0.0001"
