@@ -159,6 +159,11 @@ const DepotForm = () => {
                 ) : (
                     <p>⚠️ Non connecté.</p>
                 )}
+                <div className="debug-info">
+                    <h2>DEBUG :</h2>
+                    <p>Adresse du wallet détectée : <strong>{publicKey || "Non détectée"}</strong></p>
+                    <p>Solde récupéré : <strong>{balance !== null ? balance + " SOL" : "Solde non récupéré"}</strong></p>
+                </div>
                 <button onClick={handleConnect} disabled={isConnected}>
                     {isConnected ? '✅ Déjà connecté' : '🔗 Se connecter à Solflare'}
                 </button>
