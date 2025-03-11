@@ -1,19 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Connection, PublicKey, SystemProgram, Transaction } from '@solana/web3.js';
+import { Connection, PublicKey } from '@solana/web3.js';
 import './DepotForm.css';
 
 const DepotForm = () => {
-    const [amount, setAmount] = useState(0.05);
-    const [destinationAddress, setDestinationAddress] = useState('');
-    const [status, setStatus] = useState('');
-    const [isConnected, setIsConnected] = useState(false);
     const [publicKey, setPublicKey] = useState(null);
+    const [isConnected, setIsConnected] = useState(false);
     const [balance, setBalance] = useState(null);
     const [errorMessage, setErrorMessage] = useState('');
 
+    // Connexion Solana Mainnet
     const connection = new Connection('https://api.mainnet-beta.solana.com', 'confirmed');
 
-    // Vérifier la connexion au wallet
     useEffect(() => {
         checkWalletConnection();
 
@@ -53,14 +50,14 @@ const DepotForm = () => {
                 return;
             }
 
-            const publicKey = window.solflare.publicKey;
+            const walletPublicKey = window.solflare.publicKey.toBase58();
             setIsConnected(true);
-            setPublicKey(publicKey.toBase58()); // 🔹 Utiliser toBase58()
+            setPublicKey(walletPublicKey);
 
-            console.log(`✅ Wallet connecté : ${publicKey.toBase58()}`);
+            console.log(`✅ Wallet connecté : ${walletPublicKey}`);
 
-            // 🔥 Forcer l'affichage du solde
-            fetchBalance(publicKey.toBase58());
+            // 🔥 Tester la récupération du solde immédiatement après connexion
+            fetchBalance(walletPublicKey);
         } catch (error) {
             console.error("❌ Erreur lors de la connexion au wallet :", error);
             setErrorMessage("Erreur lors de la connexion au wallet.");
@@ -71,47 +68,28 @@ const DepotForm = () => {
         if (!walletAddress) {
             console.error("🚨 fetchBalance : Adresse du wallet non fournie !");
             setBalance(null);
+            setErrorMessage("🚨 Aucune adresse de wallet détectée.");
             return;
         }
 
         try {
-            console.log(`🔍 Récupération du solde pour ${walletAddress}`);
+            console.log(`🔍 Récupération du solde pour : ${walletAddress}`);
             const balanceLamports = await connection.getBalance(new PublicKey(walletAddress));
 
             console.log(`💰 Balance récupérée (lamports) : ${balanceLamports}`);
             setBalance(balanceLamports / 1_000_000_000); // Convertir en SOL
+            setErrorMessage('');
         } catch (error) {
             console.error("❌ Erreur lors de la récupération du solde :", error);
-            setErrorMessage("Impossible de récupérer le solde !");
+            setErrorMessage(`Erreur: ${error.message}`);
             setBalance(null);
-        }
-    };
-
-    useEffect(() => {
-        if (isConnected && publicKey) {
-            console.log("🔄 Exécution de fetchBalance() après connexion.");
-            fetchBalance(publicKey);
-        }
-    }, [isConnected, publicKey]);
-
-    const handleConnect = async () => {
-        if (!window.solflare) {
-            alert('Veuillez installer Solflare.');
-            return;
-        }
-
-        try {
-            await window.solflare.connect();
-            checkWalletConnection();
-        } catch (error) {
-            console.error('❌ Erreur lors de la connexion :', error);
-            setErrorMessage("Connexion échouée.");
         }
     };
 
     return (
         <div className="depot-form">
-            <h1>💰 Dépôt de fonds sur Solana!</h1>
+            <h1>💰 Dépôt de fonds sur Solana</h1>
+
             <div>
                 <h2>État du wallet :</h2>
                 {isConnected ? (
@@ -122,7 +100,7 @@ const DepotForm = () => {
                 ) : (
                     <p>⚠️ Non connecté.</p>
                 )}
-                <button onClick={handleConnect} disabled={isConnected}>
+                <button onClick={checkWalletConnection} disabled={isConnected}>
                     {isConnected ? '✅ Déjà connecté' : '🔗 Se connecter à Solflare'}
                 </button>
             </div>
@@ -132,7 +110,7 @@ const DepotForm = () => {
             {/* 🔍 Section Debug */}
             <div className="debug-section">
                 <h3>🛠️ Debug Info</h3>
-                <p><b>Adresse du wallet connecté :</b> {publicKey || "Non détectée"}</p>
+                <p><b>Adresse du wallet utilisé :</b> {publicKey || "Non détectée"}</p>
                 <p><b>Solde récupéré :</b> {balance !== null ? balance + " SOL" : "Solde non récupéré"}</p>
                 <p><b>Erreur :</b> {errorMessage || "Aucune erreur"}</p>
             </div>
