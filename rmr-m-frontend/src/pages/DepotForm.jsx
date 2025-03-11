@@ -158,13 +158,14 @@ const DepotForm = () => {
 
     return (
         <div className="depot-form">
-            <h1>💰 Dépôt de fonds</h1>
-
+            <h1 style={{ fontSize: "1.5em" }}>💰 Dépôt de fonds</h1>
+    
             {/* État du Wallet */}
             <div className="wallet-status">
                 {isConnected ? (
                     <>
-                        <p>✅ Connecté avec l'adresse : <strong>{publicKey}</strong></p>
+                        <p>✅ Connecté avec l'adresse :</p>
+                        <p style={{ fontSize: "1.3em", fontWeight: "bold" }}>{publicKey}</p>
                         <p>💰 Solde disponible : <strong>{balance} SOL</strong></p>
                     </>
                 ) : (
@@ -174,8 +175,8 @@ const DepotForm = () => {
                     {isConnected ? "✅ Déjà connecté" : "🔗 Se connecter à Solflare"}
                 </button>
             </div>
-
-            {/* Champ pour entrer l'adresse de destination */}
+    
+            {/* Adresse de destination */}
             <div className="input-container">
                 <label>🔹 Adresse de destination :</label>
                 <input
@@ -185,8 +186,8 @@ const DepotForm = () => {
                     placeholder="Entrez l'adresse Solana"
                 />
             </div>
-
-            {/* Champ pour entrer le montant */}
+    
+            {/* Montant */}
             <div className="input-container">
                 <label>💸 Montant (en SOL) :</label>
                 <input
@@ -198,16 +199,15 @@ const DepotForm = () => {
                     step="0.0001"
                 />
             </div>
-
-            {/* Bouton pour envoyer la transaction */}
+    
+            {/* Bouton d'envoi */}
             <button onClick={handleDepot} disabled={!isConnected}>
                 🚀 Envoyer {amount} SOL
             </button>
-
+    
             {/* Message de statut */}
             <p className="status">{status}</p>
         </div>
     );
 };
-
 export default DepotForm;
