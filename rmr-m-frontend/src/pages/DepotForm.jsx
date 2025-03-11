@@ -9,7 +9,7 @@ const DepotForm = () => {
     const [errorMessage, setErrorMessage] = useState('');
 
     // Connexion Solana Mainnet
-    const connection = new Connection('https://api.mainnet-beta.solana.com', 'confirmed');
+    const connection = new Connection('https://solana-mainnet.rpc.extrnode.com', 'confirmed'); // RPC alternatif
 
     useEffect(() => {
         checkWalletConnection();
