@@ -9,17 +9,20 @@ const DepotForm = () => {
     const [isConnected, setIsConnected] = useState(false);
     const [publicKey, setPublicKey] = useState(null);
     const [balance, setBalance] = useState(null);
+    const [errorMessage, setErrorMessage] = useState('');
 
     const connection = new Connection('https://api.mainnet-beta.solana.com', 'confirmed');
 
     // Vérifier la connexion au wallet
     useEffect(() => {
         checkWalletConnection();
+
         if (window.solflare) {
             window.solflare.on('connect', () => {
                 console.log('✅ Wallet connecté !');
                 checkWalletConnection();
             });
+
             window.solflare.on('disconnect', () => {
                 console.log('❌ Wallet déconnecté.');
                 setIsConnected(false);
@@ -27,6 +30,7 @@ const DepotForm = () => {
                 setBalance(null);
             });
         }
+
         return () => {
             if (window.solflare) {
                 window.solflare.off('connect');
@@ -36,22 +40,31 @@ const DepotForm = () => {
     }, []);
 
     const checkWalletConnection = async () => {
-        if (!window.solflare || !window.solflare.isSolflare) {
-            setIsConnected(false);
-            return;
+        try {
+            if (!window.solflare || !window.solflare.isSolflare) {
+                setIsConnected(false);
+                setErrorMessage("Solflare non détecté !");
+                return;
+            }
+
+            if (!window.solflare.isConnected) {
+                setIsConnected(false);
+                setErrorMessage("Wallet non connecté !");
+                return;
+            }
+
+            const publicKey = window.solflare.publicKey;
+            setIsConnected(true);
+            setPublicKey(publicKey.toBase58()); // 🔹 Utiliser toBase58()
+
+            console.log(`✅ Wallet connecté : ${publicKey.toBase58()}`);
+
+            // 🔥 Forcer l'affichage du solde
+            fetchBalance(publicKey.toBase58());
+        } catch (error) {
+            console.error("❌ Erreur lors de la connexion au wallet :", error);
+            setErrorMessage("Erreur lors de la connexion au wallet.");
         }
-
-        if (!window.solflare.isConnected) {
-            setIsConnected(false);
-            return;
-        }
-
-        const publicKey = window.solflare.publicKey;
-        setIsConnected(true);
-        setPublicKey(publicKey.toBase58()); // 🔹 Utiliser toBase58() pour éviter les erreurs
-
-        // Récupérer le solde après connexion
-        fetchBalance(publicKey.toBase58());
     };
 
     const fetchBalance = async (walletAddress) => {
@@ -64,16 +77,19 @@ const DepotForm = () => {
         try {
             console.log(`🔍 Récupération du solde pour ${walletAddress}`);
             const balanceLamports = await connection.getBalance(new PublicKey(walletAddress));
+
             console.log(`💰 Balance récupérée (lamports) : ${balanceLamports}`);
             setBalance(balanceLamports / 1_000_000_000); // Convertir en SOL
         } catch (error) {
             console.error("❌ Erreur lors de la récupération du solde :", error);
+            setErrorMessage("Impossible de récupérer le solde !");
             setBalance(null);
         }
     };
 
     useEffect(() => {
         if (isConnected && publicKey) {
+            console.log("🔄 Exécution de fetchBalance() après connexion.");
             fetchBalance(publicKey);
         }
     }, [isConnected, publicKey]);
@@ -89,68 +105,19 @@ const DepotForm = () => {
             checkWalletConnection();
         } catch (error) {
             console.error('❌ Erreur lors de la connexion :', error);
-        }
-    };
-
-    const handleDepot = async () => {
-        if (!isConnected) {
-            setStatus('⚠️ Veuillez vous connecter à Solflare.');
-            return;
-        }
-
-        if (!destinationAddress || !PublicKey.isOnCurve(destinationAddress)) {
-            setStatus('⚠️ Adresse de destination invalide.');
-            return;
-        }
-
-        if (amount <= 0 || isNaN(amount)) {
-            setStatus('⚠️ Veuillez entrer un montant valide.');
-            return;
-        }
-
-        if (balance < amount + 0.000005) {
-            setStatus('⚠️ Fonds insuffisants pour effectuer la transaction.');
-            return;
-        }
-
-        try {
-            const lamports = Math.round(amount * 1_000_000_000);
-
-            const transaction = new Transaction().add(
-                SystemProgram.transfer({
-                    fromPubkey: new PublicKey(publicKey),
-                    toPubkey: new PublicKey(destinationAddress),
-                    lamports,
-                })
-            );
-
-            const { blockhash } = await connection.getLatestBlockhash();
-            transaction.recentBlockhash = blockhash;
-            transaction.feePayer = new PublicKey(publicKey);
-
-            const signedTransaction = await window.solflare.signTransaction(transaction);
-            const signature = await connection.sendRawTransaction(signedTransaction.serialize());
-
-            setStatus(`✅ Transaction envoyée avec succès ! ID : ${signature}`);
-
-            await connection.confirmTransaction(signature);
-            setStatus('✅ Transaction confirmée avec succès !');
-            fetchBalance(publicKey);
-        } catch (error) {
-            console.error('❌ Erreur lors du dépôt de fonds:', error);
-            setStatus('❌ Une erreur est survenue. Veuillez réessayer.');
+            setErrorMessage("Connexion échouée.");
         }
     };
 
     return (
         <div className="depot-form">
-            <h1>💰 Dépôt de fonds sur Solana</h1>
+            <h1>💰 Dépôt de fonds sur Solana!</h1>
             <div>
                 <h2>État du wallet :</h2>
                 {isConnected ? (
                     <>
                         <p>✅ Connecté avec l'adresse : <strong>{publicKey}</strong></p>
-                        <p>💰 Solde disponible : <strong>{balance !== null ? balance + " SOL" : "Solde non récupéré"}</strong></p>
+                        <p>💰 Solde disponible : <strong>{balance !== null ? balance + " SOL" : "⏳ Chargement..."}</strong></p>
                     </>
                 ) : (
                     <p>⚠️ Non connecté.</p>
@@ -160,38 +127,14 @@ const DepotForm = () => {
                 </button>
             </div>
 
-            <div>
-                <label>🔹 Adresse de destination :</label>
-                <input
-                    type="text"
-                    value={destinationAddress}
-                    onChange={(e) => setDestinationAddress(e.target.value)}
-                    placeholder="Entrez l'adresse Solana"
-                />
-            </div>
-
-            <div>
-                <label>💸 Montant (en SOL) :</label>
-                <input
-                    type="number"
-                    value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
-                    placeholder="Entrez le montant"
-                />
-            </div>
-
-            <button onClick={handleDepot} disabled={!isConnected}>
-                🚀 Envoyer {amount} SOL
-            </button>
-
-            <p className="status">{status}</p>
+            <button onClick={() => fetchBalance(publicKey)}>🔄 Mettre à jour le solde</button>
 
             {/* 🔍 Section Debug */}
             <div className="debug-section">
                 <h3>🛠️ Debug Info</h3>
                 <p><b>Adresse du wallet connecté :</b> {publicKey || "Non détectée"}</p>
                 <p><b>Solde récupéré :</b> {balance !== null ? balance + " SOL" : "Solde non récupéré"}</p>
-                <p><b>Statut :</b> {status}</p>
+                <p><b>Erreur :</b> {errorMessage || "Aucune erreur"}</p>
             </div>
         </div>
     );
