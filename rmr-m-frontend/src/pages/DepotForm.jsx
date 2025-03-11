@@ -3,6 +3,9 @@ import { Connection, PublicKey, SystemProgram, Transaction } from "@solana/web3.
 import './DepotForm.css';
 import * as web3 from '@solana/web3.js';
 import { Buffer } from "buffer";
+if (typeof window !== "undefined") {
+    window.Buffer = Buffer;
+}
 
 const DepotForm = () => {
     const [amount, setAmount] = useState(0.05); // Montant par défaut 0.05 SOL
