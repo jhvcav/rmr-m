@@ -161,20 +161,20 @@ const DepotForm = () => {
             <h1 style={{ fontSize: "1.5em" }}>💰 Dépôt de fonds</h1>
     
             {/* État du Wallet */}
-            <div className="wallet-status">
-                {isConnected ? (
-                    <>
-                        <p>✅ Connecté avec l'adresse :</p>
-                        <p style={{ fontSize: "1.3em", fontWeight: "bold" }}>{publicKey}</p>
-                        <p>💰 Solde disponible : <strong>{balance} SOL</strong></p>
-                    </>
-                ) : (
-                    <p>⚠️ Non connecté.</p>
-                )}
-                <button onClick={handleConnect} disabled={isConnected}>
-                    {isConnected ? "✅ Déjà connecté" : "🔗 Se connecter à Solflare"}
-                </button>
-            </div>
+        <div className="wallet-status">
+            {isConnected ? (
+            <>
+                <p>✅ Connecté avec l'adresse :</p>
+                <p className="wallet-address">{publicKey}</p>
+                <p>💰 Solde disponible : <strong>{balance} SOL</strong></p>
+            </>
+        ) : (
+            <p>⚠️ Non connecté.</p>
+        )}
+        <button onClick={handleConnect} disabled={isConnected}>
+            {isConnected ? "✅ Déjà connecté" : "🔗 Se connecter à Solflare"}
+        </button>
+        </div>
     
             {/* Adresse de destination */}
             <div className="input-container">
