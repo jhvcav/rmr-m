@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Connection, PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
 import './DepotForm.css';
 import * as web3 from '@solana/web3.js';
+import { Buffer } from "buffer";
 
 const DepotForm = () => {
     const [amount, setAmount] = useState(0.05); // Montant par défaut 0.05 SOL
