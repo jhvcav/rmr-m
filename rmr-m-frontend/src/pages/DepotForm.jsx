@@ -93,25 +93,29 @@ const DepotForm = () => {
             setStatus("⚠️ Veuillez vous connecter à Solflare.");
             return;
         }
-
+    
         if (!destinationAddress || !PublicKey.isOnCurve(destinationAddress)) {
             setStatus("⚠️ Adresse de destination invalide.");
             return;
         }
-
+    
         if (amount <= 0 || isNaN(amount)) {
             setStatus("⚠️ Veuillez entrer un montant valide.");
             return;
         }
-
-        if (balance < amount + 0.000005) {
+    
+        if (balance < amount + 0.000005) { // Vérifie que le solde couvre aussi les frais
             setStatus("⚠️ Fonds insuffisants pour effectuer la transaction.");
             return;
         }
-
+    
         try {
+            console.log("🔹 Début de la transaction...");
+            console.log("➡️ Destination :", destinationAddress);
+            console.log("💸 Montant :", amount, "SOL");
+    
             const lamports = Math.round(amount * 1_000_000_000); // Convertir en lamports
-
+    
             const transaction = new Transaction().add(
                 SystemProgram.transfer({
                     fromPubkey: new PublicKey(publicKey),
@@ -119,22 +123,28 @@ const DepotForm = () => {
                     lamports,
                 })
             );
-
+    
+            console.log("🔹 Génération du blockhash...");
             const { blockhash } = await connection.getLatestBlockhash();
             transaction.recentBlockhash = blockhash;
             transaction.feePayer = new PublicKey(publicKey);
-
+    
+            console.log("🔹 Signature de la transaction...");
             const signedTransaction = await window.solflare.signTransaction(transaction);
+            console.log("🔹 Transaction signée :", signedTransaction);
+    
+            console.log("🔹 Envoi de la transaction...");
             const signature = await connection.sendRawTransaction(signedTransaction.serialize());
-
+    
+            console.log("✅ Transaction envoyée avec succès ! Signature :", signature);
             setStatus(`✅ Transaction envoyée avec succès ! ID : ${signature}`);
-
+    
             await connection.confirmTransaction(signature);
             setStatus("✅ Transaction confirmée avec succès !");
             fetchBalance(publicKey);
         } catch (error) {
-            console.error("Erreur lors du dépôt de fonds:", error);
-            setStatus("❌ Une erreur est survenue. Veuillez réessayer.");
+            console.error("❌ Erreur lors du dépôt de fonds :", error);
+            setStatus(`❌ Une erreur est survenue : ${error.message}`);
         }
     };
 
