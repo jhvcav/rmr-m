@@ -55,14 +55,24 @@ const DepotForm = () => {
 
         // Récupérer le solde du wallet connecté
         fetchBalance(publicKey);
+        console.log(`Solde récupéré : ${balance} SOL`);
     };
 
-    const fetchBalance = async (walletPublicKey) => {
-        try {
-            const balance = await connection.getBalance(new PublicKey(walletPublicKey));
-            setBalance(balance / 1_000_000_000); // Convertir en SOL
-        } catch (error) {
-            console.error('❌ Erreur lors de la récupération du solde:', error);
+    const fetchBalance = async () => {
+        if (publicKey) {
+            try {
+                console.log('Fetching balance for publicKey:', publicKey);
+                const connection = new Connection('https://api.mainnet-beta.solana.com', 'confirmed');
+                const balanceLamports = await connection.getBalance(new PublicKey(publicKey));
+                console.log('Balance en lamports:', balanceLamports);
+    
+                const balanceSOL = balanceLamports / 1000000000; // Conversion en SOL
+                console.log('Balance convertie en SOL:', balanceSOL);
+    
+                setBalance(balanceSOL);
+            } catch (error) {
+                console.error('Erreur lors de la récupération du solde:', error);
+            }
         }
     };
 
@@ -138,7 +148,7 @@ const DepotForm = () => {
 
     return (
         <div className="depot-form">
-            <h1>💰 Dépôt de fonds sur Solana</h1>
+            <h1>💰 Dépôt de fonds sur Solana!</h1>
             <div>
                 <h2>État du wallet :</h2>
                 {isConnected ? (
