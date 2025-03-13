@@ -14,13 +14,11 @@ const DepotForm = () => {
     // Vérifier la connexion au wallet (MetaMask)
     useEffect(() => {
         if (window.ethereum) {
-            const web3Provider = new ethers.providers.Web3Provider(window.ethereum);
-            setProvider(web3Provider);
-            checkWalletConnection(web3Provider);
+          console.log("MetaMask détecté !");
         } else {
-            alert("Veuillez installer MetaMask.");
+          console.log("MetaMask n'est pas détecté.");
         }
-    }, []);
+      }, []);
 
     // Fonction pour vérifier la connexion du wallet
     const checkWalletConnection = async (provider) => {
