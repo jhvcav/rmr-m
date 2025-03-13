@@ -3,7 +3,7 @@ import { ethers } from "ethers";
 import "./DepotForm.css"; // Conserve la mise en page originale
 
 const DepotForm = () => {
-  const [amount, setAmount] = useState(0.05); // Montant par défaut 0.05 SOL
+  const [amount, setAmount] = useState(0.05); // Montant par défaut 0.05 BNB
   const [destinationAddress, setDestinationAddress] = useState("");
   const [status, setStatus] = useState("");
   const [isConnected, setIsConnected] = useState(false);
@@ -26,19 +26,20 @@ const DepotForm = () => {
   const handleConnect = async () => {
     if (window.ethereum) {
       try {
-        const provider = new ethers.providers.JsonRpcProvider(RPC_PRIVATE_URL); // Connexion avec RPC privé
+        // Demander l'autorisation de se connecter au wallet MetaMask
         const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
-        const account = accounts[0];
+        const account = accounts[0]; // Premier compte
         setPublicKey(account);
         setIsConnected(true);
 
-        // Récupérer le solde en BNB
-        const balanceInWei = await provider.getBalance(account);
-        const balanceInBNB = ethers.utils.formatEther(balanceInWei); // Convertit le solde de wei à BNB
-        setBalance(balanceInBNB);
-        console.log("🔹 Solde BNB:", balanceInBNB);
+        // Initialisation du provider avec MetaMask
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        const balance = await provider.getBalance(account);
+        setBalance(ethers.utils.formatEther(balance)); // Conversion en Ether
+
+        console.log("Compte connecté :", account);
       } catch (error) {
-        console.error("Erreur de connexion à MetaMask :", error);
+        console.error("Erreur lors de la connexion à MetaMask :", error);
         setStatus("❌ Erreur lors de la connexion à MetaMask.");
       }
     } else {
