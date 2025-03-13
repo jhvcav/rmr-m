@@ -1,69 +1,86 @@
 import React, { useState, useEffect } from "react";
-import { useWallet } from "@solana/wallet-adapter-react";
-import { Connection, PublicKey, Transaction, SystemProgram, LAMPORTS_PER_SOL } from "@solana/web3.js";
-import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
-import solflareLogo from "../assets/solflare.png"; // Icône Solflare
-import phantomLogo from "../assets/phantom.png"; // Icône Phantom
-import "./LPFarming.css";
+import { ethers } from "ethers";
+import "./LPFarming.css"; // Tes styles CSS
 
 const LPFarming = () => {
   const [capital, setCapital] = useState(250);
   const [duration, setDuration] = useState(1);
   const [profit, setProfit] = useState(0);
   const [loading, setLoading] = useState(false);
-  const { publicKey, sendTransaction, connected, select } = useWallet();
+  const [account, setAccount] = useState(null);
+  const [provider, setProvider] = useState(null);
+  const [contract, setContract] = useState(null);
 
-  // Détection automatique du wallet
+  // Détection automatique du wallet (MetaMask ou autres)
   useEffect(() => {
-    if (connected && publicKey) {
-      console.log("✅ Wallet connecté :", publicKey.toBase58());
+    if (window.ethereum) {
+      const web3Provider = new ethers.providers.Web3Provider(window.ethereum);
+      setProvider(web3Provider);
+
+      // Demande de connexion avec MetaMask
+      web3Provider.send("eth_requestAccounts", []).then((accounts) => {
+        setAccount(accounts[0]);
+        console.log("Wallet connecté :", accounts[0]);
+      });
     } else {
-      console.log("❌ Aucun wallet connecté.");
+      alert("Aucun wallet compatible détecté !");
     }
-  }, [connected, publicKey]);
+  }, []);
+
+  useEffect(() => {
+    if (provider) {
+      // Adresse du contrat BSC
+      const contractAddress = "0xbc3F488c5A9a7909aE07802c2b9002Efaa7EdB9F"; // Adresse de ton contrat déployé
+
+      // ABI du contrat
+      const contractAbi = [
+        "function totalInvestment() public view returns (uint256)",
+        "function deposit() public payable",
+        "function withdraw(uint256 amount) public",
+        "function distributeInterest() public",
+        // Ajoute d'autres fonctions selon les besoins
+      ];
+
+      const contractInstance = new ethers.Contract(contractAddress, contractAbi, provider.getSigner());
+      setContract(contractInstance);
+
+      // Obtenir le solde du contrat
+      contractInstance.totalInvestment().then((balance) => {
+        console.log("Solde du contrat :", ethers.utils.formatEther(balance));
+      });
+    }
+  }, [provider]);
 
   // Calcul des gains
   const calculateProfit = () => {
-    const monthlyRate = 0.10;
+    const monthlyRate = 0.10; // Par exemple 10% par mois
     const totalProfit = capital * Math.pow(1 + monthlyRate, duration) - capital;
     setProfit(totalProfit.toFixed(2));
   };
 
-  // Connexion au wallet (Sélection automatique)
-  const connectSolanaWallet = () => {
-    if (window.solflare) {
-      select("Solflare");
-    } else if (window.solana && window.solana.isPhantom) {
-      select("Phantom");
-    } else {
-      alert("Aucun wallet compatible détecté !");
-    }
-  };
-
-  // Exécuter l'investissement
+  // Fonction pour effectuer un investissement
   const handleInvest = async () => {
-    if (!publicKey) {
+    if (!account) {
       alert("Veuillez connecter votre wallet avant d'investir !");
       return;
     }
 
-    const connection = new Connection("https://api.devnet.solana.com", "confirmed");
-    const transaction = new Transaction().add(
-      SystemProgram.transfer({
-        fromPubkey: publicKey,
-        toPubkey: new PublicKey("F2YAAoN6GX9fJmHjtB28ausHJMWjZdKZR7Kw718q2wn4"), // Adresse du contrat LPFarming
-        lamports: 0.01 * LAMPORTS_PER_SOL, // Montant en lamports (exemple : 0.01 SOL)
-      })
-    );
+    if (!contract) {
+      alert("Le contrat n'est pas chargé correctement !");
+      return;
+    }
+
+    // Conversion de l'investissement en wei (unités de BNB)
+    const valueInWei = ethers.utils.parseEther(capital.toString());
 
     try {
       setLoading(true);
-      const signature = await sendTransaction(transaction, connection);
-      alert(`✅ Transaction réussie ! ID : ${signature}`);
-      console.log("Transaction envoyée :", signature);
+      const tx = await contract.deposit({ value: valueInWei });
+      await tx.wait(); // Attendre que la transaction soit confirmée
+      alert("✅ Transaction réussie !");
     } catch (error) {
-      console.error("❌ Erreur transaction :", error);
-      alert("Échec de la transaction.");
+      console.error("Erreur transaction :", error);
+      alert("❌ Erreur lors de l'investissement !");
     } finally {
       setLoading(false);
     }
@@ -73,23 +90,20 @@ const LPFarming = () => {
     <div className="lp-container">
       <h1>LP Farming - Génération de Rendement</h1>
       <p>
-        <b>Liquidity Provider (LP) Farming</b> vous permet d’investir des fonds 
-        dans des pools de liquidités et d'obtenir un rendement stable de 
-        <b> 10% par mois</b>. Grâce à l’optimisation automatique, votre capital 
-        est réinvesti pour maximiser les gains.
+        <b>Liquidity Provider (LP) Farming</b> vous permet d’investir des fonds dans des pools de liquidités et d'obtenir un rendement stable de
+        <b> 10% par mois</b>. Grâce à l’optimisation automatique, votre capital est réinvesti pour maximiser les gains.
       </p>
 
       {/* Connexion au Wallet */}
       <div className="wallet-connection">
         <h3>Connexion au Wallet</h3>
-        {connected ? (
+        {account ? (
           <button className="wallet-button btn btn-success">
-            ✅ {publicKey.toBase58().substring(0, 6)}...{publicKey.toBase58().slice(-4)}
+            ✅ {account.substring(0, 6)}...{account.slice(-4)}
           </button>
         ) : (
-          <button className="wallet-button btn btn-primary" onClick={connectSolanaWallet}>
-            <img src={solflareLogo} alt="Solflare" className="wallet-logo" />
-            Connecter mon Wallet Solana
+          <button className="wallet-button btn btn-primary" onClick={handleInvest}>
+            Connecter mon Wallet MetaMask
           </button>
         )}
       </div>
@@ -116,14 +130,6 @@ const LPFarming = () => {
         <button onClick={calculateProfit}>Calculer</button>
         <h3>Gains estimés : <span>${profit}</span></h3>
       </div>
-
-      {/* Risques et Recommandations */}
-      <h2>Risques et Recommandations</h2>
-      <ul className="risks">
-        <li>La valeur des LP tokens peut varier en fonction du marché.</li>
-        <li>Un impermanent loss peut affecter vos gains si le pool est instable.</li>
-        <li>Utiliser des pools fiables avec une bonne liquidité.</li>
-      </ul>
 
       {/* Bouton Investir */}
       <button className="validate-btn" onClick={handleInvest} disabled={loading}>
