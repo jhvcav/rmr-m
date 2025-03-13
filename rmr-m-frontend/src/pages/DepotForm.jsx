@@ -116,7 +116,7 @@ const DepotForm = () => {
 
     return (
         <div className="depot-form">
-            <h1 style={{ fontSize: "1.5em" }}>💰 Dépôt de fonds</h1>
+            <h1 style={{ fontSize: "1.5em" }}>💰 Dépôt de fonds!!</h1>
 
             {/* État du Wallet */}
             <div className="wallet-status">
