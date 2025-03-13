@@ -1,15 +1,19 @@
-import React, { useState, useEffect } from "react";
-import './DepotForm.css';
+import { useEffect, useState } from "react";
+import { ethers } from "ethers";
+import "./DepotForm.css"; // Conserve la mise en page originale
 
 const DepotForm = () => {
-  const [amount, setAmount] = useState(0.05); // Montant par défaut en BNB
+  const [amount, setAmount] = useState(0.05); // Montant par défaut 0.05 SOL
   const [destinationAddress, setDestinationAddress] = useState("");
   const [status, setStatus] = useState("");
   const [isConnected, setIsConnected] = useState(false);
   const [publicKey, setPublicKey] = useState(null);
   const [balance, setBalance] = useState(null);
 
-  // Vérifier si MetaMask est installé
+  // URL RPC privé - Remplacer par votre RPC privé BSC
+  const RPC_PRIVATE_URL = "https://hidden-lingering-putty.bsc-testnet.quiknode.pro/2a3d280c36b92efa575cf529eb48de2999ccf7f8/"; // RPC privé testnet BSC
+
+  // Vérifier si MetaMask est disponible
   useEffect(() => {
     if (window.ethereum) {
       console.log("MetaMask détecté !");
@@ -18,90 +22,64 @@ const DepotForm = () => {
     }
   }, []);
 
-  // Fonction pour se connecter à MetaMask
+  // Connexion à MetaMask
   const handleConnect = async () => {
-    if (!window.ethereum) {
-      alert("MetaMask n'est pas installé !");
-      return;
-    }
-
-    try {
-      // Demander à l'utilisateur de se connecter à MetaMask
-      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-
-      // Si l'utilisateur se connecte, on récupère son adresse publique
-      const account = accounts[0];
-      setPublicKey(account);
-      setIsConnected(true);
-      setStatus("✅ Connecté avec succès !");
-      
-      // Récupérer le solde BNB de l'utilisateur
-      fetchBalance(account);
-    } catch (error) {
-      console.error("Erreur de connexion à MetaMask :", error);
-      setStatus("❌ Échec de la connexion.");
-    }
-  };
-
-  // Fonction pour récupérer le solde de BNB de l'utilisateur
-  const fetchBalance = async (account) => {
-    if (account) {
+    if (window.ethereum) {
       try {
-        const provider = new window.ethers.JsonRpcProvider("https://bsc-dataseed.binance.org/");  // Utilisation d'un provider BSC
-        const balance = await provider.getBalance(account);
-        setBalance(window.ethers.utils.formatEther(balance));  // Convertir en BNB
+        const provider = new ethers.providers.JsonRpcProvider(RPC_PRIVATE_URL); // Connexion avec RPC privé
+        const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+        const account = accounts[0];
+        setPublicKey(account);
+        setIsConnected(true);
+
+        // Récupérer le solde en BNB
+        const balanceInWei = await provider.getBalance(account);
+        const balanceInBNB = ethers.utils.formatEther(balanceInWei); // Convertit le solde de wei à BNB
+        setBalance(balanceInBNB);
+        console.log("🔹 Solde BNB:", balanceInBNB);
       } catch (error) {
-        console.error("Erreur lors de la récupération du solde :", error);
-        setBalance(null);
+        console.error("Erreur de connexion à MetaMask :", error);
+        setStatus("❌ Erreur lors de la connexion à MetaMask.");
       }
+    } else {
+      setStatus("❌ MetaMask n'est pas détecté.");
     }
   };
 
-  // Fonction pour effectuer le dépôt de BNB
+  // Fonction pour effectuer un dépôt (sans altérer la mise en page)
   const handleDepot = async () => {
     if (!isConnected) {
       setStatus("⚠️ Veuillez vous connecter à MetaMask.");
       return;
     }
 
-    if (!destinationAddress || !window.ethers.utils.isAddress(destinationAddress)) {
-      setStatus("⚠️ Adresse de destination invalide.");
+    if (!destinationAddress) {
+      setStatus("⚠️ Veuillez entrer une adresse de destination.");
       return;
     }
 
     if (amount <= 0 || isNaN(amount)) {
-      setStatus("⚠️ Veuillez entrer un montant valide.");
+      setStatus("⚠️ Montant invalide.");
       return;
     }
 
-    if (balance < amount) {
-      setStatus("⚠️ Fonds insuffisants pour effectuer la transaction.");
-      return;
-    }
-
+    // Utiliser le provider RPC pour envoyer une transaction
     try {
-      console.log("🔹 Début de la transaction...");
-      console.log("➡️ Destination :", destinationAddress);
-      console.log("💸 Montant :", amount, "BNB");
-
-      const provider = new window.ethers.JsonRpcProvider("https://bsc-dataseed.binance.org/");
-      const signer = provider.getSigner(); // Obtenir le signer à partir de MetaMask
+      setStatus("🔹 Début de la transaction...");
+      const provider = new ethers.providers.JsonRpcProvider(RPC_PRIVATE_URL); // Connexion avec RPC privé
+      const signer = provider.getSigner();
       const tx = {
         to: destinationAddress,
-        value: window.ethers.utils.parseEther(amount.toString()), // Convertir en Wei
+        value: ethers.utils.parseEther(amount.toString()), // Convertir le montant en wei
       };
 
-      console.log("🔹 Envoi de la transaction...");
-      const transactionResponse = await signer.sendTransaction(tx);
-      setStatus(`✅ Transaction envoyée avec succès ! ID : ${transactionResponse.hash}`);
-
-      // Attendre la confirmation de la transaction
-      await transactionResponse.wait();
-      setStatus("✅ Transaction confirmée avec succès !");
-      fetchBalance(publicKey);  // Rafraîchir le solde
+      // Envoyer la transaction
+      const txResponse = await signer.sendTransaction(tx);
+      setStatus(`✅ Transaction envoyée avec succès ! ID : ${txResponse.hash}`);
+      console.log("Transaction envoyée :", txResponse.hash);
     } catch (error) {
       console.error("❌ Erreur lors du dépôt de fonds :", error);
-      setStatus(`❌ Une erreur est survenue : ${error.message}`);
+      setStatus("❌ Une erreur est survenue lors de la transaction.");
     }
   };
 
@@ -109,7 +87,7 @@ const DepotForm = () => {
     <div className="depot-form">
       <h1 style={{ fontSize: "1.5em" }}>💰 Dépôt de fonds</h1>
 
-      {/* Affichage du statut du wallet */}
+      {/* État du Wallet */}
       <div className="wallet-status">
         {isConnected ? (
           <>
