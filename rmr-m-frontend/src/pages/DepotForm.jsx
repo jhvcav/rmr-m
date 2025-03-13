@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import Web3Modal from "web3modal";
 import { ethers } from "ethers";
 import "./DepotForm.css"; // Conserve la mise en page originale
 
@@ -10,44 +11,55 @@ const DepotForm = () => {
   const [publicKey, setPublicKey] = useState(null);
   const [balance, setBalance] = useState(null);
 
-  // URL RPC privé - Remplacer par votre RPC privé BSC
-  const RPC_PRIVATE_URL = "https://hidden-lingering-putty.bsc-testnet.quiknode.pro/2a3d280c36b92efa575cf529eb48de2999ccf7f8/"; // RPC privé testnet BSC
+  const [web3Modal, setWeb3Modal] = useState(null);
+  const [provider, setProvider] = useState(null);
+  const [signer, setSigner] = useState(null);
 
-  // Vérifier si MetaMask est disponible
+  // URL RPC privé pour BSC Testnet
+  const RPC_PRIVATE_URL = "https://hidden-lingering-putty.bsc-testnet.quiknode.pro/2a3d280c36b92efa575cf529eb48de2999ccf7f8/";
+
+  // Initialisation de Web3Modal
   useEffect(() => {
-    if (window.ethereum) {
-      console.log("MetaMask détecté !");
-    } else {
-      console.log("MetaMask n'est pas détecté.");
-    }
+    const modal = new Web3Modal({
+      cacheProvider: true,
+      providerOptions: {
+        metamask: {
+          display: {
+            name: "MetaMask",
+            description: "Connectez MetaMask",
+          },
+          package: null,
+        },
+        walletconnect: {
+          package: require("@walletconnect/web3-provider"),
+          options: {
+            infuraId: "INFURA_PROJECT_ID", // Remplacez avec votre ID Infura si nécessaire
+          },
+        },
+      },
+    });
+    setWeb3Modal(modal);
   }, []);
 
-  // Connexion à MetaMask
+  // Connexion à MetaMask ou Trust Wallet
   const handleConnect = async () => {
-    if (window.ethereum) {
-      try {
-        // Demander l'autorisation de se connecter au wallet MetaMask
-        const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
-        const account = accounts[0]; // Premier compte
-        setPublicKey(account);
-        setIsConnected(true);
+    const modalProvider = await web3Modal.connect();
+    const newProvider = new ethers.providers.Web3Provider(modalProvider);
+    const newSigner = newProvider.getSigner();
 
-        // Initialisation du provider avec MetaMask
-        const provider = new ethers.providers.Web3Provider(window.ethereum);
-        const balance = await provider.getBalance(account);
-        setBalance(ethers.utils.formatEther(balance)); // Conversion en Ether
+    setProvider(newProvider);
+    setSigner(newSigner);
 
-        console.log("Compte connecté :", account);
-      } catch (error) {
-        console.error("Erreur lors de la connexion à MetaMask :", error);
-        setStatus("❌ Erreur lors de la connexion à MetaMask.");
-      }
-    } else {
-      setStatus("❌ MetaMask n'est pas détecté.");
-    }
+    const account = await newSigner.getAddress();
+    setPublicKey(account);
+    setIsConnected(true);
+
+    const balanceWei = await newProvider.getBalance(account);
+    const balanceInBNB = ethers.utils.formatEther(balanceWei);
+    setBalance(balanceInBNB);
   };
 
-  // Fonction pour effectuer un dépôt (sans altérer la mise en page)
+  // Fonction pour effectuer un dépôt
   const handleDepot = async () => {
     if (!isConnected) {
       setStatus("⚠️ Veuillez vous connecter à MetaMask.");
@@ -64,17 +76,12 @@ const DepotForm = () => {
       return;
     }
 
-    // Utiliser le provider RPC pour envoyer une transaction
     try {
-      setStatus("🔹 Début de la transaction...");
-      const provider = new ethers.providers.JsonRpcProvider(RPC_PRIVATE_URL); // Connexion avec RPC privé
-      const signer = provider.getSigner();
       const tx = {
         to: destinationAddress,
         value: ethers.utils.parseEther(amount.toString()), // Convertir le montant en wei
       };
 
-      // Envoyer la transaction
       const txResponse = await signer.sendTransaction(tx);
       setStatus(`✅ Transaction envoyée avec succès ! ID : ${txResponse.hash}`);
       console.log("Transaction envoyée :", txResponse.hash);
