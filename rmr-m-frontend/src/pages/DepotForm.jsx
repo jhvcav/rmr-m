@@ -1,170 +1,163 @@
 import React, { useState, useEffect } from "react";
-import { ethers } from "ethers";
 import './DepotForm.css';
 
 const DepotForm = () => {
-    const [amount, setAmount] = useState(0.05); // Montant par défaut 0.05 BNB
-    const [destinationAddress, setDestinationAddress] = useState("");
-    const [status, setStatus] = useState("");
-    const [isConnected, setIsConnected] = useState(false);
-    const [publicKey, setPublicKey] = useState(null);
-    const [balance, setBalance] = useState(null);
-    const [provider, setProvider] = useState(null);
+  const [amount, setAmount] = useState(0.05); // Montant par défaut en BNB
+  const [destinationAddress, setDestinationAddress] = useState("");
+  const [status, setStatus] = useState("");
+  const [isConnected, setIsConnected] = useState(false);
+  const [publicKey, setPublicKey] = useState(null);
+  const [balance, setBalance] = useState(null);
 
-    // Vérifier la connexion au wallet (MetaMask)
-    useEffect(() => {
-        if (window.ethereum) {
-          console.log("MetaMask détecté !");
-        } else {
-          console.log("MetaMask n'est pas détecté.");
-        }
-      }, []);
+  // Vérifier si MetaMask est installé
+  useEffect(() => {
+    if (window.ethereum) {
+      console.log("MetaMask détecté !");
+    } else {
+      console.log("MetaMask n'est pas détecté.");
+    }
+  }, []);
 
-    // Fonction pour vérifier la connexion du wallet
-    const checkWalletConnection = async (provider) => {
-        try {
-            const accounts = await provider.listAccounts();
-            if (accounts.length > 0) {
-                setPublicKey(accounts[0]);
-                setIsConnected(true);
-                fetchBalance(accounts[0], provider);
-            } else {
-                setIsConnected(false);
-                setPublicKey(null);
-                setBalance(null);
-            }
-        } catch (error) {
-            console.error("Erreur lors de la connexion :", error);
-        }
-    };
+  // Fonction pour se connecter à MetaMask
+  const handleConnect = async () => {
+    if (!window.ethereum) {
+      alert("MetaMask n'est pas installé !");
+      return;
+    }
 
-    // Récupérer le solde du wallet
-    const fetchBalance = async (account, provider) => {
-        if (account) {
-            try {
-                const balance = await provider.getBalance(account);
-                setBalance(ethers.utils.formatEther(balance)); // Conversion en BNB
-            } catch (error) {
-                console.error("Erreur lors de la récupération du solde:", error);
-                setBalance(null);
-            }
-        }
-    };
+    try {
+      // Demander à l'utilisateur de se connecter à MetaMask
+      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
 
-    // Connexion au wallet
-    const handleConnect = async () => {
-        if (window.ethereum) {
-            try {
-                await window.ethereum.request({ method: "eth_requestAccounts" });
-                const web3Provider = new ethers.providers.Web3Provider(window.ethereum);
-                setProvider(web3Provider);
-                checkWalletConnection(web3Provider);
-            } catch (error) {
-                console.error("Erreur lors de la connexion au wallet :", error);
-            }
-        } else {
-            alert("Veuillez installer MetaMask.");
-        }
-    };
+      // Si l'utilisateur se connecte, on récupère son adresse publique
+      const account = accounts[0];
+      setPublicKey(account);
+      setIsConnected(true);
+      setStatus("✅ Connecté avec succès !");
+      
+      // Récupérer le solde BNB de l'utilisateur
+      fetchBalance(account);
+    } catch (error) {
+      console.error("Erreur de connexion à MetaMask :", error);
+      setStatus("❌ Échec de la connexion.");
+    }
+  };
 
-    // Fonction pour effectuer le dépôt de BNB
-    const handleDepot = async () => {
-        if (!isConnected) {
-            setStatus("⚠️ Veuillez vous connecter à MetaMask.");
-            return;
-        }
+  // Fonction pour récupérer le solde de BNB de l'utilisateur
+  const fetchBalance = async (account) => {
+    if (account) {
+      try {
+        const provider = new window.ethers.JsonRpcProvider("https://bsc-dataseed.binance.org/");  // Utilisation d'un provider BSC
+        const balance = await provider.getBalance(account);
+        setBalance(window.ethers.utils.formatEther(balance));  // Convertir en BNB
+      } catch (error) {
+        console.error("Erreur lors de la récupération du solde :", error);
+        setBalance(null);
+      }
+    }
+  };
 
-        if (!ethers.utils.isAddress(destinationAddress)) {
-            setStatus("⚠️ Adresse de destination invalide.");
-            return;
-        }
+  // Fonction pour effectuer le dépôt de BNB
+  const handleDepot = async () => {
+    if (!isConnected) {
+      setStatus("⚠️ Veuillez vous connecter à MetaMask.");
+      return;
+    }
 
-        if (amount <= 0 || isNaN(amount)) {
-            setStatus("⚠️ Veuillez entrer un montant valide.");
-            return;
-        }
+    if (!destinationAddress || !window.ethers.utils.isAddress(destinationAddress)) {
+      setStatus("⚠️ Adresse de destination invalide.");
+      return;
+    }
 
-        if (parseFloat(balance) < amount) {
-            setStatus("⚠️ Fonds insuffisants pour effectuer la transaction.");
-            return;
-        }
+    if (amount <= 0 || isNaN(amount)) {
+      setStatus("⚠️ Veuillez entrer un montant valide.");
+      return;
+    }
 
-        try {
-            setStatus("🔹 Début de la transaction...");
+    if (balance < amount) {
+      setStatus("⚠️ Fonds insuffisants pour effectuer la transaction.");
+      return;
+    }
 
-            const signer = provider.getSigner();
-            const transaction = {
-                to: destinationAddress,
-                value: ethers.utils.parseEther(amount.toString()), // Convertir le montant en Wei
-            };
+    try {
+      console.log("🔹 Début de la transaction...");
+      console.log("➡️ Destination :", destinationAddress);
+      console.log("💸 Montant :", amount, "BNB");
 
-            // Envoyer la transaction
-            const txResponse = await signer.sendTransaction(transaction);
-            setStatus(`✅ Transaction envoyée avec succès ! ID : ${txResponse.hash}`);
+      const provider = new window.ethers.JsonRpcProvider("https://bsc-dataseed.binance.org/");
+      const signer = provider.getSigner(); // Obtenir le signer à partir de MetaMask
+      const tx = {
+        to: destinationAddress,
+        value: window.ethers.utils.parseEther(amount.toString()), // Convertir en Wei
+      };
 
-            // Attendre la confirmation de la transaction
-            await txResponse.wait();
-            setStatus("✅ Transaction confirmée avec succès !");
-            fetchBalance(publicKey, provider); // Mettre à jour le solde après la transaction
-        } catch (error) {
-            console.error("❌ Erreur lors du dépôt de fonds :", error);
-            setStatus(`❌ Une erreur est survenue : ${error.message}`);
-        }
-    };
+      console.log("🔹 Envoi de la transaction...");
+      const transactionResponse = await signer.sendTransaction(tx);
+      setStatus(`✅ Transaction envoyée avec succès ! ID : ${transactionResponse.hash}`);
 
-    return (
-        <div className="depot-form">
-            <h1 style={{ fontSize: "1.5em" }}>💰 Dépôt de fonds!!</h1>
+      // Attendre la confirmation de la transaction
+      await transactionResponse.wait();
+      setStatus("✅ Transaction confirmée avec succès !");
+      fetchBalance(publicKey);  // Rafraîchir le solde
+    } catch (error) {
+      console.error("❌ Erreur lors du dépôt de fonds :", error);
+      setStatus(`❌ Une erreur est survenue : ${error.message}`);
+    }
+  };
 
-            {/* État du Wallet */}
-            <div className="wallet-status">
-                {isConnected ? (
-                    <>
-                        <p>✅ Connecté avec l'adresse :</p>
-                        <p className="wallet-address">{publicKey}</p>
-                        <p>💰 Solde disponible : <strong>{balance} BNB</strong></p>
-                    </>
-                ) : (
-                    <p>⚠️ Non connecté.</p>
-                )}
-                <button onClick={handleConnect} disabled={isConnected}>
-                    {isConnected ? "✅ Déjà connecté" : "🔗 Se connecter à MetaMask"}
-                </button>
-            </div>
+  return (
+    <div className="depot-form">
+      <h1 style={{ fontSize: "1.5em" }}>💰 Dépôt de fonds!!!</h1>
 
-            {/* Adresse de destination */}
-            <div className="input-container">
-                <label>🔹 Adresse de destination :</label>
-                <input
-                    type="text"
-                    value={destinationAddress}
-                    onChange={(e) => setDestinationAddress(e.target.value)}
-                    placeholder="Entrez l'adresse BSC"
-                />
-            </div>
+      {/* Affichage du statut du wallet */}
+      <div className="wallet-status">
+        {isConnected ? (
+          <>
+            <p>✅ Connecté avec l'adresse :</p>
+            <p className="wallet-address">{publicKey}</p>
+            <p>💰 Solde disponible : <strong>{balance} BNB</strong></p>
+          </>
+        ) : (
+          <p>⚠️ Non connecté.</p>
+        )}
+        <button onClick={handleConnect} disabled={isConnected}>
+          {isConnected ? "✅ Déjà connecté" : "🔗 Se connecter à MetaMask"}
+        </button>
+      </div>
 
-            {/* Montant */}
-            <div className="input-container">
-                <label>💸 Montant (en BNB) :</label>
-                <input
-                    type="number"
-                    value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
-                    placeholder="Entrez le montant"
-                    min="0.0001"
-                    step="0.0001"
-                />
-            </div>
+      {/* Adresse de destination */}
+      <div className="input-container">
+        <label>🔹 Adresse de destination :</label>
+        <input
+          type="text"
+          value={destinationAddress}
+          onChange={(e) => setDestinationAddress(e.target.value)}
+          placeholder="Entrez l'adresse BSC"
+        />
+      </div>
 
-            {/* Bouton d'envoi */}
-            <button onClick={handleDepot} disabled={!isConnected}>
-                🚀 Envoyer {amount} BNB
-            </button>
+      {/* Montant */}
+      <div className="input-container">
+        <label>💸 Montant (en BNB) :</label>
+        <input
+          type="number"
+          value={amount}
+          onChange={(e) => setAmount(e.target.value)}
+          placeholder="Entrez le montant"
+          min="0.0001"
+          step="0.0001"
+        />
+      </div>
 
-            {/* Message de statut */}
-            <p className="status">{status}</p>
-        </div>
-    );
+      {/* Bouton d'envoi */}
+      <button onClick={handleDepot} disabled={!isConnected}>
+        🚀 Envoyer {amount} BNB
+      </button>
+
+      {/* Message de statut */}
+      <p className="status">{status}</p>
+    </div>
+  );
 };
 
 export default DepotForm;
