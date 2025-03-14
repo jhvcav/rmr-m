@@ -17,13 +17,21 @@ const Navbar = () => {
         {/* Logo */}
         <Link to="/" className="navbar-brand">RMR-M</Link>
 
-        {/* Bouton hamburger pour mobile */}
-        <button className="menu-toggle" onClick={() => setMenuOpen(!menuOpen)}>
-          {menuOpen ? "✖" : "☰"}
-        </button>
+        {/* Bouton hamburger pour mobile (visible uniquement quand le menu est fermé) */}
+        {!menuOpen && (
+          <button className="menu-toggle menu-open-btn" onClick={() => setMenuOpen(true)}>
+            ☰
+          </button>
+        )}
 
         {/* Liste des menus - Menu latéral en mode mobile */}
         <ul className={`nav-menu ${menuOpen ? "open" : ""}`}>
+          {/* Bouton de fermeture (visible uniquement quand le menu est ouvert) */}
+          {menuOpen && (
+            <button className="menu-toggle menu-close-btn" onClick={() => setMenuOpen(false)}>
+              ✖
+            </button>
+          )}
           <li className="nav-item"><Link to="/rmr-m" onClick={() => setMenuOpen(false)}>Accueil</Link></li>
           <li className="nav-item"><Link to="/rmr-m/wallet-connect" onClick={() => setMenuOpen(false)}>Connexion Wallet</Link></li>
           <li className="nav-item"><Link to="/rmr-m-m/dashboard" onClick={() => setMenuOpen(false)}>Tableau de bord</Link></li>

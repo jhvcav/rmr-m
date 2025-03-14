@@ -13,6 +13,13 @@
   padding: 15px 20px;
 }
 
+.container {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
 /* Logo */
 .navbar-brand {
   font-size: 1.5rem;
@@ -55,36 +62,50 @@
 
 /* Menu mobile */
 @media (max-width: 768px) {
-  .menu-toggle {
-      display: block; /* Afficher le bouton hamburger */
-      z-index: 1200;
+  /* Bouton d'ouverture du menu (hamburger) - positionné à droite */
+  .menu-open-btn {
+    display: block;
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    z-index: 1200;
+  }
+
+  /* Bouton de fermeture du menu (croix) - positionné à gauche dans le menu ouvert */
+  .menu-close-btn {
+    display: block;
+    position: absolute;
+    top: 15px;
+    left: 20px;
+    z-index: 1200;
+    color: white;
   }
 
   .nav-menu {
-      position: fixed;
-      top: 0;
-      left: -100%; /* Caché par défaut */
-      width: 250px;
-      height: 100vh;
-      background-color: rgba(0, 0, 0, 0.9);
-      color: white;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 20px;
-      padding-top: 60px;
-      transition: left 0.3s ease-in-out;
-      z-index: 1100;
+    position: fixed;
+    top: 0;
+    left: -100%; /* Caché par défaut */
+    width: 250px;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.9);
+    color: white;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    padding-top: 60px;
+    transition: left 0.3s ease-in-out;
+    z-index: 1100;
   }
 
   .nav-menu.open {
-      left: 0; /* Affichage du menu */
+    left: 0; /* Affichage du menu */
   }
 
   .nav-item a {
-      color: white;
-      font-size: 18px;
-      display: block;
-      padding: 10px;
+    color: white;
+    font-size: 18px;
+    display: block;
+    padding: 10px;
   }
 }
