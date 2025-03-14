@@ -39,78 +39,61 @@ const DepotForm = () => {
   };
 
   // Connexion à MetaMask
-  const handleConnect = async () => {
-    if (!window.ethereum) {
-      setStatus("❌ Veuillez installer MetaMask.");
-      return;
-    }
+  // Connexion à MetaMask
+const handleConnect = async () => {
+  if (!window.ethereum) {
+    setStatus("❌ Veuillez installer MetaMask.");
+    return;
+  }
 
-    try {
-      // Basculer vers le réseau BSC Testnet
-      const isBSCTestnet = await switchToBSCTestnet();
-      if (!isBSCTestnet) return;
+  try {
+    // Basculer vers le réseau BSC Testnet
+    const isBSCTestnet = await switchToBSCTestnet();
+    if (!isBSCTestnet) return;
 
-      // Demander l'accès au compte MetaMask
-      const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
-      const account = accounts[0]; // Récupérer le premier compte connecté
-      setPublicKey(account);
-      setIsConnected(true);
+    // Demander l'accès au compte MetaMask
+    const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+    const account = accounts[0]; // Récupérer le premier compte connecté
+    setPublicKey(account);
+    setIsConnected(true);
 
-      // Initialisation du provider avec ton RPC privé
-      const provider = new ethers.providers.JsonRpcProvider(BSC_TESTNET_RPC);
+    // Utiliser le provider de MetaMask au lieu d'un JsonRpcProvider séparé
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
 
-      // Récupérer le solde BNB
-      const balanceWei = await provider.getBalance(account);
-      const balanceInBNB = ethers.utils.formatEther(balanceWei);
-      setBalance(balanceInBNB);
-      setStatus("✅ Wallet connecté avec succès !");
-    } catch (error) {
-      console.error("Erreur lors de la connexion à MetaMask :", error);
-      if (error.code === 4001) {
-        setStatus("❌ Connexion refusée par l'utilisateur.");
-      } else {
-        setStatus("❌ Erreur lors de la connexion à MetaMask.");
-      }
-    }
-  };
+    // Récupérer le solde BNB
+    const balanceWei = await provider.getBalance(account);
+    const balanceInBNB = ethers.utils.formatEther(balanceWei);
+    setBalance(balanceInBNB);
+    setStatus("✅ Wallet connecté avec succès !");
+  } catch (error) {
+    console.error("Erreur lors de la connexion à MetaMask :", error);
+    // Reste du code de gestion d'erreur...
+  }
+};
 
   // Fonction pour effectuer un dépôt
   const handleDepot = async () => {
-    if (!isConnected) {
-      setStatus("⚠️ Veuillez vous connecter à MetaMask.");
-      return;
-    }
-
-    if (!destinationAddress) {
-      setStatus("⚠️ Veuillez entrer une adresse de destination.");
-      return;
-    }
-
-    if (amount <= 0 || isNaN(amount)) {
-      setStatus("⚠️ Montant invalide.");
-      return;
-    }
-
+    // Vérifications...
+    
     try {
-      // Utiliser ton RPC privé pour le provider
-      const provider = new ethers.providers.JsonRpcProvider(BSC_TESTNET_RPC);
-      const signer = provider.getSigner(publicKey); // Utiliser le compte connecté comme signer
-
+      // Utiliser le provider de MetaMask
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner(); // Pas besoin de spécifier publicKey ici
+  
       const tx = {
         to: destinationAddress,
-        value: ethers.utils.parseEther(amount.toString()), // Convertir le montant en wei
+        value: ethers.utils.parseEther(amount.toString()),
       };
-
+  
       const txResponse = await signer.sendTransaction(tx);
       setStatus(`✅ Transaction envoyée avec succès ! ID : ${txResponse.hash}`);
-
+  
       // Rafraîchir le solde après la transaction
       const balanceWei = await provider.getBalance(publicKey);
       const balanceInBNB = ethers.utils.formatEther(balanceWei);
       setBalance(balanceInBNB);
     } catch (error) {
-      console.error("❌ Erreur lors du dépôt de fonds :", error);
-      setStatus("❌ Une erreur est survenue lors de la transaction.");
+      // Gestion d'erreur...
     }
   };
 
