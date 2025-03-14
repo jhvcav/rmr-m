@@ -9,32 +9,59 @@ const DepotForm = () => {
   const [isConnected, setIsConnected] = useState(false);
   const [publicKey, setPublicKey] = useState(null);
   const [balance, setBalance] = useState(null);
-  
+
+  // Vérifier si MetaMask est installé
+  const checkMetaMask = () => {
+    if (!window.ethereum) {
+      setStatus("❌ MetaMask n'est pas détecté.");
+      return false;
+    }
+    return true;
+  };
+
   // Initialiser la connexion à MetaMask
   const handleConnect = async () => {
-    if (window.ethereum) {
-      try {
-        // Demander l'accès au compte MetaMask
-        const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
-        const account = accounts[0]; // Prendre le premier compte
-        setPublicKey(account);
-        setIsConnected(true);
+    if (!checkMetaMask()) return;
 
-        // Initialisation du provider
-        const provider = new ethers.providers.Web3Provider(window.ethereum);
-        const balanceWei = await provider.getBalance(account);
-        const balanceInBNB = ethers.utils.formatEther(balanceWei); // Conversion en BNB
-        setBalance(balanceInBNB);
-        console.log("Compte connecté :", account);
-      } catch (error) {
-        console.error("Erreur lors de la connexion à MetaMask :", error);
+    try {
+      // Demander l'accès au compte MetaMask
+      const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+      const account = accounts[0]; // Prendre le premier compte
+      setPublicKey(account);
+      setIsConnected(true);
+
+      // Initialisation du provider
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const balanceWei = await provider.getBalance(account);
+      const balanceInBNB = ethers.utils.formatEther(balanceWei); // Conversion en BNB
+      setBalance(balanceInBNB);
+      setStatus("✅ Connecté avec succès !");
+      console.log("Compte connecté :", account);
+    } catch (error) {
+      console.error("Erreur lors de la connexion à MetaMask :", error);
+      if (error.code === 4001) {
+        setStatus("❌ Connexion refusée par l'utilisateur.");
+      } else {
         setStatus("❌ Erreur lors de la connexion à MetaMask.");
       }
-    } else {
-      setStatus("❌ MetaMask n'est pas détecté.");
     }
   };
 
+  // Rafraîchir le solde
+  const refreshBalance = async () => {
+    if (!publicKey) return;
+
+    try {
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const balanceWei = await provider.getBalance(publicKey);
+      const balanceInBNB = ethers.utils.formatEther(balanceWei);
+      setBalance(balanceInBNB);
+    } catch (error) {
+      console.error("Erreur lors de la récupération du solde :", error);
+    }
+  };
+
+  // Gérer le dépôt de fonds
   const handleDepot = async () => {
     if (!isConnected) {
       setStatus("⚠️ Veuillez vous connecter à MetaMask.");
@@ -63,6 +90,9 @@ const DepotForm = () => {
       const txResponse = await signer.sendTransaction(tx);
       setStatus(`✅ Transaction envoyée avec succès ! ID : ${txResponse.hash}`);
       console.log("Transaction envoyée :", txResponse.hash);
+
+      // Rafraîchir le solde après la transaction
+      await refreshBalance();
     } catch (error) {
       console.error("❌ Erreur lors du dépôt de fonds :", error);
       setStatus("❌ Une erreur est survenue lors de la transaction.");
