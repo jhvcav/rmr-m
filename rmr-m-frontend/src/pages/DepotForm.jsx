@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { ethers } from "ethers";
 import "./DepotForm.css"; // Assure-toi que le fichier CSS est correctement lié
 
-const BSC_TESTNET_ID = "0x613d1563d102482491c271afb223c03c94e8209547fc143fc83d369020a91769"; // ID de la chaîne BSC Testnet en hexadécimal (97 en décimal)
 const BSC_TESTNET_RPC = "https://hidden-lingering-putty.bsc-testnet.quiknode.pro/2a3d280c36b92efa575cf529eb48de2999ccf7f8/"; // Remplace par ton RPC privé
 
 const DepotForm = () => {
@@ -40,6 +39,7 @@ const DepotForm = () => {
 
   // Connexion à MetaMask
   // Connexion à MetaMask
+// Connexion à MetaMask
 const handleConnect = async () => {
   if (!window.ethereum) {
     setStatus("❌ Veuillez installer MetaMask.");
@@ -55,19 +55,25 @@ const handleConnect = async () => {
     const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
     const account = accounts[0]; // Récupérer le premier compte connecté
     setPublicKey(account);
-    setIsConnected(true);
-
-    // Utiliser le provider de MetaMask au lieu d'un JsonRpcProvider séparé
+    
+    // Utiliser le provider de MetaMask directement
     const provider = new ethers.providers.Web3Provider(window.ethereum);
 
     // Récupérer le solde BNB
     const balanceWei = await provider.getBalance(account);
     const balanceInBNB = ethers.utils.formatEther(balanceWei);
     setBalance(balanceInBNB);
+    
+    // Définir l'état connecté APRÈS avoir obtenu toutes les informations
+    setIsConnected(true);
     setStatus("✅ Wallet connecté avec succès !");
   } catch (error) {
     console.error("Erreur lors de la connexion à MetaMask :", error);
-    // Reste du code de gestion d'erreur...
+    if (error.code === 4001) {
+      setStatus("❌ Connexion refusée par l'utilisateur.");
+    } else {
+      setStatus(`❌ Erreur lors de la connexion à MetaMask: ${error.message}`);
+    }
   }
 };
 
