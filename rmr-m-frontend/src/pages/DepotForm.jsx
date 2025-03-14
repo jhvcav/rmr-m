@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { ethers } from "ethers"; // Librairie pour interagir avec la BSC
+import { ethers } from "ethers";
 import "./DepotForm.css"; // Conserve la mise en page originale
 
 const DepotForm = () => {
@@ -14,9 +14,11 @@ const DepotForm = () => {
   const handleConnect = async () => {
     if (window.ethereum) {
       try {
+        // Demander la permission pour se connecter
         const provider = new ethers.providers.Web3Provider(window.ethereum);
-        const accounts = await provider.send("eth_requestAccounts", []);
-        const account = accounts[0]; // Récupère l'adresse du premier compte
+        await provider.send("eth_requestAccounts", []); // Demande l'accès au compte
+        const signer = provider.getSigner();
+        const account = await signer.getAddress(); // Récupère l'adresse du premier compte
         setPublicKey(account);
         setIsConnected(true);
 
@@ -68,7 +70,7 @@ const DepotForm = () => {
 
   return (
     <div className="depot-form">
-      <h1 style={{ fontSize: "1.5em" }}>💰 Dépôt de fonds</h1>
+      <h1 style={{ fontSize: "1.5em" }}>💰 Dépôt de fonds!</h1>
 
       {/* Connexion au Wallet */}
       <div className="wallet-status">
