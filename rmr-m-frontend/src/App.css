@@ -9,7 +9,6 @@
 /* Fond de la page */
 body {
   background: linear-gradient(to right, #141e30, #243b55);
-  color: #ffffff;
   padding-top: 80px; /* Ajuste la hauteur de la navbar */
   display: flex;
   flex-direction: column;

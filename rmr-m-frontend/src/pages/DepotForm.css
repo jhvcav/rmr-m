@@ -1,80 +1,194 @@
+/* DepotForm.css */
 .depot-form {
-    max-width: 450px;
-    margin: 50px auto;
+    max-width: 800px;
+    margin: 20px auto;
     padding: 20px;
-    background: #1a1a1a;
-    color: white;
-    text-align: center;
+    background-color: #f9f9f9;
     border-radius: 10px;
-    box-shadow: 0px 0px 15px rgba(255, 255, 255, 0.2);
-    word-wrap: break-word;
-    overflow-wrap: break-word;
-}
-
-.wallet-status {
-    background: #2a2a2a;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  
+  .depot-form h1 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #333;
+  }
+  
+  .depot-form h2 {
+    font-size: 1.2em;
+    margin: 15px 0;
+    padding-bottom: 5px;
+    border-bottom: 1px solid #ddd;
+    color: #444;
+  }
+  
+  /* Récapitulatif de l'investissement */
+  .investment-summary {
+    background-color: #f2f8fd;
     padding: 15px;
     border-radius: 8px;
     margin-bottom: 20px;
-    text-align: center;
-    font-size: 1.1em;
-    word-wrap: break-word;
-    overflow-wrap: break-word;
-}
-
-.wallet-address {
-    font-size: 1.2em;
-    font-weight: bold;
-    word-break: break-all; /* Coupe l'adresse pour éviter le débordement */
-    overflow-wrap: break-word;
-    max-width: 100%;
-    display: block;
-    padding: 10px;
-    background: #333;
-    border-radius: 5px;
-    margin-top: 10px;
-}
-
-.input-container {
+    border-left: 4px solid #007bff;
+  }
+  
+  .investment-summary h2 {
+    margin-top: 0;
+    color: #007bff;
+    border-bottom: none;
+  }
+  
+  .summary-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px dashed #ddd;
+  }
+  
+  .summary-item:last-child {
+    border-bottom: none;
+  }
+  
+  /* Status du Wallet */
+  .wallet-status {
+    background-color: #f0f7f0;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border-left: 4px solid #28a745;
+  }
+  
+  .wallet-status h2 {
+    margin-top: 0;
+    color: #28a745;
+    border-bottom: none;
+  }
+  
+  .wallet-address {
+    font-family: monospace;
+    background-color: #eee;
+    padding: 8px;
+    border-radius: 4px;
+    font-size: 0.9em;
+    word-break: break-all;
+  }
+  
+  /* Inputs */
+  .input-container {
     margin-bottom: 15px;
-    text-align: left;
-}
-
-.input-container label {
-    font-size: 1.2em;
+  }
+  
+  .input-container label {
     display: block;
     margin-bottom: 5px;
-}
-
-.input-container input {
+    font-weight: bold;
+  }
+  
+  .input-container input {
     width: 100%;
     padding: 10px;
-    font-size: 1.1em;
+    border: 1px solid #ddd;
     border-radius: 5px;
-    border: 1px solid #555;
-    background: #1e1e1e;
-    color: white;
-}
-
-button {
-    background: #00cc99;
-    color: white;
+    font-size: 16px;
+  }
+  
+  .input-container small {
+    display: block;
+    color: #777;
+    margin-top: 5px;
+    font-style: italic;
+  }
+  
+  /* Boutons */
+  .depot-form button {
+    padding: 12px 15px;
     border: none;
-    padding: 12px 20px;
-    font-size: 1.2em;
-    cursor: pointer;
     border-radius: 5px;
-    transition: 0.3s;
-    width: 100%;
-}
-
-button:hover {
-    background: #00b388;
-}
-
-.status {
-    margin-top: 15px;
-    font-size: 1.1em;
+    cursor: pointer;
+    font-size: 16px;
     font-weight: bold;
-    color: #ffcc00;
-}
+    transition: background-color 0.2s;
+  }
+  
+  .connect-btn {
+    background-color: #007bff;
+    color: white;
+    width: 100%;
+    margin-top: 10px;
+  }
+  
+  .connect-btn:hover {
+    background-color: #0069d9;
+  }
+  
+  .deposit-btn {
+    background-color: #28a745;
+    color: white;
+    width: 100%;
+    margin: 20px 0;
+  }
+  
+  .deposit-btn:hover {
+    background-color: #218838;
+  }
+  
+  .btn-retour {
+    background-color: #6c757d;
+    color: white;
+    width: 100%;
+  }
+  
+  .btn-retour:hover {
+    background-color: #5a6268;
+  }
+  
+  button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  
+  /* Messages de statut */
+  .status {
+    padding: 12px;
+    margin: 15px 0;
+    border-radius: 5px;
+    background-color: #f8f9fa;
+    border-left: 4px solid #ffc107;
+    text-align: center;
+  }
+  
+  /* Informations de sécurité */
+  .security-info {
+    background-color: #fff;
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 20px;
+    border-left: 4px solid #17a2b8;
+  }
+  
+  .security-info h3 {
+    color: #17a2b8;
+    margin-top: 0;
+  }
+  
+  .security-info p {
+    margin-bottom: 0;
+    line-height: 1.5;
+  }
+  
+  .form-actions {
+    margin: 20px 0;
+  }
+  
+  /* Styles pour mobiles */
+  @media (max-width: 768px) {
+    .depot-form {
+      padding: 15px;
+      margin: 10px;
+    }
+    
+    .summary-item {
+      flex-direction: column;
+      gap: 5px;
+    }
+  }

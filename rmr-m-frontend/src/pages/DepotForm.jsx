@@ -1,14 +1,43 @@
+/**
+ * Copyright (c) 2025 Jean Hugues CAVALIE
+ * Tous droits réservés.
+ * Ce code ne peut pas être utilisé ou redistribué sans autorisation.
+ */
+
 import React, { useState, useEffect } from "react";
-import * as ethers from "ethers"; // Modifié pour s'assurer que tout le module ethers est importé
+import { useLocation, useNavigate } from "react-router-dom";
+import * as ethers from "ethers"; 
 import "./DepotForm.css";
 
 const DepotForm = () => {
-  const [amount, setAmount] = useState(0.05);
-  const [destinationAddress, setDestinationAddress] = useState("");
-  const [status, setStatus] = useState("");
+  const location = useLocation();
+  const navigate = useNavigate();
+  
+  // Paramètres récupérés de LPFarming
+  const [montantInvesti, setMontantInvesti] = useState("");
+  const [dureeInvestissement, setDureeInvestissement] = useState("");
+  const [rendementEstime, setRendementEstime] = useState(0);
+  const [frais, setFrais] = useState(0);
+  const [adressePool, setAdressePool] = useState("");
+  
+  // Paramètres MetaMask
   const [isConnected, setIsConnected] = useState(false);
   const [publicKey, setPublicKey] = useState(null);
   const [balance, setBalance] = useState(null);
+  const [status, setStatus] = useState("");
+  
+  // Récupération des paramètres passés via la navigation
+  useEffect(() => {
+    if (location.state) {
+      const { montant, adressePool, duree, rendementEstime, frais } = location.state;
+      
+      if (montant) setMontantInvesti(montant);
+      if (adressePool) setAdressePool(adressePool);
+      if (duree) setDureeInvestissement(duree);
+      if (rendementEstime) setRendementEstime(rendementEstime);
+      if (frais) setFrais(frais);
+    }
+  }, [location]);
 
   // Fonction pour créer un provider compatible avec plusieurs versions d'ethers
   const getProvider = () => {
@@ -31,7 +60,7 @@ const DepotForm = () => {
   useEffect(() => {
     if (window.ethereum) {
       console.log("MetaMask détecté !");
-      console.log("Version ethers:", ethers.version); // Affiche la version d'ethers
+      console.log("Version ethers:", ethers.version);
       
       // Écouter les changements de compte
       window.ethereum.on('accountsChanged', (accounts) => {
@@ -200,12 +229,12 @@ const DepotForm = () => {
       return;
     }
 
-    if (!destinationAddress) {
-      setStatus("⚠️ Veuillez entrer une adresse de destination.");
+    if (!adressePool) {
+      setStatus("⚠️ Adresse du pool non spécifiée.");
       return;
     }
 
-    if (amount <= 0 || isNaN(amount)) {
+    if (montantInvesti <= 0 || isNaN(montantInvesti)) {
       setStatus("⚠️ Montant invalide.");
       return;
     }
@@ -231,7 +260,7 @@ const DepotForm = () => {
 
       // Vérifier que nous avons assez de fonds
       const currentBalance = await provider.getBalance(publicKey);
-      const amountWei = ethers.utils.parseEther(amount.toString());
+      const amountWei = ethers.utils.parseEther(montantInvesti.toString());
       
       if (currentBalance.lt(amountWei)) {
         setStatus("❌ Solde insuffisant pour cette transaction.");
@@ -241,7 +270,7 @@ const DepotForm = () => {
       setStatus("⏳ Envoi de la transaction...");
       
       const tx = {
-        to: destinationAddress,
+        to: adressePool,
         value: amountWei,
       };
 
@@ -253,18 +282,60 @@ const DepotForm = () => {
       
       // Rafraîchir le solde après la transaction
       updateBalance(publicKey);
+      
+      // Navigation vers une page de confirmation après transaction réussie
+      navigate("/rmr-m/confirmation-depot", {
+        state: {
+          transactionId: txResponse.hash,
+          montant: montantInvesti,
+          adressePool: adressePool,
+          duree: dureeInvestissement
+        }
+      });
     } catch (error) {
       console.error("❌ Erreur lors du dépôt de fonds :", error);
       setStatus(`❌ Erreur lors de la transaction: ${error.message}`);
     }
   };
 
+  // Fonction pour formater une adresse blockchain (afficher uniquement début et fin)
+  const formatAdresse = (adresse) => {
+    if (!adresse || adresse.length < 10) return adresse;
+    return `${adresse.substring(0, 6)}...${adresse.substring(adresse.length - 4)}`;
+  };
+
   return (
     <div className="depot-form">
-      <h1 style={{ fontSize: "1.5em" }}>💰 Dépôt de fonds!</h1>
+      <h1 style={{ fontSize: "1.5em" }}>💰 Dépôt de fonds pour LPFarming</h1>
+
+      {/* Récapitulatif de l'investissement */}
+      <div className="investment-summary">
+        <h2>📋 Récapitulatif de votre investissement</h2>
+        <div className="summary-item">
+          <span>💵 Montant à investir:</span>
+          <span>{montantInvesti} USDT</span>
+        </div>
+        <div className="summary-item">
+          <span>⏱️ Durée d'investissement:</span>
+          <span>{dureeInvestissement} jours</span>
+        </div>
+        <div className="summary-item">
+          <span>📈 Rendement estimé:</span>
+          <span>{rendementEstime.toFixed(2)} USDT</span>
+        </div>
+        <div className="summary-item">
+          <span>💸 Frais de gestion:</span>
+          <span>{frais.toFixed(2)} USDT</span>
+        </div>
+        <div className="summary-item">
+          <span>🔗 Adresse du pool:</span>
+          <span title={adressePool}>{formatAdresse(adressePool)}</span>
+        </div>
+      </div>
 
       {/* Vérification de la connexion au Wallet */}
       <div className="wallet-status">
+        <h2>👛 Statut du wallet</h2>
         {isConnected ? (
           <>
             <p>✅ Connecté avec l'adresse :</p>
@@ -272,44 +343,59 @@ const DepotForm = () => {
             <p>💰 Solde disponible : <strong>{balance} BNB</strong></p>
           </>
         ) : (
-          <p>⚠️ Non connecté.</p>
+          <p>⚠️ Non connecté. Veuillez connecter votre wallet pour continuer.</p>
         )}
-        <button onClick={handleConnect} disabled={isConnected}>
+        <button className="connect-btn" onClick={handleConnect} disabled={isConnected}>
           {isConnected ? "✅ Déjà connecté" : "🔗 Se connecter à MetaMask"}
         </button>
       </div>
 
-      {/* Adresse de destination */}
+      {/* Montant converti en BNB (si nécessaire) */}
       <div className="input-container">
-        <label>🔹 Adresse de destination :</label>
-        <input
-          type="text"
-          value={destinationAddress}
-          onChange={(e) => setDestinationAddress(e.target.value)}
-          placeholder="Entrez l'adresse BSC"
-        />
-      </div>
-
-      {/* Montant */}
-      <div className="input-container">
-        <label>💸 Montant (en BNB) :</label>
+        <label>💸 Montant à déposer :</label>
         <input
           type="number"
-          value={amount}
-          onChange={(e) => setAmount(parseFloat(e.target.value))}
-          placeholder="Entrez le montant"
+          value={montantInvesti}
+          onChange={(e) => setMontantInvesti(parseFloat(e.target.value))}
           min="0.0001"
           step="0.0001"
         />
+        <small>Ce montant sera converti en BNB lors de la transaction</small>
       </div>
 
       {/* Bouton d'envoi */}
-      <button onClick={handleDepot} disabled={!isConnected}>
-        🚀 Envoyer {amount} BNB
+      <button 
+        className="deposit-btn" 
+        onClick={handleDepot} 
+        disabled={!isConnected}
+      >
+        🚀 Confirmer le dépôt de {montantInvesti} USDT
       </button>
 
+      {/* Actions supplémentaires */}
+      <div className="form-actions">
+        <button 
+          type="button" 
+          className="btn-retour" 
+          onClick={() => navigate(-1)}
+        >
+          ↩️ Retour
+        </button>
+      </div>
+
       {/* Message de statut */}
-      <p className="status">{status}</p>
+      {status && <p className="status">{status}</p>}
+      
+      {/* Informations de sécurité */}
+      <div className="security-info">
+        <h3>🔒 Sécurité de votre investissement</h3>
+        <p>
+          Votre dépôt sera sécurisé par contrat intelligent et vous pourrez suivre 
+          son évolution en temps réel depuis votre tableau de bord. Les rendements 
+          sont calculés quotidiennement et peuvent être réclamés à l'échéance ou 
+          réinvestis selon votre choix.
+        </p>
+      </div>
     </div>
   );
 };

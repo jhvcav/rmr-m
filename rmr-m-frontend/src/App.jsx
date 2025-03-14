@@ -45,6 +45,7 @@ const App = () => {
               <Route path="/rmr-m/contact" element={<Contact />} />
               <Route path="/rmr-m/a-propos" element={<APropos />} />
               <Route path="/rmr-m/lp-farming" element={<LPFarming />} />
+              <Route path="/rmr-m/depot-form" element={<DepotForm />} />
               <Route path="/rmr-m/App" element={<DepotForm />} />
             </Routes>
           </Router>
