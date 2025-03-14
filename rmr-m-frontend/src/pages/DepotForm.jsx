@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { ethers } from "ethers"; // Assurez-vous d'importer ethers
+import { ethers } from "ethers"; // Importer ethers
 import "./DepotForm.css"; // Conserve la mise en page originale
 
 const DepotForm = () => {
@@ -9,7 +9,7 @@ const DepotForm = () => {
   const [isConnected, setIsConnected] = useState(false);
   const [publicKey, setPublicKey] = useState(null);
   const [balance, setBalance] = useState(null);
-  const [provider, setProvider] = useState(null); // Initialisation correcte du provider
+  const [provider, setProvider] = useState(null); // Initialisation du provider
   const [signer, setSigner] = useState(null); // Initialisation du signer
 
   // URL RPC privé pour BSC Testnet
@@ -24,14 +24,14 @@ const DepotForm = () => {
         const account = accounts[0]; // Premier compte
         setPublicKey(account);
         setIsConnected(true);
-  
-        // Initialisation du provider
+
+        // Initialisation du provider avec window.ethereum
         const newProvider = new ethers.providers.Web3Provider(window.ethereum);
         setProvider(newProvider);
         const newSigner = newProvider.getSigner();
         setSigner(newSigner);
 
-        // Obtenir le solde
+        // Récupérer le solde de l'utilisateur en BNB
         const balanceWei = await newProvider.getBalance(account);
         const balanceInBNB = ethers.utils.formatEther(balanceWei);
         setBalance(balanceInBNB);
