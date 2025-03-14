@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { ethers } from "ethers";
-import "./DepotForm.css"; // Conserve la mise en page originale
+import "./DepotForm.css"; // Assure-toi que le fichier CSS est correctement lié
 
 const BSC_NETWORK_ID = "0x38"; // ID de la chaîne BSC Mainnet en hexadécimal (56 en décimal)
 
@@ -63,7 +63,6 @@ const DepotForm = () => {
       const balanceInBNB = ethers.utils.formatEther(balanceWei);
       setBalance(balanceInBNB);
       setStatus("✅ Wallet connecté avec succès !");
-      console.log("Solde BNB récupéré :", balanceInBNB);
     } catch (error) {
       console.error("Erreur lors de la connexion à MetaMask :", error);
       if (error.code === 4001) {
@@ -101,7 +100,6 @@ const DepotForm = () => {
 
       const txResponse = await signer.sendTransaction(tx);
       setStatus(`✅ Transaction envoyée avec succès ! ID : ${txResponse.hash}`);
-      console.log("Transaction envoyée :", txResponse.hash);
 
       // Rafraîchir le solde après la transaction
       const balanceWei = await provider.getBalance(publicKey);
