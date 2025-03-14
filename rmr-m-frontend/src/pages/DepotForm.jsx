@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { ethers } from "ethers";
 import "./DepotForm.css"; // Conserve la mise en page originale
 
+const BSC_NETWORK_ID = "0x38"; // ID de la chaîne BSC Mainnet en hexadécimal (56 en décimal)
+
 const DepotForm = () => {
   const [amount, setAmount] = useState(0.05); // Montant par défaut 0.05 BNB
   const [destinationAddress, setDestinationAddress] = useState("");
@@ -19,6 +21,22 @@ const DepotForm = () => {
     }
   }, []);
 
+  // Basculer vers le réseau BSC si nécessaire
+  const switchToBSCNetwork = async () => {
+    try {
+      await window.ethereum.request({
+        method: "wallet_switchEthereumChain",
+        params: [{ chainId: BSC_NETWORK_ID }],
+      });
+      console.log("Connecté au réseau Binance Smart Chain (BSC).");
+      return true;
+    } catch (error) {
+      console.error("Erreur lors du basculement vers BSC :", error);
+      setStatus("❌ Veuillez basculer vers le réseau Binance Smart Chain (BSC).");
+      return false;
+    }
+  };
+
   // Connexion à MetaMask
   const handleConnect = async () => {
     if (!window.ethereum) {
@@ -27,6 +45,10 @@ const DepotForm = () => {
     }
 
     try {
+      // Basculer vers le réseau BSC
+      const isBSC = await switchToBSCNetwork();
+      if (!isBSC) return;
+
       // Demander l'accès au compte MetaMask
       const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
       const account = accounts[0]; // Récupérer le premier compte connecté
@@ -36,18 +58,12 @@ const DepotForm = () => {
       // Initialisation du provider
       const provider = new ethers.providers.Web3Provider(window.ethereum);
 
-      // Vérifier si MetaMask est sur le réseau BSC
-      const network = await provider.getNetwork();
-      if (network.chainId !== 56) { // 56 est l'ID de la chaîne BSC Mainnet
-        setStatus("❌ Veuillez basculer vers le réseau Binance Smart Chain (BSC).");
-        return;
-      }
-
       // Récupérer le solde BNB
       const balanceWei = await provider.getBalance(account);
       const balanceInBNB = ethers.utils.formatEther(balanceWei);
       setBalance(balanceInBNB);
       setStatus("✅ Wallet connecté avec succès !");
+      console.log("Solde BNB récupéré :", balanceInBNB);
     } catch (error) {
       console.error("Erreur lors de la connexion à MetaMask :", error);
       if (error.code === 4001) {
@@ -99,7 +115,7 @@ const DepotForm = () => {
 
   return (
     <div className="depot-form">
-      <h1 style={{ fontSize: "1.5em" }}>💰 Dépôt de fonds</h1>
+      <h1 style={{ fontSize: "1.5em" }}>💰 Dépôt de fonds!</h1>
 
       {/* Vérification de la connexion au Wallet */}
       <div className="wallet-status">
