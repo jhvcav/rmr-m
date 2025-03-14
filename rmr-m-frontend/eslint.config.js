@@ -1,33 +1,34 @@
-import js from '@eslint/js'
-import globals from 'globals'
-import reactHooks from 'eslint-plugin-react-hooks'
-import reactRefresh from 'eslint-plugin-react-refresh'
-
-export default [
-  { ignores: ['dist'] },
-  {
-    files: ['**/*.{js,jsx}'],
-    languageOptions: {
-      ecmaVersion: 2020,
-      globals: globals.browser,
-      parserOptions: {
-        ecmaVersion: 'latest',
-        ecmaFeatures: { jsx: true },
-        sourceType: 'module',
-      },
-    },
-    plugins: {
-      'react-hooks': reactHooks,
-      'react-refresh': reactRefresh,
-    },
-    rules: {
-      ...js.configs.recommended.rules,
-      ...reactHooks.configs.recommended.rules,
-      'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
-      'react-refresh/only-export-components': [
-        'warn',
-        { allowConstantExport: true },
-      ],
+module.exports = {
+  env: {
+    browser: true,
+    es2021: true,
+    node: true,
+  },
+  extends: [
+    'eslint:recommended',
+    'plugin:react/recommended',
+    'plugin:react-hooks/recommended',
+    'plugin:jsx-a11y/recommended',
+    'plugin:import/errors',
+    'plugin:import/warnings',
+    'plugin:import/typescript',
+  ],
+  parser: '@babel/eslint-parser',
+  parserOptions: {
+    ecmaVersion: 12, // Equivalent à ES2021
+    sourceType: 'module',
+    ecmaFeatures: {
+      jsx: true,
     },
   },
-]
+  plugins: ['react', 'react-hooks', 'jsx-a11y', 'import'],
+  rules: {
+    'react/prop-types': 'off', // Si vous n'utilisez pas les PropTypes
+    'react/react-in-jsx-scope': 'off', // React n'a plus besoin d'être importé en 17+
+    'jsx-a11y/anchor-is-valid': 'off', // Si vous utilisez des liens avec # ou sans href valide
+    'import/no-unresolved': 'error', // S'assurer que toutes les importations sont résolues
+    'no-console': 'warn', // Avertir sur les console.log
+    'no-unused-vars': 'warn', // Avertir sur les variables inutilisées
+    'react-hooks/exhaustive-deps': 'warn', // Avertir sur les dépendances manquantes dans useEffect
+  },
+};
