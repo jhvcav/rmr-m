@@ -62,13 +62,15 @@
 
 /* Menu mobile */
 @media (max-width: 768px) {
-  /* Bouton d'ouverture du menu (hamburger) - positionné à droite */
+  /* Bouton d'ouverture du menu (hamburger) - positionné plus à droite */
   .menu-open-btn {
     display: block;
     position: absolute;
     top: 15px;
-    right: 20px;
+    right: 10px; /* Rapproché du bord droit */
     z-index: 1200;
+    padding-right: 0; /* Supprime le padding interne à droite */
+    margin-right: 0; /* Supprime la marge à droite */
   }
 
   /* Bouton de fermeture du menu (croix) - positionné à gauche dans le menu ouvert */
