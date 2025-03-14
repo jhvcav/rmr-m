@@ -7,17 +7,12 @@
   background-color: white;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   z-index: 1000;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   padding: 15px 20px;
 }
 
 .container {
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  display: inline-block;
+  /* Retiré width: 100% pour éviter qu'il prenne toute la largeur */
 }
 
 /* Logo */
@@ -62,31 +57,43 @@
 
 /* Menu mobile */
 @media (max-width: 768px) {
-  /* Bouton d'ouverture du menu (hamburger) - positionné plus à droite et réduit en taille */
+  /* Bouton d'ouverture du menu (hamburger) - positionné véritablement en haut à droite */
   .menu-open-btn {
     display: block;
-    position: absolute;
+    position: fixed; /* Changé de absolute à fixed pour s'assurer qu'il est par rapport à la fenêtre */
     top: 15px;
-    right: 10px; /* Rapproché du bord droit */
+    right: 15px; /* Positionné par rapport au bord droit de la fenêtre */
     z-index: 1200;
-    padding: 5px; /* Réduit le padding interne sur tous les côtés */
-    margin-right: 0; /* Supprime la marge à droite */
-    font-size: 20px; /* Réduit la taille de l'icône (était 24px) */
-    height: 30px; /* Définit une hauteur fixe au bouton */
-    width: 30px; /* Définit une largeur fixe au bouton */
+    background: transparent; /* Fond transparent */
+    border: none; /* Pas de bordure */
+    padding: 5px; /* Réduit le padding interne */
+    font-size: 20px; /* Taille de l'icône réduite */
+    height: 30px; /* Hauteur fixe */
+    width: 30px; /* Largeur fixe */
     display: flex;
     align-items: center;
     justify-content: center;
+    outline: none; /* Supprime le contour au focus */
   }
 
-  /* Bouton de fermeture du menu (croix) - positionné à gauche dans le menu ouvert */
+  /* Bouton de fermeture du menu (croix) - positionné véritablement en haut à gauche dans le menu ouvert */
   .menu-close-btn {
     display: block;
-    position: absolute;
+    position: fixed; /* Changé de absolute à fixed */
     top: 15px;
-    left: 20px;
-    z-index: 1200;
+    left: 15px;
+    z-index: 1300; /* Z-index plus élevé que le menu */
     color: white;
+    background: transparent; /* Fond transparent */
+    border: none; /* Pas de bordure */
+    padding: 5px; /* Padding réduit */
+    font-size: 20px; /* Taille de l'icône réduite */
+    height: 30px; /* Hauteur fixe */
+    width: 30px; /* Largeur fixe */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    outline: none; /* Supprime le contour au focus */
   }
 
   .nav-menu {

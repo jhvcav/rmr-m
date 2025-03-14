@@ -16,16 +16,17 @@ const Navbar = () => {
       <div className="container">
         {/* Logo */}
         <Link to="/" className="navbar-brand">RMR-M</Link>
+      </div>
+      
+      {/* Bouton hamburger pour mobile (visible uniquement quand le menu est fermé) */}
+      {!menuOpen && (
+        <button className="menu-toggle menu-open-btn" onClick={() => setMenuOpen(true)}>
+          ☰
+        </button>
+      )}
 
-        {/* Bouton hamburger pour mobile (visible uniquement quand le menu est fermé) */}
-        {!menuOpen && (
-          <button className="menu-toggle menu-open-btn" onClick={() => setMenuOpen(true)}>
-            ☰
-          </button>
-        )}
-
-        {/* Liste des menus - Menu latéral en mode mobile */}
-        <ul className={`nav-menu ${menuOpen ? "open" : ""}`}>
+      {/* Liste des menus - Menu latéral en mode mobile */}
+      <ul className={`nav-menu ${menuOpen ? "open" : ""}`}>
           {/* Bouton de fermeture (visible uniquement quand le menu est ouvert) */}
           {menuOpen && (
             <button className="menu-toggle menu-close-btn" onClick={() => setMenuOpen(false)}>
@@ -41,7 +42,6 @@ const Navbar = () => {
           <li className="nav-item"><Link to="/rmr-m/contact" onClick={() => setMenuOpen(false)}>Contact</Link></li>
           <li className="nav-item"><Link to="/rmr-m/a-propos" onClick={() => setMenuOpen(false)}>À propos</Link></li>
         </ul>
-      </div>
     </nav>
   );
 };
