@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import * as ethers from "ethers";
+import * as ethers from "ethers"; // Modifié pour s'assurer que tout le module ethers est importé
 import "./DepotForm.css";
 
 const DepotForm = () => {
@@ -10,10 +10,28 @@ const DepotForm = () => {
   const [publicKey, setPublicKey] = useState(null);
   const [balance, setBalance] = useState(null);
 
+  // Fonction pour créer un provider compatible avec plusieurs versions d'ethers
+  const getProvider = () => {
+    if (!window.ethereum) return null;
+    
+    // Pour ethers v5
+    if (ethers.providers && ethers.providers.Web3Provider) {
+      return new ethers.providers.Web3Provider(window.ethereum);
+    }
+    
+    // Pour ethers v6
+    if (ethers.BrowserProvider) {
+      return new ethers.BrowserProvider(window.ethereum);
+    }
+    
+    throw new Error("Version d'ethers non supportée");
+  };
+
   // Vérifier si MetaMask est installé et configurer les écouteurs d'événements
   useEffect(() => {
     if (window.ethereum) {
       console.log("MetaMask détecté !");
+      console.log("Version ethers:", ethers.version); // Affiche la version d'ethers
       
       // Écouter les changements de compte
       window.ethereum.on('accountsChanged', (accounts) => {
@@ -56,7 +74,12 @@ const DepotForm = () => {
   // Fonction pour mettre à jour le solde
   const updateBalance = async (address) => {
     try {
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const provider = getProvider();
+      if (!provider) {
+        console.error("Impossible d'initialiser le provider");
+        return;
+      }
+      
       const balanceWei = await provider.getBalance(address);
       const balanceInBNB = ethers.utils.formatEther(balanceWei);
       setBalance(balanceInBNB);
@@ -137,8 +160,12 @@ const DepotForm = () => {
       const account = accounts[0];
       setPublicKey(account);
       
-      // Utiliser le provider de MetaMask directement
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      // Utiliser le provider avec la fonction getProvider
+      const provider = getProvider();
+      if (!provider) {
+        setStatus("❌ Erreur d'initialisation du provider ethers");
+        return;
+      }
       
       // Vérifier que nous sommes toujours sur le bon réseau
       const network = await provider.getNetwork();
@@ -186,8 +213,12 @@ const DepotForm = () => {
     try {
       setStatus("⏳ Préparation de la transaction...");
       
-      // Utiliser le provider de MetaMask
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      // Utiliser le provider avec la fonction getProvider
+      const provider = getProvider();
+      if (!provider) {
+        setStatus("❌ Erreur d'initialisation du provider ethers");
+        return;
+      }
       
       // Vérifier que nous sommes toujours sur le bon réseau
       const network = await provider.getNetwork();
@@ -230,7 +261,7 @@ const DepotForm = () => {
 
   return (
     <div className="depot-form">
-      <h1 style={{ fontSize: "1.5em" }}>💰 Dépôt de fonds</h1>
+      <h1 style={{ fontSize: "1.5em" }}>💰 Dépôt de fonds!</h1>
 
       {/* Vérification de la connexion au Wallet */}
       <div className="wallet-status">
