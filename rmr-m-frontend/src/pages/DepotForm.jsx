@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from "react";
-import { ethers } from "ethers"; // Importer ethers
+import { useEffect, useState } from "react";
+import { ethers } from "ethers";
+import Web3Modal from "web3modal";
 import "./DepotForm.css"; // Conserve la mise en page originale
 
 const DepotForm = () => {
@@ -9,38 +10,51 @@ const DepotForm = () => {
   const [isConnected, setIsConnected] = useState(false);
   const [publicKey, setPublicKey] = useState(null);
   const [balance, setBalance] = useState(null);
-  const [provider, setProvider] = useState(null); // Initialisation du provider
+  const [provider, setProvider] = useState(null); // Initialisation correcte du provider
   const [signer, setSigner] = useState(null); // Initialisation du signer
 
-  // URL RPC privé pour BSC Testnet
-  const RPC_PRIVATE_URL = "https://bsc-dataseed.binance.org/"; // RPC privé BSC
+  // Initialisation de Web3Modal
+  useEffect(() => {
+    const modal = new Web3Modal({
+      cacheProvider: true,
+      providerOptions: {
+        metamask: {
+          display: {
+            name: "MetaMask",
+            description: "Connectez MetaMask",
+          },
+          package: null,
+        },
+      },
+    });
+    setWeb3Modal(modal);
+  }, []);
 
   // Connexion à MetaMask
   const handleConnect = async () => {
-    if (window.ethereum) {
-      try {
-        // Demander l'autorisation de se connecter au wallet MetaMask
-        const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
-        const account = accounts[0]; // Premier compte
-        setPublicKey(account);
-        setIsConnected(true);
+    try {
+      // Demander à l'utilisateur de se connecter à MetaMask
+      const modalProvider = await web3Modal.connect();
+      const newProvider = new ethers.providers.Web3Provider(modalProvider); // Utilisation de Web3Provider
+      const newSigner = newProvider.getSigner();
 
-        // Initialisation du provider avec window.ethereum
-        const newProvider = new ethers.providers.Web3Provider(window.ethereum);
-        setProvider(newProvider);
-        const newSigner = newProvider.getSigner();
-        setSigner(newSigner);
+      setProvider(newProvider);
+      setSigner(newSigner);
 
-        // Récupérer le solde de l'utilisateur en BNB
-        const balanceWei = await newProvider.getBalance(account);
-        const balanceInBNB = ethers.utils.formatEther(balanceWei);
-        setBalance(balanceInBNB);
-      } catch (error) {
-        console.error("Erreur lors de la connexion à MetaMask :", error);
-        setStatus("❌ Erreur lors de la connexion à MetaMask.");
-      }
-    } else {
-      setStatus("❌ MetaMask n'est pas détecté.");
+      const account = await newSigner.getAddress();
+      setPublicKey(account);
+      setIsConnected(true);
+
+      // Récupérer le solde BNB du wallet connecté
+      const balanceWei = await newProvider.getBalance(account);
+      const balanceInBNB = ethers.utils.formatEther(balanceWei);
+      setBalance(balanceInBNB);
+
+      alert(`Solde BNB récupéré avec succès : ${balanceInBNB} BNB`); // Affichage du solde BNB
+
+    } catch (error) {
+      setStatus("❌ Erreur lors de la connexion à MetaMask.");
+      alert("Erreur lors de la connexion à MetaMask : " + error.message); // Affichage de l'erreur
     }
   };
 
@@ -48,39 +62,40 @@ const DepotForm = () => {
   const handleDepot = async () => {
     if (!isConnected) {
       setStatus("⚠️ Veuillez vous connecter à MetaMask.");
+      alert("Veuillez vous connecter à MetaMask."); // Affichage de l'erreur
       return;
     }
 
     if (!destinationAddress) {
       setStatus("⚠️ Veuillez entrer une adresse de destination.");
+      alert("Veuillez entrer une adresse de destination."); // Affichage de l'erreur
       return;
     }
 
     if (amount <= 0 || isNaN(amount)) {
       setStatus("⚠️ Montant invalide.");
+      alert("Veuillez entrer un montant valide."); // Affichage de l'erreur
       return;
     }
 
     try {
-      // Créer une transaction pour envoyer des fonds
       const tx = {
         to: destinationAddress,
         value: ethers.utils.parseEther(amount.toString()), // Convertir le montant en wei
       };
 
-      // Envoyer la transaction
       const txResponse = await signer.sendTransaction(tx);
       setStatus(`✅ Transaction envoyée avec succès ! ID : ${txResponse.hash}`);
-      console.log("Transaction envoyée :", txResponse.hash);
+      alert(`Transaction envoyée avec succès : ${txResponse.hash}`); // Affichage de la réussite de la transaction
     } catch (error) {
-      console.error("❌ Erreur lors du dépôt de fonds :", error);
       setStatus("❌ Une erreur est survenue lors de la transaction.");
+      alert("Erreur lors de la transaction : " + error.message); // Affichage de l'erreur
     }
   };
 
   return (
     <div className="depot-form">
-      <h1 style={{ fontSize: "1.5em" }}>💰 Dépôt de fonds!</h1>
+      <h1 style={{ fontSize: "1.5em" }}>💰 Dépôt de fonds</h1>
 
       {/* État du Wallet */}
       <div className="wallet-status">
