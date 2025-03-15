@@ -2,6 +2,9 @@ import React, { useState, useEffect } from "react";
 import { ethers } from "ethers";
 import "./LPFarming.css"; // Tes styles CSS
 
+// Style de décalage vers la droite - ajustez la valeur selon vos besoins
+
+
 const LPFarming = () => {
   const [capital, setCapital] = useState(250);
   const [duration, setDuration] = useState(1);
@@ -10,6 +13,12 @@ const LPFarming = () => {
   const [account, setAccount] = useState(null);
   const [provider, setProvider] = useState(null);
   const [contract, setContract] = useState(null);
+
+  // Style de décalage vers la droite - ajustez la valeur selon vos besoins
+  const containerStyle = {
+    position: 'relative',
+    left: '780px'
+  };
 
   // Détection automatique du wallet (MetaMask ou autres)
   useEffect(() => {
@@ -87,7 +96,7 @@ const LPFarming = () => {
   };
 
   return (
-    <div className="lp-container">
+    <div className="lp-container" style={containerStyle}>
       <h1>LP Farming - Génération de Rendement</h1>
       <p>
         <b>Liquidity Provider (LP) Farming</b> vous permet d’investir des fonds dans des pools de liquidités et d'obtenir un rendement stable de

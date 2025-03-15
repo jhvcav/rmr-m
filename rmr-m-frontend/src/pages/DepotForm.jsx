@@ -13,6 +13,12 @@ const DepotForm = () => {
   const location = useLocation();
   const navigate = useNavigate();
   
+  // Style de décalage vers la droite - ajustez la valeur selon vos besoins
+  const offsetStyle = {
+    position: 'relative',
+    left: '1200px'
+  };
+  
   // Paramètres récupérés de LPFarming
   const [montantInvesti, setMontantInvesti] = useState("");
   const [dureeInvestissement, setDureeInvestissement] = useState("");
@@ -305,7 +311,7 @@ const DepotForm = () => {
   };
 
   return (
-    <div className="depot-form">
+    <div className="depot-form" style={offsetStyle}>
       <h1 style={{ fontSize: "1.5em" }}>💰 Dépôt de fonds pour LPFarming</h1>
 
       {/* Récapitulatif de l'investissement */}

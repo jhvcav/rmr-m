@@ -2,7 +2,7 @@
 .home-container {
     width: 800px;
     position: relative;
-    left: calc(80% + 25px); /* Décalage de 25px vers la droite */
+    left: calc(100% + 25px); /* Décalage de 25px vers la droite */
     transform: translateX(-50%);
     padding: 15px; /* Padding réduit (était 20px) */
     text-align: center;
