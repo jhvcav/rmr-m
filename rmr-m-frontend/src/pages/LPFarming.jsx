@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { ethers } from "ethers";
+import { useNavigate } from "react-router-dom"; // Importez useNavigate
 import "./LPFarming.css"; // Tes styles CSS
 
-// Style de décalage vers la droite - ajustez la valeur selon vos besoins
-
-
 const LPFarming = () => {
+  const navigate = useNavigate(); // Initialisez useNavigate
   const [capital, setCapital] = useState(250);
   const [duration, setDuration] = useState(1);
   const [profit, setProfit] = useState(0);
@@ -67,6 +66,34 @@ const LPFarming = () => {
     setProfit(totalProfit.toFixed(2));
   };
 
+  // Fonction pour transférer vers le formulaire de dépôt
+  const goToDepotForm = () => {
+    // Calculer les frais (par exemple, 2% du capital)
+    const frais = capital * 0.02;
+    
+    // Calculer le rendement estimé si ce n'est pas déjà fait
+    if (profit === 0) {
+      calculateProfit();
+    }
+    
+    // Convertir la durée de mois en jours pour la cohérence avec DepotForm
+    const dureeJours = duration * 30;
+    
+    // Adresse du pool (utiliser l'adresse du contrat si disponible)
+    const poolAddress = contract ? contract.address : "0xbc3F488c5A9a7909aE07802c2b9002Efaa7EdB9F";
+    
+    // Navigation vers le formulaire de dépôt avec les données de la simulation
+    navigate("/rmr-m/depot-form", {
+      state: {
+        montant: capital,
+        adressePool: poolAddress,
+        duree: dureeJours,
+        rendementEstime: parseFloat(profit),
+        frais: frais
+      }
+    });
+  };
+
   // Fonction pour effectuer un investissement
   const handleInvest = async () => {
     if (!account) {
@@ -74,21 +101,15 @@ const LPFarming = () => {
       return;
     }
 
-    if (!contract) {
-      alert("Le contrat n'est pas chargé correctement !");
-      return;
-    }
-
-    // Conversion de l'investissement en wei (unités de BNB)
-    const valueInWei = ethers.utils.parseEther(capital.toString());
-
     try {
       setLoading(true);
-      const tx = await contract.deposit({ value: valueInWei });
-      await tx.wait(); // Attendre que la transaction soit confirmée
-      alert("✅ Transaction réussie !");
+      
+      // Au lieu d'interagir directement avec le contrat, 
+      // naviguer vers la page DepotForm
+      goToDepotForm();
+      
     } catch (error) {
-      console.error("Erreur transaction :", error);
+      console.error("Erreur:", error);
       alert("❌ Erreur lors de l'investissement !");
     } finally {
       setLoading(false);
@@ -99,8 +120,8 @@ const LPFarming = () => {
     <div className="lp-container" style={containerStyle}>
       <h1>LP Farming - Génération de Rendement</h1>
       <p>
-        <b>Liquidity Provider (LP) Farming</b> vous permet d’investir des fonds dans des pools de liquidités et d'obtenir un rendement stable de
-        <b> 10% par mois</b>. Grâce à l’optimisation automatique, votre capital est réinvesti pour maximiser les gains.
+        <b>Liquidity Provider (LP) Farming</b> vous permet d'investir des fonds dans des pools de liquidités et d'obtenir un rendement stable de
+        <b> 10% par mois</b>. Grâce à l'optimisation automatique, votre capital est réinvesti pour maximiser les gains.
       </p>
 
       {/* Connexion au Wallet */}

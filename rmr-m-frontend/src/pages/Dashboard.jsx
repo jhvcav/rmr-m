@@ -26,6 +26,12 @@ const Dashboard = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [hasInvestments, setHasInvestments] = useState(true); // Nouvel état pour vérifier si l'utilisateur a des investissements
 
+  // Style de décalage vers la droite - ajustez la valeur selon vos besoins
+  const containerStyle = {
+    position: 'relative',
+    left: '780px'
+  };
+
   // Fonction pour créer un provider compatible avec plusieurs versions d'ethers
   const getProvider = () => {
     if (!window.ethereum) return null;
@@ -490,7 +496,7 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="dashboard-container">
+    <div className="dashboard-container" style={containerStyle}>
       <h1>📊 Tableau de Bord</h1>
       
       {isLoading ? (

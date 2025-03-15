@@ -11,7 +11,7 @@ import { motion } from "framer-motion"; // Importer Framer Motion pour les anima
 
 // Ajout d'un style inline pour compenser le décalage vers la gauche
 const containerStyle = {
-  marginLeft: "50px" // Décalage manuel vers la droite
+  marginLeft: "230px" // Décalage manuel vers la droite
 };
 
 const Home = () => {
