@@ -1,10 +1,12 @@
+import React from "react";
+
 const InvestmentHistory = () => {
-    return (
-      <div className="container text-center mt-5">
-        <h1>Historique des Investissements</h1>
-        <p>Suivez tous vos investissements passés.</p>
-      </div>
-    );
-  };
-  
-  export default InvestmentHistory;
+  return (
+    <div>
+      <h1>À propos de RMR-M</h1>
+      <p>Informations sur la plateforme et ses objectifs.</p>
+    </div>
+  );
+};
+
+export default InvestmentHistory;

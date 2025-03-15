@@ -6,52 +6,33 @@
 
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { ConnectionProvider, WalletProvider } from "@solana/wallet-adapter-react";
-import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
-import { PhantomWalletAdapter, SolflareWalletAdapter } from "@solana/wallet-adapter-wallets";
 
+// Import des composants
 import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
-import WalletConnect from "./pages/WalletConnect";
 import Dashboard from "./pages/Dashboard";
-import NFT from "./pages/NFT";
-import Affiliation from "./pages/Affiliation";
-import Historique from "./pages/Historique";
-import Contact from "./pages/Contact";
-import APropos from "./pages/APropos";
 import LPFarming from "./pages/LPFarming";
 import DepotForm from "./pages/DepotForm";
-
+import InvestmentHistory from "./pages/InvestmentHistory";
 import "./App.css";
 
 const App = () => {
-  const wallets = [new PhantomWalletAdapter(), new SolflareWalletAdapter()];
-
   return (
-    <ConnectionProvider endpoint="https://api.devnet.solana.com">
-      <WalletProvider wallets={wallets} autoConnect>
-        <WalletModalProvider>
-          <Router>
-            <Navbar />
-            <Routes>
-              {/* Route de l apage d'accueil */}
-              <Route path="/rmr-m" element={<Home />} />
-              {/* Les autres routes */}
-              <Route path="/rmr-m/wallet-connect" element={<WalletConnect />} />
-              <Route path="/rmr-m/dashboard" element={<Dashboard />} />
-              <Route path="/rmr-m/nft" element={<NFT />} />
-              <Route path="/rmr-m/affiliation" element={<Affiliation />} />
-              <Route path="/rmr-m/historique" element={<Historique />} />
-              <Route path="/rmr-m/contact" element={<Contact />} />
-              <Route path="/rmr-m/a-propos" element={<APropos />} />
-              <Route path="/rmr-m/lp-farming" element={<LPFarming />} />
-              <Route path="/rmr-m/depot-form" element={<DepotForm />} />
-              <Route path="/rmr-m/App" element={<DepotForm />} />
-            </Routes>
-          </Router>
-        </WalletModalProvider>
-      </WalletProvider>
-    </ConnectionProvider>
+    <Router>
+      <div className="app-wrapper">
+        <Navbar />
+        <div className="content-container">
+          <Routes>
+            <Route path="/rmr-m" element={<Home />} />
+            <Route path="/rmr-m/dashboard" element={<Dashboard />} />
+            <Route path="/rmr-m/lpfarming" element={<LPFarming />} />
+            <Route path="/rmr-m/depot-form" element={<DepotForm />} />
+            <Route path="/rmr-m/historique" element={<InvestmentHistory />} />
+            {/* Ajoutez d'autres routes selon vos besoins */}
+          </Routes>
+        </div>
+      </div>
+    </Router>
   );
 };
 

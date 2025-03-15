@@ -1,100 +1,100 @@
-/* Reset global */
+/* App.css - Solution de force brute pour le centrage */
+
+/* Réinitialisation de base */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: "Arial", sans-serif;
 }
 
-/* Fond de la page */
 body {
-  background: linear-gradient(to right, #141e30, #243b55);
-  padding-top: 80px; /* Ajuste la hauteur de la navbar */
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  line-height: 1.6;
+  color: #333;
+  background-color: #f8f9fa;
+  overflow-x: hidden; /* Empêche le défilement horizontal */
+}
+
+/* Solution de force brute pour le centrage */
+.app-wrapper {
+  width: 100%;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
-  align-items: center; /* Centre le contenu horizontalement */
-  justify-content: flex-start; /* Aligne en haut de la page */
-  height: 100vh;
-  width: 100%;
+  align-items: center; /* Force le centrage horizontal de tous les enfants */
 }
 
-/* Navbar */
-.navbar {
+.content-container {
   width: 100%;
-  position: fixed;
-  top: 0;
-  left: 0;
-  background: #1e1e1e; /* Fond sombre */
-  padding: 15px 0;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-  display: flex;
-  justify-content: center; /* Centre les éléments horizontalement */
-  align-items: center;
-  z-index: 1000;
-}
-
-/* Conteneur de la navbar */
-.navbar .container {
-  display: flex;
-  justify-content: space-between; /* Espace entre le logo et les liens */
-  align-items: center;
-  width: 90%;
   max-width: 1200px;
+  padding-top: 80px; /* Espace pour la navbar fixe */
+  padding-left: 20px;
+  padding-right: 20px;
+  padding-bottom: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Force le centrage horizontal de tous les enfants */
 }
 
-/* Conteneur principal de la page d'accueil */
-.home-container {
-  width: 100%;
-  max-width: 800px;
-  text-align: center;
-  margin-top: 20px; /* Espace sous la navbar */
+/* Force le centrage de tout contenu de page */
+.content-container > div {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
 }
 
-/* Titre */
-h1 {
-  font-size: 2.5rem;
-  font-weight: bold;
-  margin-bottom: 1rem;
-  text-align: center;
-}
-
-/* Paragraphe */
-p {
-  font-size: 1.3rem;
-  margin-bottom: 1.5rem;
-  text-align: center;
-}
-
-/* Bouton */
-.btn-dark {
-  background-color: black !important;
-  color: white !important;
-  padding: 12px 24px;
-  font-size: 1.2rem;
-  border-radius: 8px;
+/* Styles des liens */
+a {
   text-decoration: none;
+  color: #007bff;
+  transition: color 0.3s;
+}
+
+a:hover {
+  color: #0056b3;
+}
+
+/* Styles des boutons */
+.btn {
   display: inline-block;
-  margin-top: 20px;
+  padding: 10px 20px;
+  margin: 0 10px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  text-align: center;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+.btn:hover {
+  background-color: #0056b3;
+  transform: translateY(-2px);
+}
+
+.btn-dark {
+  background-color: #343a40;
 }
 
 .btn-dark:hover {
-  background-color: #222 !important;
+  background-color: #23272b;
 }
 
-/* Logo */
-.navbar-brand {
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: white !important;
-  text-decoration: none;
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .content-container {
+    padding-top: 70px;
+    padding-left: 15px;
+    padding-right: 15px;
+    padding-bottom: 20px;
+  }
+  
+  .btn {
+    padding: 8px 16px;
+    font-size: 14px;
+  }
 }
-
-/* Liens */
-.nav-item a {
-  color: white;
-  text-decoration: none;
-  font-size: 1.2rem;
-  padding: 8px 12px;
-  transition: all 0.3s ease-in-out;
-}
-

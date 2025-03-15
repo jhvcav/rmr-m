@@ -9,9 +9,14 @@ import { Link } from "react-router-dom";
 import "./Home.css";
 import { motion } from "framer-motion"; // Importer Framer Motion pour les animations
 
+// Ajout d'un style inline pour compenser le décalage vers la gauche
+const containerStyle = {
+  marginLeft: "50px" // Décalage manuel vers la droite
+};
+
 const Home = () => {
   return (
-    <div className="home-container">
+    <div className="home-container" style={containerStyle}>
       {/* Animation du titre */}
       <motion.h1 
         initial={{ opacity: 0, y: -50 }}
@@ -32,6 +37,7 @@ const Home = () => {
 
       {/* Animation du bouton */}
       <motion.div 
+        className="button-container"
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5, delay: 1 }}
@@ -44,7 +50,7 @@ const Home = () => {
       <section className="solutions">
         <h2>Nos solutions pour générer des gains</h2>
         <div className="solution-list">
-          <Link to="/rmr-m/lp-farming" className="solution-card">
+          <Link to="/rmr-m/lpfarming" className="solution-card">
             <h3>📈 Investissements</h3>
             <p>Placer des fonds dans des pools et obtenir un rendement stable.</p>
           </Link>
@@ -61,7 +67,7 @@ const Home = () => {
             <p>Investissez dans nos NFT exclusifs et bénéficiez d'avantages.</p>
           </div>
           <div className="solution-card">
-            <h3>🤝 Programme d’affiliation</h3>
+            <h3>🤝 Programme d'affiliation</h3>
             <p>Gagnez des commissions en invitant d'autres investisseurs.</p>
           </div>
         </div>

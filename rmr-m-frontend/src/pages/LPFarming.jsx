@@ -1,173 +1,140 @@
-/**
- * Copyright (c) 2025 Jean Hugues CAVALIE
- * Tous droits réservés.
- * Ce code ne peut pas être utilisé ou redistribué sans autorisation.
- */
-
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import "./LPFarming.css"; // Assurez-vous d'avoir un fichier CSS correspondant
+import React, { useState, useEffect } from "react";
+import { ethers } from "ethers";
+import "./LPFarming.css"; // Tes styles CSS
 
 const LPFarming = () => {
-  const navigate = useNavigate(); // Hook pour la navigation
+  const [capital, setCapital] = useState(250);
+  const [duration, setDuration] = useState(1);
+  const [profit, setProfit] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [account, setAccount] = useState(null);
+  const [provider, setProvider] = useState(null);
+  const [contract, setContract] = useState(null);
 
-  // États pour stocker les valeurs de simulation
-  const [montantInvesti, setMontantInvesti] = useState("");
-  const [dureeInvestissement, setDureeInvestissement] = useState("30"); // Défaut à 30 jours
-  const [resultatSimulation, setResultatSimulation] = useState(null);
-  
-  // Paramètres fictifs du pool (à adapter selon vos besoins réels)
-  const poolInfo = {
-    adresse: "0x1234567890abcdef1234567890abcdef12345678",
-    tauxRendement: 0.12, // 12% par an
-    frais: 0.02, // 2% de frais
+  // Détection automatique du wallet (MetaMask ou autres)
+  useEffect(() => {
+    if (window.ethereum) {
+      const web3Provider = new ethers.providers.Web3Provider(window.ethereum);
+      setProvider(web3Provider);
+
+      // Demande de connexion avec MetaMask
+      web3Provider.send("eth_requestAccounts", []).then((accounts) => {
+        setAccount(accounts[0]);
+        console.log("Wallet connecté :", accounts[0]);
+      });
+    } else {
+      alert("Aucun wallet compatible détecté !");
+    }
+  }, []);
+
+  useEffect(() => {
+    if (provider) {
+      // Adresse du contrat BSC
+      const contractAddress = "0xbc3F488c5A9a7909aE07802c2b9002Efaa7EdB9F"; // Adresse de ton contrat déployé
+
+      // ABI du contrat
+      const contractAbi = [
+        "function totalInvestment() public view returns (uint256)",
+        "function deposit() public payable",
+        "function withdraw(uint256 amount) public",
+        "function distributeInterest() public",
+        // Ajoute d'autres fonctions selon les besoins
+      ];
+
+      const contractInstance = new ethers.Contract(contractAddress, contractAbi, provider.getSigner());
+      setContract(contractInstance);
+
+      // Obtenir le solde du contrat
+      contractInstance.totalInvestment().then((balance) => {
+        console.log("Solde du contrat :", ethers.utils.formatEther(balance));
+      });
+    }
+  }, [provider]);
+
+  // Calcul des gains
+  const calculateProfit = () => {
+    const monthlyRate = 0.10; // Par exemple 10% par mois
+    const totalProfit = capital * Math.pow(1 + monthlyRate, duration) - capital;
+    setProfit(totalProfit.toFixed(2));
   };
 
-  // Fonction pour calculer le rendement estimé
-  const calculerRendement = () => {
-    if (!montantInvesti || montantInvesti <= 0) {
-      alert("Veuillez entrer un montant valide");
+  // Fonction pour effectuer un investissement
+  const handleInvest = async () => {
+    if (!account) {
+      alert("Veuillez connecter votre wallet avant d'investir !");
       return;
     }
 
-    const montant = parseFloat(montantInvesti);
-    const duree = parseInt(dureeInvestissement);
-    
-    // Calcul du rendement annuel proratisé à la durée choisie
-    const rendementJournalier = poolInfo.tauxRendement / 365;
-    const rendementPeriode = montant * rendementJournalier * duree;
-    
-    // Calcul des frais
-    const fraisMontant = montant * poolInfo.frais;
-    
-    // Montant final
-    const montantFinal = montant + rendementPeriode - fraisMontant;
-
-    // Mise à jour du résultat de simulation
-    setResultatSimulation({
-      montantInvesti: montant,
-      duree: duree,
-      rendementEstime: rendementPeriode,
-      frais: fraisMontant,
-      montantFinal: montantFinal
-    });
-  };
-
-  // Fonction pour naviguer vers le formulaire de dépôt
-  const allerAuDepot = () => {
-    // Si la simulation n'a pas été faite, on la fait d'abord
-    if (!resultatSimulation) {
-      calculerRendement();
+    if (!contract) {
+      alert("Le contrat n'est pas chargé correctement !");
       return;
     }
-    
-    // Navigation vers DepotForm avec les paramètres nécessaires
-    navigate("/rmr-m/depot-form", {
-      state: {
-        montant: resultatSimulation.montantInvesti,
-        adressePool: poolInfo.adresse,
-        duree: resultatSimulation.duree,
-        rendementEstime: resultatSimulation.rendementEstime,
-        frais: resultatSimulation.frais
-      }
-    });
+
+    // Conversion de l'investissement en wei (unités de BNB)
+    const valueInWei = ethers.utils.parseEther(capital.toString());
+
+    try {
+      setLoading(true);
+      const tx = await contract.deposit({ value: valueInWei });
+      await tx.wait(); // Attendre que la transaction soit confirmée
+      alert("✅ Transaction réussie !");
+    } catch (error) {
+      console.error("Erreur transaction :", error);
+      alert("❌ Erreur lors de l'investissement !");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="lp-farming-container">
-      <h1>Liquid Proof of Farming (LPF)</h1>
-      
-      <section className="description-section">
-        <h2>Qu'est-ce que le LPFarming ?</h2>
-        <p>
-          Le Liquid Proof of Farming (LPF) est une méthode d'investissement qui permet
-          aux détenteurs de crypto-monnaies de générer des rendements passifs en fournissant
-          des liquidités à des pools spécifiques. En échange de votre participation, vous recevez
-          une part des frais de transaction et des récompenses générées par le pool.
-        </p>
-        <p>
-          Notre plateforme simplifie ce processus en vous permettant d'investir directement
-          dans des pools soigneusement sélectionnés pour leur sécurité et leur rendement.
-        </p>
-      </section>
-      
-      <section className="simulation-section">
-        <h2>Simulez votre investissement</h2>
-        
-        <div className="simulation-form">
-          <div className="form-group">
-            <label htmlFor="montant">Montant à investir (USDT):</label>
-            <input
-              type="number"
-              id="montant"
-              value={montantInvesti}
-              onChange={(e) => setMontantInvesti(e.target.value)}
-              placeholder="Ex: 1000"
-              min="1"
-            />
-          </div>
-          
-          <div className="form-group">
-            <label htmlFor="duree">Durée d'investissement (jours):</label>
-            <select
-              id="duree"
-              value={dureeInvestissement}
-              onChange={(e) => setDureeInvestissement(e.target.value)}
-            >
-              <option value="30">30 jours</option>
-              <option value="60">60 jours</option>
-              <option value="90">90 jours</option>
-              <option value="180">180 jours</option>
-              <option value="365">365 jours</option>
-            </select>
-          </div>
-          
-          <button className="btn-calculer" onClick={calculerRendement}>
-            Calculer le rendement
+    <div className="lp-container">
+      <h1>LP Farming - Génération de Rendement</h1>
+      <p>
+        <b>Liquidity Provider (LP) Farming</b> vous permet d’investir des fonds dans des pools de liquidités et d'obtenir un rendement stable de
+        <b> 10% par mois</b>. Grâce à l’optimisation automatique, votre capital est réinvesti pour maximiser les gains.
+      </p>
+
+      {/* Connexion au Wallet */}
+      <div className="wallet-connection">
+        <h3>Connexion au Wallet</h3>
+        {account ? (
+          <button className="wallet-button btn btn-success">
+            ✅ {account.substring(0, 6)}...{account.slice(-4)}
           </button>
-        </div>
-        
-        {resultatSimulation && (
-          <div className="simulation-results">
-            <h3>Résultats de la simulation</h3>
-            <div className="result-item">
-              <span>Montant investi:</span>
-              <span>{resultatSimulation.montantInvesti.toFixed(2)} USDT</span>
-            </div>
-            <div className="result-item">
-              <span>Durée d'investissement:</span>
-              <span>{resultatSimulation.duree} jours</span>
-            </div>
-            <div className="result-item">
-              <span>Rendement estimé:</span>
-              <span>{resultatSimulation.rendementEstime.toFixed(2)} USDT</span>
-            </div>
-            <div className="result-item">
-              <span>Frais de gestion:</span>
-              <span>{resultatSimulation.frais.toFixed(2)} USDT</span>
-            </div>
-            <div className="result-item total">
-              <span>Montant estimé à terme:</span>
-              <span>{resultatSimulation.montantFinal.toFixed(2)} USDT</span>
-            </div>
-            
-            <button className="btn-valider" onClick={allerAuDepot}>
-              Valider mon choix
-            </button>
-          </div>
+        ) : (
+          <button className="wallet-button btn btn-primary" onClick={handleInvest}>
+            Connecter mon Wallet MetaMask
+          </button>
         )}
-      </section>
-      
-      <section className="advantages-section">
-        <h2>Avantages du LPFarming sur notre plateforme</h2>
-        <ul>
-          <li>Sélection rigoureuse des pools pour minimiser les risques</li>
-          <li>Rendements attractifs par rapport aux placements traditionnels</li>
-          <li>Interface simplifiée pour investir sans connaissance technique</li>
-          <li>Flexibilité des durées d'investissement</li>
-          <li>Frais transparents et compétitifs</li>
-        </ul>
-      </section>
+      </div>
+
+      {/* Simulateur de Gains */}
+      <h2>Simulateur de Gains</h2>
+      <div className="simulator">
+        <label>Capital à investir ($) :</label>
+        <input
+          type="number"
+          min="250"
+          value={capital}
+          onChange={(e) => setCapital(Number(e.target.value))}
+        />
+
+        <label>Durée (mois) :</label>
+        <input
+          type="number"
+          min="1"
+          value={duration}
+          onChange={(e) => setDuration(Number(e.target.value))}
+        />
+
+        <button onClick={calculateProfit}>Calculer</button>
+        <h3>Gains estimés : <span>${profit}</span></h3>
+      </div>
+
+      {/* Bouton Investir */}
+      <button className="validate-btn" onClick={handleInvest} disabled={loading}>
+        {loading ? "Transaction en cours..." : "Valider mon choix"}
+      </button>
     </div>
   );
 };

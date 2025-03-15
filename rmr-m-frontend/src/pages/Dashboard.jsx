@@ -1,10 +1,12 @@
+import React from "react";
+
 const Dashboard = () => {
-    return (
-      <div className="container text-center mt-5">
-        <h1>Tableau de Bord</h1>
-        <p>Gérez vos investissements ici.</p>
-      </div>
-    );
-  };
-  
-  export default Dashboard;
+  return (
+    <div>
+      <h1>À propos de RMR-M</h1>
+      <p>Informations sur la plateforme et ses objectifs.</p>
+    </div>
+  );
+};
+
+export default Dashboard;

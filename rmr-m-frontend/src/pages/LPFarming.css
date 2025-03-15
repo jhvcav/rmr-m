@@ -1,138 +1,103 @@
-/* LPFarming.css */
-.lp-farming-container {
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 20px;
-    font-family: Arial, sans-serif;
+/* 📌 Styles généraux */
+.lp-container {
+  max-width: 100%;
+  padding: 20px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* 📌 Ajustement pour les smartphones */
+@media screen and (max-width: 500px) {
+  .lp-container {
+    padding: 1px;
   }
-  
-  .lp-farming-container h1, 
-  .lp-farming-container h2, 
-  .lp-farming-container h3 {
-    color: #333;
-    margin-bottom: 20px;
-  }
-  
-  .description-section,
-  .simulation-section,
-  .advantages-section {
-    margin-bottom: 40px;
-    padding: 20px;
-    background-color: #f9f9f9;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  }
-  
-  .simulation-form {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    margin-bottom: 20px;
-  }
-  
-  .simulation-form .form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-  }
-  
-  .simulation-form .form-group label {
-    font-weight: bold;
-    margin-bottom: 5px;
-  }
-  
-  .simulation-form .form-group input,
-  .simulation-form .form-group select {
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 16px;
-  }
-  
-  .btn-calculer, 
-  .btn-valider {
-    padding: 12px 20px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 16px;
-    font-weight: bold;
-    transition: background-color 0.3s;
-  }
-  
-  .btn-calculer {
-    background-color: #007bff;
-    color: white;
-  }
-  
-  .btn-calculer:hover {
-    background-color: #0056b3;
-  }
-  
-  .btn-valider {
-    background-color: #28a745;
-    color: white;
-    margin-top: 20px;
-  }
-  
-  .btn-valider:hover {
-    background-color: #218838;
-  }
-  
-  .simulation-results {
-    background-color: #e9f7ef;
-    padding: 20px;
-    border-radius: 8px;
-    margin-top: 20px;
-  }
-  
-  .result-item {
-    display: flex;
-    justify-content: space-between;
-    padding: 10px 0;
-    border-bottom: 1px solid #ddd;
-  }
-  
-  .result-item.total {
-    font-weight: bold;
-    font-size: 18px;
-    border-bottom: none;
-    margin-top: 10px;
-    color: #28a745;
-  }
-  
-  .advantages-section ul {
-    list-style-type: none;
-    padding: 0;
-  }
-  
-  .advantages-section li {
-    padding: 10px 0;
-    border-bottom: 1px solid #eee;
+}
+
+/* 📌 Styles des boutons */
+.wallet-buttons, .simulator {
+  width: 100%;
+  max-width: 400px;
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+/* 📌 Boutons améliorés */
+.btn {
+  width: 100%;
+  padding: 15px;
+  font-size: 16px;
+  border-radius: 8px;
+}
+
+/* 📌 Champs de saisie */
+.simulator input {
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+/* 📌 Validation */
+.validate-btn {
+  width: 100%;
+  padding: 15px;
+  font-size: 18px;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.validate-btn:disabled {
+  background-color: gray;
+  cursor: not-allowed;
+}
+
+.wallet-connect-section {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.wallet-connect-section h3 {
+  margin-bottom: 10px;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.solana-connect {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.wallet-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 20px;
+  font-size: 16px;
+  font-weight: bold;
+  border-radius: 8px;
+  cursor: pointer;
+  gap: 10px;
+}
+
+.wallet-logo {
+  width: 24px;
+  height: 24px;
+}
+
+@media screen and (max-width: 768px) {
+  .fixed-container {
     position: relative;
-    padding-left: 30px;
+    bottom: auto;
+    width: 100%;
+    background: none;
+    padding: 1px;
   }
-  
-  .advantages-section li:before {
-    content: '✓';
-    color: #28a745;
-    position: absolute;
-    left: 0;
-    font-weight: bold;
-  }
-  
-  @media (max-width: 768px) {
-    .result-item {
-      flex-direction: column;
-      gap: 5px;
-    }
-    
-    .form-group label {
-      font-size: 14px;
-    }
-    
-    .btn-calculer, 
-    .btn-valider {
-      width: 100%;
-    }
-  }
+}
