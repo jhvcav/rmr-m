@@ -43,7 +43,7 @@ const Home = () => {
         transition={{ duration: 0.5, delay: 1 }}
       >
         <Link to="rmr-m/dashboard" className="btn btn-dark">Je fais mon choix</Link>
-        <Link to="App" className="btn btn-dark">Commencer</Link>
+        <Link to="/rmr-m/depot-form" className="btn btn-dark">Commencer</Link>
       </motion.div>
 
       {/* Section des solutions de gains */}

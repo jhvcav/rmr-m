@@ -1,0 +1,57 @@
+/* Logo.css - Styles pour le composant Logo séparé */
+
+.logo-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 15px 0;
+    background-color: #f8f9fa; /* Couleur de fond, à personnaliser */
+    width: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1001; /* Supérieur à la navbar pour s'assurer qu'il est au-dessus */
+  }
+  
+  .logo-link {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: inherit;
+  }
+  
+  /* Styles pour l'image du logo */
+  .logo-image {
+    height: 50px; /* Hauteur fixe pour l'image */
+    margin-right: 10px; /* Espace entre l'image et le texte */
+  }
+  
+  /* Styles pour le texte du logo */
+  .logo-text {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #007bff; /* Couleur principale, à personnaliser */
+    letter-spacing: 1px;
+    /* Vous pouvez ajouter d'autres styles comme les ombres, les dégradés, etc. */
+  }
+  
+  /* Animation du logo au survol */
+  .logo-link:hover .logo-text {
+    color: #0056b3; /* Couleur plus foncée au survol */
+    transition: color 0.3s ease;
+  }
+  
+  /* Responsive */
+  @media (max-width: 768px) {
+    .logo-container {
+      padding: 10px 0;
+    }
+    
+    .logo-image {
+      height: 40px;
+    }
+    
+    .logo-text {
+      font-size: 1.5rem;
+    }
+  }

@@ -1,4 +1,4 @@
-/* App.css - Solution de force brute pour le centrage */
+/* App.css - Solution globale pour décaler les contenus vers la droite */
 
 /* Réinitialisation de base */
 * {
@@ -15,34 +15,42 @@ body {
   overflow-x: hidden; /* Empêche le défilement horizontal */
 }
 
-/* Solution de force brute pour le centrage */
 .app-wrapper {
-  width: 100%;
-  min-height: 100vh;
   display: flex;
   flex-direction: column;
-  align-items: center; /* Force le centrage horizontal de tous les enfants */
+  min-height: 100vh;
 }
 
+/* Solution pour décaler tous les contenus vers la droite */
 .content-container {
+  flex: 1;
+  padding-top: 140px; /* Espace pour le logo (80px) + navbar (60px) */
   width: 100%;
   max-width: 1200px;
-  padding-top: 80px; /* Espace pour la navbar fixe */
+  /* Décalage vers la droite */
+  margin-left: calc(85% + 50px); /* 50px est le décalage vers la droite - à ajuster */
+  transform: translateX(-50%);
   padding-left: 20px;
   padding-right: 20px;
   padding-bottom: 40px;
-  display: flex;
-  flex-direction: column;
-  align-items: center; /* Force le centrage horizontal de tous les enfants */
+  position: relative;
 }
 
-/* Force le centrage de tout contenu de page */
-.content-container > div {
-  width: 100% !important;
-  max-width: 100% !important;
-  margin-left: auto !important;
-  margin-right: auto !important;
+/* Alternative avec décalage plus précis - décommentez pour utiliser */
+/*
+.content-container {
+  flex: 1;
+  padding-top: 140px;
+  width: 100%;
+  max-width: 1200px;
+  position: relative;
+  left: 50px; /* Décalage direct vers la droite - à ajuster *//*
+  margin: 0 auto;
+  padding-left: 20px;
+  padding-right: 20px;
+  padding-bottom: 40px;
 }
+*/
 
 /* Styles des liens */
 a {
@@ -87,11 +95,20 @@ a:hover {
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .content-container {
-    padding-top: 70px;
+    padding-top: 110px; /* Espace réduit pour le logo (60px) + navbar (50px) */
     padding-left: 15px;
     padding-right: 15px;
     padding-bottom: 20px;
+    /* Ajustement du décalage pour mobile si nécessaire */
+    margin-left: calc(70% + 30px); /* Décalage réduit sur mobile */
   }
+  
+  /* Alternative avec décalage direct pour mobile */
+  /*
+  .content-container {
+    left: 30px; /* Décalage réduit sur mobile *//*
+  }
+  */
   
   .btn {
     padding: 8px 16px;

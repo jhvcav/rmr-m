@@ -1,49 +1,64 @@
 /* Styles généraux de la barre de navigation */
 .navbar {
   position: fixed;
-  top: 0;
+  top: 80px; /* Espace pour le logo au-dessus */
   left: 0;
   width: 100%;
-  background-color: white;
+  background-color: #343a40; /* Couleur de fond foncée, vous pouvez personnaliser */
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   z-index: 1000;
-  padding: 15px 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px 20px;
 }
 
+/* Container avec positionnement flexible */
 .container {
-  display: inline-block;
-  /* Retiré width: 100% pour éviter qu'il prenne toute la largeur */
-}
-
-/* Logo */
-.navbar-brand {
-  font-size: 1.5rem;
-  font-weight: bold;
-  text-decoration: none;
-  color: black;
+  width: 100%;
+  max-width: 1200px;
+  display: flex;
+  justify-content: center; /* Centre le menu horizontalement */
+  align-items: center;
+  position: relative;
 }
 
 /* Menu desktop */
 .nav-menu {
   list-style: none;
   display: flex;
-  gap: 20px;
+  justify-content: center; /* Centre les éléments du menu */
+  gap: 10px;
+  margin: 0;
+  padding: 0;
 }
 
-/* Liens de la barre de navigation */
+/* Élément de menu */
+.nav-item {
+  display: flex;
+  justify-content: center; /* Centre le contenu de chaque élément */
+  align-items: center;
+}
+
+/* Liens de la barre de navigation avec texte centré */
 .nav-item a {
   text-decoration: none;
-  color: black;
-  font-size: 1rem;
+  color: white; /* Texte blanc sur fond foncé */
+  font-size: 0.9rem;
   font-weight: bold;
-  padding: 10px 15px;
+  padding: 8px 12px;
   transition: 0.3s;
+  border-radius: 4px;
+  text-align: center; /* Centre le texte horizontalement */
+  display: flex;
+  justify-content: center; /* Centre le contenu */
+  align-items: center;
+  min-width: 100px; /* Largeur minimale pour un meilleur alignement */
 }
 
 .nav-item a:hover {
   background-color: #007bff;
   color: white;
-  border-radius: 5px;
 }
 
 /* Bouton hamburger */
@@ -53,47 +68,38 @@
   background: none;
   border: none;
   cursor: pointer;
+  color: white;
 }
 
 /* Menu mobile */
 @media (max-width: 768px) {
-  /* Bouton d'ouverture du menu (hamburger) - positionné véritablement en haut à droite */
+  .navbar {
+    top: 60px; /* Espace réduit pour le logo sur mobile */
+    padding: 8px 15px;
+  }
+  
   .menu-open-btn {
     display: block;
-    position: fixed; /* Changé de absolute à fixed pour s'assurer qu'il est par rapport à la fenêtre */
-    top: 15px;
-    right: 15px; /* Positionné par rapport au bord droit de la fenêtre */
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    right: 10px;
     z-index: 1200;
-    background: transparent; /* Fond transparent */
-    border: none; /* Pas de bordure */
-    padding: 5px; /* Réduit le padding interne */
-    font-size: 20px; /* Taille de l'icône réduite */
-    height: 30px; /* Hauteur fixe */
-    width: 30px; /* Largeur fixe */
+    padding: 5px;
+    font-size: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
-    outline: none; /* Supprime le contour au focus */
   }
 
-  /* Bouton de fermeture du menu (croix) - positionné véritablement en haut à gauche dans le menu ouvert */
+  /* Bouton de fermeture du menu (croix) - positionné à gauche dans le menu ouvert */
   .menu-close-btn {
     display: block;
-    position: fixed; /* Changé de absolute à fixed */
+    position: fixed;
     top: 15px;
-    left: 15px;
-    z-index: 1300; /* Z-index plus élevé que le menu */
+    left: 20px;
+    z-index: 1200;
     color: white;
-    background: transparent; /* Fond transparent */
-    border: none; /* Pas de bordure */
-    padding: 5px; /* Padding réduit */
-    font-size: 20px; /* Taille de l'icône réduite */
-    height: 30px; /* Hauteur fixe */
-    width: 30px; /* Largeur fixe */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    outline: none; /* Supprime le contour au focus */
   }
 
   .nav-menu {
@@ -117,10 +123,20 @@
     left: 0; /* Affichage du menu */
   }
 
+  .nav-item {
+    width: 100%; /* Prend toute la largeur disponible */
+    display: flex;
+    justify-content: center;
+  }
+
   .nav-item a {
     color: white;
-    font-size: 18px;
-    display: block;
+    font-size: 16px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     padding: 10px;
+    width: 80%; /* Largeur du lien par rapport à l'élément parent */
+    text-align: center;
   }
 }

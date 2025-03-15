@@ -1,0 +1,411 @@
+/* InvestmentHistory.css */
+.history-container {
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  
+  .history-container h1 {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #333;
+    font-size: 2em;
+  }
+  
+  .history-container h2 {
+    color: #333;
+    margin: 25px 0 15px;
+    font-size: 1.5em;
+    border-bottom: 2px solid #f0f0f0;
+    padding-bottom: 8px;
+  }
+  
+  /* Loading spinner */
+  .loading-container {
+    text-align: center;
+    padding: 40px 0;
+  }
+  
+  .loading-spinner {
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #3498db;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 20px;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  /* Wallet info */
+  .wallet-info {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 12px 20px;
+    margin-bottom: 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  
+  .wallet-info p {
+    margin: 0;
+  }
+  
+  .wallet-info span:first-child {
+    font-weight: bold;
+    margin-right: 5px;
+  }
+  
+  /* Filters section */
+  .filters-section {
+    background-color: #f8f9fa;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 25px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  }
+  
+  .tab-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 15px;
+  }
+  
+  .tab-btn {
+    padding: 10px 15px;
+    background-color: #f1f1f1;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+  }
+  
+  .tab-btn.active {
+    background-color: #007bff;
+    color: white;
+    font-weight: bold;
+  }
+  
+  .tab-btn:hover:not(.active) {
+    background-color: #e6e6e6;
+  }
+  
+  .date-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 15px;
+  }
+  
+  .date-input {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .date-input label {
+    font-weight: bold;
+    min-width: 40px;
+  }
+  
+  .date-input input {
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+  }
+  
+  .filter-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+  }
+  
+  .apply-filter-btn {
+    padding: 8px 15px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  .apply-filter-btn:hover {
+    background-color: #218838;
+  }
+  
+  .reset-filter-btn {
+    padding: 8px 15px;
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  .reset-filter-btn:hover {
+    background-color: #5a6268;
+  }
+  
+  /* Export options */
+  .export-options {
+    text-align: right;
+    margin-bottom: 20px;
+  }
+  
+  .export-btn {
+    padding: 8px 15px;
+    background-color: #17a2b8;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+  
+  .export-btn:hover {
+    background-color: #138496;
+  }
+  
+  /* Transactions list */
+  .transactions-list {
+    background-color: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .transactions-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .transactions-table th,
+  .transactions-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .transactions-table th {
+    background-color: #f8f9fa;
+    color: #333;
+    font-weight: bold;
+  }
+  
+  .transactions-table tr:last-child td {
+    border-bottom: none;
+  }
+  
+  .transactions-table tr:hover {
+    background-color: #f5f5f5;
+  }
+  
+  .transaction-type {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .transaction-type-icon {
+    font-size: 1.2em;
+  }
+  
+  .transaction-amount {
+    font-weight: bold;
+  }
+  
+  .transaction-amount.investment,
+  .transaction-amount.reinvestment {
+    color: #28a745;
+  }
+  
+  .transaction-amount.withdrawal {
+    color: #dc3545;
+  }
+  
+  .transaction-id {
+    font-family: monospace;
+    font-size: 0.9em;
+    color: #6c757d;
+  }
+  
+  .transaction-hash {
+    font-family: monospace;
+    font-size: 0.9em;
+    color: #007bff;
+    cursor: pointer;
+  }
+  
+  .transaction-hash:hover {
+    text-decoration: underline;
+  }
+  
+  .transaction-status {
+    padding: 4px 8px;
+    border-radius: 20px;
+    font-size: 0.8em;
+    font-weight: bold;
+    display: inline-block;
+  }
+  
+  .transaction-status.completed {
+    background-color: #d4edda;
+    color: #155724;
+  }
+  
+  .transaction-status.pending {
+    background-color: #fff3cd;
+    color: #856404;
+  }
+  
+  .transaction-status.failed {
+    background-color: #f8d7da;
+    color: #721c24;
+  }
+  
+  .no-transactions {
+    padding: 30px;
+    text-align: center;
+    color: #6c757d;
+  }
+  
+  .pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+    gap: 5px;
+  }
+  
+  .pagination-btn {
+    padding: 8px 12px;
+    border: 1px solid #dee2e6;
+    background-color: #fff;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  
+  .pagination-btn.active {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+  }
+  
+  .pagination-btn:hover:not(.active) {
+    background-color: #f8f9fa;
+  }
+  
+  .pagination-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  
+  /* Not connected state */
+  .not-connected {
+    text-align: center;
+    padding: 50px 20px;
+    background-color: #f8f9fa;
+    border-radius: 10px;
+    margin-bottom: 20px;
+  }
+  
+  .connect-wallet-btn {
+    margin-top: 20px;
+    padding: 12px 25px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  .connect-wallet-btn:hover {
+    background-color: #0056b3;
+  }
+  
+  /* Status message */
+  .status-message {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #343a40;
+    color: white;
+    padding: 15px 25px;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    animation: fadeIn 0.3s;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  /* Back to dashboard button */
+  .back-to-dashboard {
+    display: inline-block;
+    margin: 20px 0;
+    padding: 10px 20px;
+    background-color: #6c757d;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: bold;
+    transition: background-color 0.2s;
+  }
+  
+  .back-to-dashboard:hover {
+    background-color: #5a6268;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .wallet-info {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    
+    .tab-filters {
+      justify-content: center;
+    }
+    
+    .transactions-table th,
+    .transactions-table td {
+      padding: 10px 8px;
+      font-size: 0.9em;
+    }
+    
+    .date-filters {
+      flex-direction: column;
+    }
+    
+    .responsive-table {
+      overflow-x: auto;
+    }
+    
+    .status-message {
+      left: 20px;
+      right: 20px;
+      text-align: center;
+    }
+  }
