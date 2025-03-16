@@ -8,6 +8,7 @@ import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import * as ethers from "ethers"; 
 import "./DepotForm.css";
+import "./ResponsiveStyles.css"; // Import des styles responsifs
 
 // ABI minimal pour un contrat ERC-20
 const ERC20_ABI = [
@@ -26,17 +27,11 @@ const ERC20_ABI = [
 ];
 
 // Adresse du contrat USDC sur BSC Testnet
-const USDC_CONTRACT_ADDRESS = "0xb48249Ef5b895d6e7AD398186DF2B0c3Cec2BF94"; // À remplacer par l'adresse réelle de l'USDC sur BSC Testnet
+const USDC_CONTRACT_ADDRESS = "0x64544969ed7EBf5f083679233325356EbE738930";
 
 const DepotForm = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  
-  // Style de décalage vers la droite - ajustez la valeur selon vos besoins
-  const offsetStyle = {
-    position: 'relative',
-    left: '1200px'
-  };
   
   // Paramètres récupérés de LPFarming
   const [montantInvesti, setMontantInvesti] = useState("");
@@ -51,6 +46,7 @@ const DepotForm = () => {
   const [balanceBNB, setBalanceBNB] = useState(null);
   const [balanceUSDC, setBalanceUSDC] = useState(null);
   const [usdcDecimals, setUsdcDecimals] = useState(18); // Par défaut 18, sera mis à jour
+  const [usdcSymbol, setUsdcSymbol] = useState("USDC");
   const [status, setStatus] = useState("");
   const [usdcApproved, setUsdcApproved] = useState(false);
   
@@ -146,11 +142,20 @@ const DepotForm = () => {
       // Récupérer le solde USDC
       const usdcContract = new ethers.Contract(USDC_CONTRACT_ADDRESS, ERC20_ABI, provider);
       
+      // Récupérer le symbole
+      try {
+        const symbol = await usdcContract.symbol();
+        setUsdcSymbol(symbol);
+      } catch (error) {
+        console.error("Erreur lors de la récupération du symbole:", error);
+        // Garder le symbole par défaut (USDC)
+      }
+      
       // Récupérer le nombre de décimales
       try {
         const decimals = await usdcContract.decimals();
         setUsdcDecimals(decimals);
-        console.log(`USDC a ${decimals} décimales`);
+        console.log(`${usdcSymbol} a ${decimals} décimales`);
       } catch (error) {
         console.error("Erreur lors de la récupération des décimales:", error);
         // Utiliser la valeur par défaut (18)
@@ -414,15 +419,15 @@ const DepotForm = () => {
   };
 
   return (
-    <div className="depot-form" style={offsetStyle}>
+    <div className="depot-form responsive-container">
       <h1 style={{ fontSize: "1.5em" }}>💰 Dépôt de fonds pour LPFarming</h1>
 
       {/* Récapitulatif de l'investissement */}
-      <div className="investment-summary">
+      <div className="investment-summary responsive-card">
         <h2>📋 Récapitulatif de votre investissement</h2>
         <div className="summary-item">
           <span>💵 Montant à investir:</span>
-          <span>{montantInvesti} USDC</span>
+          <span>{montantInvesti} {usdcSymbol}</span>
         </div>
         <div className="summary-item">
           <span>⏱️ Durée d'investissement:</span>
@@ -430,11 +435,11 @@ const DepotForm = () => {
         </div>
         <div className="summary-item">
           <span>📈 Rendement estimé:</span>
-          <span>{rendementEstime.toFixed(2)} USDC</span>
+          <span>{rendementEstime.toFixed(2)} {usdcSymbol}</span>
         </div>
         <div className="summary-item">
           <span>💸 Frais de gestion:</span>
-          <span>{frais.toFixed(2)} USDC</span>
+          <span>{frais.toFixed(2)} {usdcSymbol}</span>
         </div>
         <div className="summary-item">
           <span>🔗 Adresse du pool:</span>
@@ -443,26 +448,26 @@ const DepotForm = () => {
       </div>
 
       {/* Vérification de la connexion au Wallet */}
-      <div className="wallet-status">
+      <div className="wallet-status responsive-card">
         <h2>👛 Statut du wallet</h2>
         {isConnected ? (
           <>
             <p>✅ Connecté avec l'adresse :</p>
             <p className="wallet-address">{publicKey}</p>
-            <p>💰 Solde disponible : <strong>{balanceUSDC} USDC</strong></p>
+            <p>💰 Solde disponible : <strong>{balanceUSDC} {usdcSymbol}</strong></p>
             <p>🔄 Solde BNB (pour frais) : <strong>{balanceBNB} BNB</strong></p>
           </>
         ) : (
           <p>⚠️ Non connecté. Veuillez connecter votre wallet pour continuer.</p>
         )}
-        <button className="connect-btn" onClick={handleConnect} disabled={isConnected}>
+        <button className="connect-btn responsive-button" onClick={handleConnect} disabled={isConnected}>
           {isConnected ? "✅ Déjà connecté" : "🔗 Se connecter à MetaMask"}
         </button>
       </div>
 
       {/* Montant à déposer */}
-      <div className="input-container">
-        <label>💸 Montant à déposer (USDC) :</label>
+      <div className="input-container responsive-form">
+        <label>💸 Montant à déposer ({usdcSymbol}) :</label>
         <input
           type="number"
           value={montantInvesti}
@@ -476,28 +481,29 @@ const DepotForm = () => {
           }}
           min="0.1"
           step="0.1"
+          className="responsive-form"
         />
-        <small>Le montant minimum recommandé est de 1 USDC</small>
+        <small>Le montant minimum recommandé est de 1 {usdcSymbol}</small>
       </div>
 
       {/* Boutons d'approbation et d'envoi */}
       <div className="buttons-container">
         {isConnected && !usdcApproved && (
           <button 
-            className="approve-btn" 
+            className="approve-btn responsive-button" 
             onClick={handleApproveUSDC}
             disabled={!isConnected || usdcApproved}
           >
-            🔓 Approuver l'utilisation de {montantInvesti} USDC
+            🔓 Approuver l'utilisation de {montantInvesti} {usdcSymbol}
           </button>
         )}
         
         <button 
-          className="deposit-btn" 
+          className="deposit-btn responsive-button" 
           onClick={handleDepot} 
           disabled={!isConnected || !usdcApproved}
         >
-          🚀 Confirmer le dépôt de {montantInvesti} USDC
+          🚀 Confirmer le dépôt de {montantInvesti} {usdcSymbol}
         </button>
       </div>
 
@@ -505,7 +511,7 @@ const DepotForm = () => {
       <div className="form-actions">
         <button 
           type="button" 
-          className="btn-retour" 
+          className="btn-retour responsive-button" 
           onClick={() => navigate(-1)}
         >
           ↩️ Retour
@@ -516,22 +522,22 @@ const DepotForm = () => {
       {status && <p className="status">{status}</p>}
       
       {/* Informations sur les USDC */}
-      <div className="usdc-info" style={{ marginTop: '20px', padding: '10px', backgroundColor: '#f5f5f5', borderRadius: '5px' }}>
-        <h3>ℹ️ Informations sur les USDC</h3>
+      <div className="usdc-info responsive-card" style={{ marginTop: '20px', padding: '10px', backgroundColor: '#f5f5f5', borderRadius: '5px' }}>
+        <h3>ℹ️ Informations sur les {usdcSymbol}</h3>
         <p>
-          Les USDC (USD Coin) sont des stablecoins dont la valeur est indexée sur le dollar américain (1 USDC = 1 USD).
+          Les {usdcSymbol} (USD Coin) sont des stablecoins dont la valeur est indexée sur le dollar américain (1 {usdcSymbol} = 1 USD).
           Pour pouvoir effectuer un dépôt, vous devez :
         </p>
         <ol>
-          <li>Avoir suffisamment d'USDC dans votre portefeuille</li>
+          <li>Avoir suffisamment d'{usdcSymbol} dans votre portefeuille</li>
           <li>Avoir un peu de BNB (0.005 minimum) pour payer les frais de transaction</li>
-          <li>Approuver l'utilisation de vos USDC par le contrat de pool</li>
+          <li>Approuver l'utilisation de vos {usdcSymbol} par le contrat de pool</li>
         </ol>
-        <p>Si vous n'avez pas d'USDC sur BSC Testnet, vous pouvez en obtenir via un faucet de test ou un échange.</p>
+        <p>Si vous n'avez pas d'{usdcSymbol} sur BSC Testnet, vous pouvez en obtenir via un faucet de test ou un échange.</p>
       </div>
       
       {/* Informations de sécurité */}
-      <div className="security-info">
+      <div className="security-info responsive-card">
         <h3>🔒 Sécurité de votre investissement</h3>
         <p>
           Votre dépôt sera sécurisé par contrat intelligent et vous pourrez suivre 

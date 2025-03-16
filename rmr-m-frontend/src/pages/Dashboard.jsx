@@ -8,12 +8,29 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import * as ethers from "ethers";
 import "./Dashboard.css";
+import "./ResponsiveStyles.css"; // Import des styles responsifs
+
+// ABI minimal pour un contrat ERC-20
+const ERC20_ABI = [
+  // Récupérer le solde
+  "function balanceOf(address owner) view returns (uint256)",
+  // Récupérer le nombre de décimales
+  "function decimals() view returns (uint8)",
+  // Récupérer le symbole
+  "function symbol() view returns (string)",
+];
+
+// Adresse du contrat USDC sur BSC Testnet
+const USDC_CONTRACT_ADDRESS = "0x64544969ed7EBf5f083679233325356EbE738930";
 
 const Dashboard = () => {
   // États pour le wallet et la connexion
   const [isConnected, setIsConnected] = useState(false);
   const [publicKey, setPublicKey] = useState(null);
-  const [balance, setBalance] = useState(null);
+  const [balanceBNB, setBalanceBNB] = useState(null);
+  const [balanceUSDC, setBalanceUSDC] = useState(null);
+  const [usdcDecimals, setUsdcDecimals] = useState(18); // Par défaut 18, sera mis à jour
+  const [usdcSymbol, setUsdcSymbol] = useState("USDC");
   const [status, setStatus] = useState("");
 
   // États pour les données d'investissement
@@ -25,12 +42,6 @@ const Dashboard = () => {
   const [matureInvestments, setMatureInvestments] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [hasInvestments, setHasInvestments] = useState(true); // Nouvel état pour vérifier si l'utilisateur a des investissements
-
-  // Style de décalage vers la droite - ajustez la valeur selon vos besoins
-  const containerStyle = {
-    position: 'relative',
-    left: '780px'
-  };
 
   // Fonction pour créer un provider compatible avec plusieurs versions d'ethers
   const getProvider = () => {
@@ -78,10 +89,8 @@ const Dashboard = () => {
           return;
         }
         
-        // Récupérer le solde
-        const balanceWei = await provider.getBalance(account);
-        const balanceInBNB = ethers.utils.formatEther(balanceWei);
-        setBalance(balanceInBNB);
+        // Récupérer les soldes
+        await updateBalances(account, provider);
         
         // Définir comme connecté
         setIsConnected(true);
@@ -101,14 +110,20 @@ const Dashboard = () => {
 
     // Écouter les changements de compte
     if (window.ethereum) {
-      window.ethereum.on('accountsChanged', (accounts) => {
+      window.ethereum.on('accountsChanged', async (accounts) => {
         if (accounts.length > 0) {
           setPublicKey(accounts[0]);
+          // Utiliser le provider 
+          const provider = getProvider();
+          if (provider) {
+            await updateBalances(accounts[0], provider);
+          }
           fetchInvestmentData(accounts[0]);
         } else {
           setIsConnected(false);
           setPublicKey(null);
-          setBalance(null);
+          setBalanceBNB(null);
+          setBalanceUSDC(null);
           setStatus("⚠️ Déconnecté de MetaMask.");
         }
       });
@@ -121,6 +136,45 @@ const Dashboard = () => {
       }
     };
   }, []);
+
+  // Fonction pour mettre à jour les soldes BNB et USDC
+  const updateBalances = async (address, provider) => {
+    try {
+      // Récupérer le solde BNB
+      const balanceWei = await provider.getBalance(address);
+      const balanceInBNB = ethers.utils.formatEther(balanceWei);
+      setBalanceBNB(balanceInBNB);
+      
+      // Récupérer les informations et le solde USDC
+      const usdcContract = new ethers.Contract(USDC_CONTRACT_ADDRESS, ERC20_ABI, provider);
+      
+      // Récupérer le symbole
+      try {
+        const symbol = await usdcContract.symbol();
+        setUsdcSymbol(symbol);
+      } catch (error) {
+        console.error("Erreur lors de la récupération du symbole:", error);
+        // Garder le symbole par défaut (USDC)
+      }
+      
+      // Récupérer le nombre de décimales
+      try {
+        const decimals = await usdcContract.decimals();
+        setUsdcDecimals(decimals);
+      } catch (error) {
+        console.error("Erreur lors de la récupération des décimales:", error);
+        // Utiliser la valeur par défaut (18)
+      }
+      
+      // Récupérer le solde USDC
+      const usdcBalance = await usdcContract.balanceOf(address);
+      const formattedUsdcBalance = ethers.utils.formatUnits(usdcBalance, usdcDecimals);
+      setBalanceUSDC(formattedUsdcBalance);
+      
+    } catch (error) {
+      console.error("Erreur lors de la mise à jour des soldes:", error);
+    }
+  };
 
   // Fonction pour récupérer les données d'investissement (simulation)
   const fetchInvestmentData = async (address) => {
@@ -241,7 +295,7 @@ const Dashboard = () => {
   // Fonction pour retirer les gains
   const handleWithdrawEarnings = async () => {
     if (availableForWithdrawal < 5) {
-      setStatus("⚠️ Le minimum pour retirer est de 5 USDT.");
+      setStatus(`⚠️ Le minimum pour retirer est de 5 ${usdcSymbol}.`);
       return;
     }
     
@@ -250,7 +304,7 @@ const Dashboard = () => {
     // Simulation du retrait
     await new Promise(resolve => setTimeout(resolve, 2000));
     
-    setStatus(`✅ Retrait de ${availableForWithdrawal.toFixed(2)} USDT effectué avec succès!`);
+    setStatus(`✅ Retrait de ${availableForWithdrawal.toFixed(2)} ${usdcSymbol} effectué avec succès!`);
     setAvailableForWithdrawal(0);
     
     // En situation réelle, appel au contrat smart pour retirer les gains
@@ -268,7 +322,7 @@ const Dashboard = () => {
     // Simulation du réinvestissement
     await new Promise(resolve => setTimeout(resolve, 2000));
     
-    setStatus(`✅ Réinvestissement de ${totalEarnings.toFixed(2)} USDT effectué avec succès!`);
+    setStatus(`✅ Réinvestissement de ${totalEarnings.toFixed(2)} ${usdcSymbol} effectué avec succès!`);
     setTotalInvested(totalInvested + totalEarnings);
     setTotalEarnings(0);
     setAvailableForWithdrawal(0);
@@ -285,12 +339,12 @@ const Dashboard = () => {
     
     const totalMature = matureInvestments.reduce((sum, inv) => sum + inv.amount, 0);
     
-    setStatus(`⏳ Retrait du capital de ${totalMature.toFixed(2)} USDT en cours...`);
+    setStatus(`⏳ Retrait du capital de ${totalMature.toFixed(2)} ${usdcSymbol} en cours...`);
     
     // Simulation du retrait
     await new Promise(resolve => setTimeout(resolve, 2000));
     
-    setStatus(`✅ Capital de ${totalMature.toFixed(2)} USDT retiré avec succès!`);
+    setStatus(`✅ Capital de ${totalMature.toFixed(2)} ${usdcSymbol} retiré avec succès!`);
     
     // Mise à jour des listes
     setInvestmentsList(investmentsList.filter(inv => inv.status !== "matured"));
@@ -308,59 +362,59 @@ const Dashboard = () => {
         <h2>Vous n'avez pas encore d'investissement actif</h2>
         <p>Commencez votre parcours d'investissement dès aujourd'hui pour générer des revenus passifs.</p>
         
-        <div className="dashboard-summary">
-          <div className="summary-card">
+        <div className="dashboard-summary responsive-grid">
+          <div className="summary-card responsive-card">
             <h3>💰 Total Investi</h3>
-            <p className="summary-value">0.00 USDT</p>
+            <p className="summary-value">0.00 {usdcSymbol}</p>
           </div>
           
-          <div className="summary-card">
+          <div className="summary-card responsive-card">
             <h3>📈 Gains Cumulés</h3>
-            <p className="summary-value">0.00 USDT</p>
+            <p className="summary-value">0.00 {usdcSymbol}</p>
           </div>
           
-          <div className="summary-card">
+          <div className="summary-card responsive-card">
             <h3>📆 Gains Quotidiens</h3>
-            <p className="summary-value">0.00 USDT</p>
+            <p className="summary-value">0.00 {usdcSymbol}</p>
           </div>
         </div>
         
         <div className="investment-options">
           <h3>Options d'investissement disponibles</h3>
-          <div className="options-grid">
-            <div className="option-card">
+          <div className="options-grid responsive-grid">
+            <div className="option-card responsive-card">
               <h4>📅 Plan 30 jours</h4>
               <p>Taux annuel: 8%</p>
               <p>Idéal pour: Court terme</p>
             </div>
-            <div className="option-card">
+            <div className="option-card responsive-card">
               <h4>📅 Plan 90 jours</h4>
               <p>Taux annuel: 12%</p>
               <p>Idéal pour: Moyen terme</p>
             </div>
-            <div className="option-card">
+            <div className="option-card responsive-card">
               <h4>📅 Plan 180 jours</h4>
               <p>Taux annuel: 15%</p>
               <p>Idéal pour: Long terme</p>
             </div>
           </div>
           
-          <Link to="/rmr-m/lpfarming" className="start-investing-btn">
+          <Link to="/rmr-m/lpfarming" className="start-investing-btn responsive-button">
             🚀 Commencer à investir maintenant
           </Link>
         </div>
         
         <div className="dashboard-faq">
           <h3>Questions fréquentes</h3>
-          <div className="faq-item">
+          <div className="faq-item responsive-card">
             <h4>💡 Comment fonctionne l'investissement LPFarming?</h4>
             <p>Le LPFarming vous permet de gagner des rendements passifs en fournissant des liquidités à des pools spécifiques. Vous recevez une part des frais de transaction générés par ces pools.</p>
           </div>
-          <div className="faq-item">
+          <div className="faq-item responsive-card">
             <h4>💡 Quand puis-je retirer mes investissements?</h4>
-            <p>Vous pouvez retirer votre capital une fois la période d'investissement terminée. Les gains peuvent être retirés à tout moment une fois qu'ils atteignent 5 USDT.</p>
+            <p>Vous pouvez retirer votre capital une fois la période d'investissement terminée. Les gains peuvent être retirés à tout moment une fois qu'ils atteignent 5 {usdcSymbol}.</p>
           </div>
-          <div className="faq-item">
+          <div className="faq-item responsive-card">
             <h4>💡 Y a-t-il des frais?</h4>
             <p>Des frais de 2% sont appliqués lors de l'entrée dans un plan d'investissement. Il n'y a pas de frais de sortie lorsque vous retirez votre capital après la période d'investissement.</p>
           </div>
@@ -374,41 +428,41 @@ const Dashboard = () => {
     return (
       <>
         {/* Résumé des investissements */}
-        <div className="dashboard-summary">
-          <div className="summary-card">
+        <div className="dashboard-summary responsive-grid">
+          <div className="summary-card responsive-card">
             <h3>💰 Total Investi</h3>
-            <p className="summary-value">{totalInvested.toFixed(2)} USDT</p>
+            <p className="summary-value">{totalInvested.toFixed(2)} {usdcSymbol}</p>
           </div>
           
-          <div className="summary-card">
+          <div className="summary-card responsive-card">
             <h3>📈 Gains Cumulés</h3>
-            <p className="summary-value">{totalEarnings.toFixed(2)} USDT</p>
+            <p className="summary-value">{totalEarnings.toFixed(2)} {usdcSymbol}</p>
           </div>
           
-          <div className="summary-card">
+          <div className="summary-card responsive-card">
             <h3>📆 Gains Quotidiens</h3>
-            <p className="summary-value">{dailyEarnings.toFixed(2)} USDT</p>
+            <p className="summary-value">{dailyEarnings.toFixed(2)} {usdcSymbol}</p>
           </div>
           
-          <div className="summary-card">
+          <div className="summary-card responsive-card">
             <h3>💸 Disponible pour Retrait</h3>
-            <p className="summary-value">{availableForWithdrawal.toFixed(2)} USDT</p>
+            <p className="summary-value">{availableForWithdrawal.toFixed(2)} {usdcSymbol}</p>
           </div>
         </div>
         
         {/* Actions rapides */}
         <div className="dashboard-actions">
           <button 
-            className={`action-btn withdraw-btn ${availableForWithdrawal < 5 ? 'disabled' : ''}`}
+            className={`action-btn withdraw-btn responsive-button ${availableForWithdrawal < 5 ? 'disabled' : ''}`}
             onClick={handleWithdrawEarnings} 
             disabled={availableForWithdrawal < 5}
           >
             🔄 Retirer mes gains
-            {availableForWithdrawal < 5 && <span className="btn-note">(min. 5 USDT)</span>}
+            {availableForWithdrawal < 5 && <span className="btn-note">(min. 5 {usdcSymbol})</span>}
           </button>
           
           <button 
-            className={`action-btn reinvest-btn ${totalEarnings <= 0 ? 'disabled' : ''}`}
+            className={`action-btn reinvest-btn responsive-button ${totalEarnings <= 0 ? 'disabled' : ''}`}
             onClick={handleReinvestEarnings} 
             disabled={totalEarnings <= 0}
           >
@@ -416,7 +470,7 @@ const Dashboard = () => {
           </button>
           
           <button 
-            className={`action-btn capital-btn ${matureInvestments.length === 0 ? 'disabled' : ''}`}
+            className={`action-btn capital-btn responsive-button ${matureInvestments.length === 0 ? 'disabled' : ''}`}
             onClick={handleWithdrawCapital} 
             disabled={matureInvestments.length === 0}
           >
@@ -430,7 +484,7 @@ const Dashboard = () => {
           
           <div className="investments-list">
             {investmentsList.map((investment) => (
-              <div key={investment.id} className={`investment-card ${investment.status}`}>
+              <div key={investment.id} className={`investment-card ${investment.status} responsive-card`}>
                 <div className="investment-header">
                   <h3>{investment.id}</h3>
                   <span className={`status-badge ${investment.status}`}>
@@ -441,7 +495,7 @@ const Dashboard = () => {
                 <div className="investment-details">
                   <div className="detail-item">
                     <span className="detail-label">Montant:</span>
-                    <span className="detail-value">{investment.amount.toFixed(2)} USDT</span>
+                    <span className="detail-value">{investment.amount.toFixed(2)} {usdcSymbol}</span>
                   </div>
                   
                   <div className="detail-item">
@@ -466,12 +520,12 @@ const Dashboard = () => {
                   
                   <div className="detail-item">
                     <span className="detail-label">Rendement quotidien:</span>
-                    <span className="detail-value">{investment.dailyReturn.toFixed(3)} USDT</span>
+                    <span className="detail-value">{investment.dailyReturn.toFixed(3)} {usdcSymbol}</span>
                   </div>
                   
                   <div className="detail-item">
                     <span className="detail-label">Total gagné:</span>
-                    <span className="detail-value">{investment.totalEarned.toFixed(2)} USDT</span>
+                    <span className="detail-value">{investment.totalEarned.toFixed(2)} {usdcSymbol}</span>
                   </div>
                   
                   {investment.status === "active" && (
@@ -486,7 +540,7 @@ const Dashboard = () => {
           </div>
           
           <div className="add-investment">
-            <Link to="/rmr-m/lpfarming" className="add-investment-btn">
+            <Link to="/rmr-m/lpfarming" className="add-investment-btn responsive-button">
               ➕ Ajouter un nouvel investissement
             </Link>
           </div>
@@ -496,7 +550,7 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="dashboard-container" style={containerStyle}>
+    <div className="dashboard-container responsive-container">
       <h1>📊 Tableau de Bord</h1>
       
       {isLoading ? (
@@ -507,15 +561,19 @@ const Dashboard = () => {
       ) : isConnected ? (
         <>
           {/* Informations du wallet */}
-          <div className="wallet-info-card">
+          <div className="wallet-info-card responsive-card">
             <h2>👛 Informations du wallet</h2>
             <p className="wallet-address">
               <span>Adresse: </span>
               <span>{publicKey ? `${publicKey.substring(0, 6)}...${publicKey.substring(publicKey.length - 4)}` : "-"}</span>
             </p>
             <p>
-              <span>Solde: </span>
-              <span>{balance ? `${parseFloat(balance).toFixed(4)} BNB` : "-"}</span>
+              <span>Solde BNB: </span>
+              <span>{balanceBNB ? `${parseFloat(balanceBNB).toFixed(4)} BNB` : "-"}</span>
+            </p>
+            <p>
+              <span>Solde {usdcSymbol}: </span>
+              <span>{balanceUSDC ? `${parseFloat(balanceUSDC).toFixed(2)} ${usdcSymbol}` : "-"}</span>
             </p>
           </div>
           
@@ -524,15 +582,15 @@ const Dashboard = () => {
           
           {/* Lien vers l'historique complet */}
           <div className="view-history-container">
-            <Link to="/rmr-m/historique" className="view-history-btn">
+            <Link to="/rmr-m/historique" className="view-history-btn responsive-button">
               📜 Voir l'historique complet des transactions
             </Link>
           </div>
         </>
       ) : (
-        <div className="not-connected">
+        <div className="not-connected responsive-card">
           <p>Veuillez connecter votre wallet pour accéder à votre tableau de bord.</p>
-          <button className="connect-wallet-btn" onClick={() => window.location.reload()}>
+          <button className="connect-wallet-btn responsive-button" onClick={() => window.location.reload()}>
             🔗 Connecter avec MetaMask
           </button>
         </div>

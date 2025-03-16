@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { ethers } from "ethers";
-import { useNavigate } from "react-router-dom"; // Importez useNavigate
-import "./LPFarming.css"; // Tes styles CSS
+import { useNavigate } from "react-router-dom";
+import "./LPFarming.css";
+import "./ResponsiveStyles.css"; // Import des styles responsifs
 
 // ABI minimal pour un contrat ERC-20
 const ERC20_ABI = [
@@ -14,10 +15,10 @@ const ERC20_ABI = [
 ];
 
 // Adresse du contrat USDC sur BSC Testnet
-const USDC_CONTRACT_ADDRESS = "0xb48249Ef5b895d6e7AD398186DF2B0c3Cec2BF94"; // À remplacer par l'adresse réelle de l'USDC sur BSC Testnet
+const USDC_CONTRACT_ADDRESS = "0xb48249Ef5b895d6e7AD398186DF2B0c3Cec2BF94";
 
 const LPFarming = () => {
-  const navigate = useNavigate(); // Initialisez useNavigate
+  const navigate = useNavigate();
   const [capital, setCapital] = useState(250);
   const [duration, setDuration] = useState(1);
   const [profit, setProfit] = useState(0);
@@ -26,14 +27,8 @@ const LPFarming = () => {
   const [provider, setProvider] = useState(null);
   const [contract, setContract] = useState(null);
   const [usdcBalance, setUsdcBalance] = useState(null);
-  const [usdcDecimals, setUsdcDecimals] = useState(18); // Par défaut 18, sera mis à jour
+  const [usdcDecimals, setUsdcDecimals] = useState(18);
   const [usdcSymbol, setUsdcSymbol] = useState("USDC");
-
-  // Style de décalage vers la droite - ajustez la valeur selon vos besoins
-  const containerStyle = {
-    position: 'relative',
-    left: '780px'
-  };
 
   // Fonction pour créer un provider compatible avec plusieurs versions d'ethers
   const getProvider = () => {
@@ -106,7 +101,6 @@ const LPFarming = () => {
         setUsdcSymbol(symbol);
       } catch (error) {
         console.error("Erreur lors de la récupération du symbole:", error);
-        // Garder le symbole par défaut (USDC)
       }
       
       // Récupérer le nombre de décimales
@@ -116,7 +110,6 @@ const LPFarming = () => {
         console.log(`${usdcSymbol} a ${decimals} décimales`);
       } catch (error) {
         console.error("Erreur lors de la récupération des décimales:", error);
-        // Utiliser la valeur par défaut (18)
       }
       
       // Récupérer le solde USDC
@@ -132,7 +125,7 @@ const LPFarming = () => {
   useEffect(() => {
     if (provider && account) {
       // Adresse du contrat BSC
-      const contractAddress = "0xbc3F488c5A9a7909aE07802c2b9002Efaa7EdB9F"; // Adresse de ton contrat déployé
+      const contractAddress = "0xbc3F488c5A9a7909aE07802c2b9002Efaa7EdB9F";
 
       // ABI du contrat
       const contractAbi = [
@@ -140,7 +133,6 @@ const LPFarming = () => {
         "function deposit() public payable",
         "function withdraw(uint256 amount) public",
         "function distributeInterest() public",
-        // Ajoute d'autres fonctions selon les besoins
       ];
 
       const contractInstance = new ethers.Contract(contractAddress, contractAbi, provider.getSigner());
@@ -270,7 +262,7 @@ const LPFarming = () => {
   };
 
   return (
-    <div className="lp-container" style={containerStyle}>
+    <div className="lp-container responsive-container">
       <h1>LP Farming - Génération de Rendement</h1>
       <p>
         <b>Liquidity Provider (LP) Farming</b> vous permet d'investir des fonds dans des pools de liquidités et d'obtenir un rendement stable de
@@ -278,11 +270,11 @@ const LPFarming = () => {
       </p>
 
       {/* Connexion au Wallet */}
-      <div className="wallet-connection">
+      <div className="wallet-connection responsive-card">
         <h3>Connexion au Wallet</h3>
         {account ? (
           <div>
-            <button className="wallet-button btn btn-success">
+            <button className="wallet-button btn btn-success responsive-button">
               ✅ {account.substring(0, 6)}...{account.slice(-4)}
             </button>
             {usdcBalance !== null && (
@@ -292,7 +284,7 @@ const LPFarming = () => {
             )}
           </div>
         ) : (
-          <button className="wallet-button btn btn-primary" onClick={connectWallet}>
+          <button className="wallet-button btn btn-primary responsive-button" onClick={connectWallet}>
             Connecter mon Wallet MetaMask
           </button>
         )}
@@ -300,13 +292,14 @@ const LPFarming = () => {
 
       {/* Simulateur de Gains */}
       <h2>Simulateur de Gains en {usdcSymbol}</h2>
-      <div className="simulator">
+      <div className="simulator responsive-card">
         <label>Capital à investir ({usdcSymbol}) :</label>
         <input
           type="number"
           min="1"
           value={capital}
           onChange={(e) => setCapital(Number(e.target.value))}
+          className="responsive-form"
         />
 
         <label>Durée (mois) :</label>
@@ -315,15 +308,16 @@ const LPFarming = () => {
           min="1"
           value={duration}
           onChange={(e) => setDuration(Number(e.target.value))}
+          className="responsive-form"
         />
 
-        <button onClick={calculateProfit}>Calculer</button>
+        <button onClick={calculateProfit} className="responsive-button">Calculer</button>
         <h3>Gains estimés : <span>{profit} {usdcSymbol}</span></h3>
       </div>
 
       {/* Bouton Investir */}
       <button 
-        className="validate-btn" 
+        className="validate-btn responsive-button" 
         onClick={handleInvest} 
         disabled={loading}
       >
@@ -331,7 +325,7 @@ const LPFarming = () => {
       </button>
 
       {/* Information sur USDC */}
-      <div className="usdc-info" style={{ marginTop: '20px', padding: '10px', backgroundColor: '#f5f5f5', borderRadius: '5px' }}>
+      <div className="usdc-info responsive-card" style={{ marginTop: '20px', padding: '10px', backgroundColor: '#f5f5f5', borderRadius: '5px' }}>
         <h3>ℹ️ Informations sur les {usdcSymbol}</h3>
         <p>
           Pour utiliser ce service, vous avez besoin de {usdcSymbol} sur le réseau BSC Testnet.
