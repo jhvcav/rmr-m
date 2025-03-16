@@ -21,7 +21,7 @@ const ERC20_ABI = [
 ];
 
 // Adresse du contrat USDC sur BSC Testnet
-const USDC_CONTRACT_ADDRESS = "0x64544969ed7EBf5f083679233325356EbE738930";
+const USDC_CONTRACT_ADDRESS = "0xb48249Ef5b895d6e7AD398186DF2B0c3Cec2BF94";
 
 const Dashboard = () => {
   // États pour le wallet et la connexion
