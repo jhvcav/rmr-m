@@ -2,7 +2,7 @@
 .depot-form {
   width: 100%;
   max-width: 800px;
-  margin: 20px auto; /* Centre horizontalement */
+  margin: auto; /* Centre horizontalement */
   padding: 20px;
   background-color: #f9f9f9;
   border-radius: 10px;
