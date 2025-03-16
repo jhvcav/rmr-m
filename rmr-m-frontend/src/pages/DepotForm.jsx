@@ -9,6 +9,25 @@ import { useLocation, useNavigate } from "react-router-dom";
 import * as ethers from "ethers"; 
 import "./DepotForm.css";
 
+// ABI minimal pour un contrat ERC-20
+const ERC20_ABI = [
+  // Récupérer le solde
+  "function balanceOf(address owner) view returns (uint256)",
+  // Récupérer le nombre de décimales
+  "function decimals() view returns (uint8)",
+  // Récupérer le symbole
+  "function symbol() view returns (string)",
+  // Approuver un montant pour un spender
+  "function approve(address spender, uint256 amount) returns (bool)",
+  // Vérifier l'allocation
+  "function allowance(address owner, address spender) view returns (uint256)",
+  // Transférer des tokens
+  "function transfer(address to, uint256 amount) returns (bool)"
+];
+
+// Adresse du contrat USDC sur BSC Testnet
+const USDC_CONTRACT_ADDRESS = "0x64544969ed7EBf5f083679233325356EbE738930"; // À remplacer par l'adresse réelle de l'USDC sur BSC Testnet
+
 const DepotForm = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -29,8 +48,11 @@ const DepotForm = () => {
   // Paramètres MetaMask
   const [isConnected, setIsConnected] = useState(false);
   const [publicKey, setPublicKey] = useState(null);
-  const [balance, setBalance] = useState(null);
+  const [balanceBNB, setBalanceBNB] = useState(null);
+  const [balanceUSDC, setBalanceUSDC] = useState(null);
+  const [usdcDecimals, setUsdcDecimals] = useState(18); // Par défaut 18, sera mis à jour
   const [status, setStatus] = useState("");
+  const [usdcApproved, setUsdcApproved] = useState(false);
   
   // Récupération des paramètres passés via la navigation
   useEffect(() => {
@@ -72,11 +94,12 @@ const DepotForm = () => {
       window.ethereum.on('accountsChanged', (accounts) => {
         if (accounts.length > 0) {
           setPublicKey(accounts[0]);
-          updateBalance(accounts[0]);
+          updateBalances(accounts[0]);
         } else {
           setIsConnected(false);
           setPublicKey(null);
-          setBalance(null);
+          setBalanceBNB(null);
+          setBalanceUSDC(null);
           setStatus("⚠️ Déconnecté de MetaMask.");
         }
       });
@@ -89,7 +112,7 @@ const DepotForm = () => {
         } else {
           // Si on a déjà une adresse, mettre à jour le solde
           if (publicKey) {
-            updateBalance(publicKey);
+            updateBalances(publicKey);
           }
         }
       });
@@ -106,8 +129,8 @@ const DepotForm = () => {
     };
   }, [publicKey]); // Dépendance à publicKey pour la mise à jour correcte
 
-  // Fonction pour mettre à jour le solde
-  const updateBalance = async (address) => {
+  // Fonction pour mettre à jour les soldes BNB et USDC
+  const updateBalances = async (address) => {
     try {
       const provider = getProvider();
       if (!provider) {
@@ -115,11 +138,37 @@ const DepotForm = () => {
         return;
       }
       
+      // Récupérer le solde BNB
       const balanceWei = await provider.getBalance(address);
       const balanceInBNB = ethers.utils.formatEther(balanceWei);
-      setBalance(balanceInBNB);
+      setBalanceBNB(balanceInBNB);
+      
+      // Récupérer le solde USDC
+      const usdcContract = new ethers.Contract(USDC_CONTRACT_ADDRESS, ERC20_ABI, provider);
+      
+      // Récupérer le nombre de décimales
+      try {
+        const decimals = await usdcContract.decimals();
+        setUsdcDecimals(decimals);
+        console.log(`USDC a ${decimals} décimales`);
+      } catch (error) {
+        console.error("Erreur lors de la récupération des décimales:", error);
+        // Utiliser la valeur par défaut (18)
+      }
+      
+      // Récupérer le solde USDC
+      const usdcBalance = await usdcContract.balanceOf(address);
+      const formattedUsdcBalance = ethers.utils.formatUnits(usdcBalance, usdcDecimals);
+      setBalanceUSDC(formattedUsdcBalance);
+      
+      // Vérifier si l'utilisateur a déjà approuvé le contrat
+      if (adressePool) {
+        const allowance = await usdcContract.allowance(address, adressePool);
+        const formattedAllowance = ethers.utils.formatUnits(allowance, usdcDecimals);
+        setUsdcApproved(parseFloat(formattedAllowance) >= parseFloat(montantInvesti || "0"));
+      }
     } catch (error) {
-      console.error("Erreur lors de la mise à jour du solde:", error);
+      console.error("Erreur lors de la mise à jour des soldes:", error);
     }
   };
 
@@ -209,10 +258,8 @@ const DepotForm = () => {
         return;
       }
 
-      // Récupérer le solde BNB
-      const balanceWei = await provider.getBalance(account);
-      const balanceInBNB = ethers.utils.formatEther(balanceWei);
-      setBalance(balanceInBNB);
+      // Mettre à jour les soldes
+      await updateBalances(account);
       
       // Définir l'état connecté APRÈS avoir obtenu toutes les informations
       setIsConnected(true);
@@ -225,6 +272,58 @@ const DepotForm = () => {
         setStatus(`❌ Erreur lors de la connexion: ${error.message}`);
       }
       setIsConnected(false);
+    }
+  };
+
+  // Fonction pour approuver l'utilisation des USDC
+  const handleApproveUSDC = async () => {
+    if (!isConnected) {
+      setStatus("⚠️ Veuillez vous connecter à MetaMask.");
+      return;
+    }
+
+    if (!adressePool) {
+      setStatus("⚠️ Adresse du pool non spécifiée.");
+      return;
+    }
+
+    if (montantInvesti <= 0 || isNaN(montantInvesti)) {
+      setStatus("⚠️ Montant invalide.");
+      return;
+    }
+
+    try {
+      setStatus("⏳ Préparation de l'approbation USDC...");
+      
+      // Utiliser le provider avec la fonction getProvider
+      const provider = getProvider();
+      if (!provider) {
+        setStatus("❌ Erreur d'initialisation du provider ethers");
+        return;
+      }
+      
+      const signer = provider.getSigner();
+      const usdcContract = new ethers.Contract(USDC_CONTRACT_ADDRESS, ERC20_ABI, signer);
+      
+      // Convertir le montant en unités avec les décimales correctes
+      const amountToApprove = ethers.utils.parseUnits(montantInvesti.toString(), usdcDecimals);
+      
+      setStatus("⏳ Demande d'approbation USDC...");
+      const txApprove = await usdcContract.approve(adressePool, amountToApprove);
+      
+      setStatus(`⏳ Approbation USDC en cours... ID : ${txApprove.hash}`);
+      
+      // Attendre la confirmation
+      await txApprove.wait(1);
+      
+      setStatus("✅ Approbation USDC réussie !");
+      setUsdcApproved(true);
+      
+      // Rafraîchir les soldes
+      updateBalances(publicKey);
+    } catch (error) {
+      console.error("Erreur lors de l'approbation USDC:", error);
+      setStatus(`❌ Erreur d'approbation: ${error.message}`);
     }
   };
 
@@ -242,6 +341,12 @@ const DepotForm = () => {
 
     if (montantInvesti <= 0 || isNaN(montantInvesti)) {
       setStatus("⚠️ Montant invalide.");
+      return;
+    }
+
+    // Vérifier si l'utilisateur a approuvé assez d'USDC
+    if (!usdcApproved) {
+      setStatus("⚠️ Veuillez d'abord approuver l'utilisation des USDC.");
       return;
     }
 
@@ -263,43 +368,41 @@ const DepotForm = () => {
       }
       
       const signer = provider.getSigner();
+      const usdcContract = new ethers.Contract(USDC_CONTRACT_ADDRESS, ERC20_ABI, signer);
 
-      // Vérifier que nous avons assez de fonds
-      const currentBalance = await provider.getBalance(publicKey);
-      const amountWei = ethers.utils.parseEther(montantInvesti.toString());
+      // Vérifier que nous avons assez d'USDC
+      const usdcBalance = await usdcContract.balanceOf(publicKey);
+      const amountInDecimals = ethers.utils.parseUnits(montantInvesti.toString(), usdcDecimals);
       
-      if (currentBalance.lt(amountWei)) {
-        setStatus("❌ Solde insuffisant pour cette transaction.");
+      if (usdcBalance.lt(amountInDecimals)) {
+        setStatus("❌ Solde USDC insuffisant pour cette transaction.");
         return;
       }
 
-      setStatus("⏳ Envoi de la transaction...");
+      setStatus("⏳ Envoi de la transaction USDC...");
       
-      const tx = {
-        to: adressePool,
-        value: amountWei,
-      };
-
-      const txResponse = await signer.sendTransaction(tx);
-      setStatus(`✅ Transaction envoyée ! ID : ${txResponse.hash}`);
+      // Transfert direct d'USDC au pool
+      const txTransfer = await usdcContract.transfer(adressePool, amountInDecimals);
+      
+      setStatus(`✅ Transaction USDC envoyée ! ID : ${txTransfer.hash}`);
 
       // Attendre que la transaction soit confirmée
-      await txResponse.wait(1); // Attendre 1 confirmation
+      await txTransfer.wait(1); // Attendre 1 confirmation
       
-      // Rafraîchir le solde après la transaction
-      updateBalance(publicKey);
+      // Rafraîchir les soldes après la transaction
+      updateBalances(publicKey);
       
       // Navigation vers une page de confirmation après transaction réussie
       navigate("/rmr-m/confirmation-depot", {
         state: {
-          transactionId: txResponse.hash,
+          transactionId: txTransfer.hash,
           montant: montantInvesti,
           adressePool: adressePool,
           duree: dureeInvestissement
         }
       });
     } catch (error) {
-      console.error("❌ Erreur lors du dépôt de fonds :", error);
+      console.error("❌ Erreur lors du dépôt d'USDC :", error);
       setStatus(`❌ Erreur lors de la transaction: ${error.message}`);
     }
   };
@@ -319,7 +422,7 @@ const DepotForm = () => {
         <h2>📋 Récapitulatif de votre investissement</h2>
         <div className="summary-item">
           <span>💵 Montant à investir:</span>
-          <span>{montantInvesti} USDT</span>
+          <span>{montantInvesti} USDC</span>
         </div>
         <div className="summary-item">
           <span>⏱️ Durée d'investissement:</span>
@@ -327,11 +430,11 @@ const DepotForm = () => {
         </div>
         <div className="summary-item">
           <span>📈 Rendement estimé:</span>
-          <span>{rendementEstime.toFixed(2)} USDT</span>
+          <span>{rendementEstime.toFixed(2)} USDC</span>
         </div>
         <div className="summary-item">
           <span>💸 Frais de gestion:</span>
-          <span>{frais.toFixed(2)} USDT</span>
+          <span>{frais.toFixed(2)} USDC</span>
         </div>
         <div className="summary-item">
           <span>🔗 Adresse du pool:</span>
@@ -346,7 +449,8 @@ const DepotForm = () => {
           <>
             <p>✅ Connecté avec l'adresse :</p>
             <p className="wallet-address">{publicKey}</p>
-            <p>💰 Solde disponible : <strong>{balance} BNB</strong></p>
+            <p>💰 Solde disponible : <strong>{balanceUSDC} USDC</strong></p>
+            <p>🔄 Solde BNB (pour frais) : <strong>{balanceBNB} BNB</strong></p>
           </>
         ) : (
           <p>⚠️ Non connecté. Veuillez connecter votre wallet pour continuer.</p>
@@ -356,27 +460,46 @@ const DepotForm = () => {
         </button>
       </div>
 
-      {/* Montant converti en BNB (si nécessaire) */}
+      {/* Montant à déposer */}
       <div className="input-container">
-        <label>💸 Montant à déposer :</label>
+        <label>💸 Montant à déposer (USDC) :</label>
         <input
           type="number"
           value={montantInvesti}
-          onChange={(e) => setMontantInvesti(parseFloat(e.target.value))}
-          min="0.0001"
-          step="0.0001"
+          onChange={(e) => {
+            const newValue = parseFloat(e.target.value);
+            setMontantInvesti(newValue);
+            // Réinitialiser l'approbation si le montant change
+            if (newValue !== montantInvesti) {
+              setUsdcApproved(false);
+            }
+          }}
+          min="0.1"
+          step="0.1"
         />
-        <small>Ce montant sera converti en BNB lors de la transaction</small>
+        <small>Le montant minimum recommandé est de 1 USDC</small>
       </div>
 
-      {/* Bouton d'envoi */}
-      <button 
-        className="deposit-btn" 
-        onClick={handleDepot} 
-        disabled={!isConnected}
-      >
-        🚀 Confirmer le dépôt de {montantInvesti} USDT
-      </button>
+      {/* Boutons d'approbation et d'envoi */}
+      <div className="buttons-container">
+        {isConnected && !usdcApproved && (
+          <button 
+            className="approve-btn" 
+            onClick={handleApproveUSDC}
+            disabled={!isConnected || usdcApproved}
+          >
+            🔓 Approuver l'utilisation de {montantInvesti} USDC
+          </button>
+        )}
+        
+        <button 
+          className="deposit-btn" 
+          onClick={handleDepot} 
+          disabled={!isConnected || !usdcApproved}
+        >
+          🚀 Confirmer le dépôt de {montantInvesti} USDC
+        </button>
+      </div>
 
       {/* Actions supplémentaires */}
       <div className="form-actions">
@@ -391,6 +514,21 @@ const DepotForm = () => {
 
       {/* Message de statut */}
       {status && <p className="status">{status}</p>}
+      
+      {/* Informations sur les USDC */}
+      <div className="usdc-info" style={{ marginTop: '20px', padding: '10px', backgroundColor: '#f5f5f5', borderRadius: '5px' }}>
+        <h3>ℹ️ Informations sur les USDC</h3>
+        <p>
+          Les USDC (USD Coin) sont des stablecoins dont la valeur est indexée sur le dollar américain (1 USDC = 1 USD).
+          Pour pouvoir effectuer un dépôt, vous devez :
+        </p>
+        <ol>
+          <li>Avoir suffisamment d'USDC dans votre portefeuille</li>
+          <li>Avoir un peu de BNB (0.005 minimum) pour payer les frais de transaction</li>
+          <li>Approuver l'utilisation de vos USDC par le contrat de pool</li>
+        </ol>
+        <p>Si vous n'avez pas d'USDC sur BSC Testnet, vous pouvez en obtenir via un faucet de test ou un échange.</p>
+      </div>
       
       {/* Informations de sécurité */}
       <div className="security-info">
