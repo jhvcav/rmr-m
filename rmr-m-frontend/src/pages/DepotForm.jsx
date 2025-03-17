@@ -26,8 +26,8 @@ const ERC20_ABI = [
   "function transfer(address to, uint256 amount) returns (bool)"
 ];
 
-// Adresse du contrat USDC sur BSC Testnet
-const USDC_CONTRACT_ADDRESS = "0xb48249Ef5b895d6e7AD398186DF2B0c3Cec2BF94";
+// Adresse du contrat USDC sur BSC Mainnet
+const USDC_CONTRACT_ADDRESS = "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d"; // Adresse réelle de l'USDC sur BSC Mainnet
 
 const DepotForm = () => {
   const location = useLocation();
@@ -48,7 +48,14 @@ const DepotForm = () => {
   const [usdcDecimals, setUsdcDecimals] = useState(18); // Par défaut 18, sera mis à jour
   const [usdcSymbol, setUsdcSymbol] = useState("USDC");
   const [status, setStatus] = useState("");
+  const [statusHistory, setStatusHistory] = useState([]);
   const [usdcApproved, setUsdcApproved] = useState(false);
+  
+  // Fonction pour ajouter un message de statut avec historique
+  const addStatus = (message) => {
+    setStatus(message);
+    setStatusHistory(prev => [...prev, `${new Date().toLocaleTimeString()}: ${message}`]);
+  };
   
   // Récupération des paramètres passés via la navigation
   useEffect(() => {
@@ -96,15 +103,15 @@ const DepotForm = () => {
           setPublicKey(null);
           setBalanceBNB(null);
           setBalanceUSDC(null);
-          setStatus("⚠️ Déconnecté de MetaMask.");
+          addStatus("⚠️ Déconnecté de MetaMask.");
         }
       });
       
       // Écouter les changements de réseau
       window.ethereum.on('chainChanged', (chainId) => {
-        if (chainId !== "0x61") { // BSC Testnet
+        if (chainId !== "0x38") { // BSC Mainnet
           setIsConnected(false);
-          setStatus("⚠️ Veuillez vous connecter au réseau BSC Testnet.");
+          addStatus("⚠️ Veuillez vous connecter au réseau BSC Mainnet.");
         } else {
           // Si on a déjà une adresse, mettre à jour le solde
           if (publicKey) {
@@ -113,7 +120,7 @@ const DepotForm = () => {
         }
       });
     } else {
-      setStatus("❌ Veuillez installer MetaMask.");
+      addStatus("❌ Veuillez installer MetaMask.");
     }
     
     // Nettoyer les écouteurs lors du démontage du composant
@@ -177,14 +184,14 @@ const DepotForm = () => {
     }
   };
 
-  // Basculer vers le réseau BSC Testnet si nécessaire
-  const switchToBSCTestnet = async () => {
+  // Basculer vers le réseau BSC Mainnet si nécessaire
+  const switchToBSCMainnet = async () => {
     try {
       await window.ethereum.request({
         method: "wallet_switchEthereumChain",
-        params: [{ chainId: "0x61" }], // Chaîne BSC Testnet (97 en décimal)
+        params: [{ chainId: "0x38" }], // Chaîne BSC Mainnet (56 en décimal)
       });
-      console.log("Connecté au réseau Binance Smart Chain Testnet.");
+      console.log("Connecté au réseau Binance Smart Chain Mainnet.");
       return true;
     } catch (error) {
       // Si l'erreur est 4902, cela signifie que le réseau n'est pas ajouté
@@ -194,28 +201,28 @@ const DepotForm = () => {
             method: "wallet_addEthereumChain",
             params: [
               {
-                chainId: "0x61",
-                chainName: "BSC Testnet",
+                chainId: "0x38",
+                chainName: "Binance Smart Chain",
                 nativeCurrency: {
                   name: "BNB",
                   symbol: "BNB",
                   decimals: 18,
                 },
-                rpcUrls: ["https://data-seed-prebsc-1-s1.binance.org:8545/"],
-                blockExplorerUrls: ["https://testnet.bscscan.com/"],
+                rpcUrls: ["https://bsc-dataseed.binance.org/"],
+                blockExplorerUrls: ["https://bscscan.com/"],
               },
             ],
           });
           // Essayer de basculer à nouveau après avoir ajouté le réseau
-          return await switchToBSCTestnet();
+          return await switchToBSCMainnet();
         } catch (addError) {
-          console.error("Erreur lors de l'ajout du réseau BSC Testnet:", addError);
-          setStatus("❌ Impossible d'ajouter le réseau BSC Testnet.");
+          console.error("Erreur lors de l'ajout du réseau BSC Mainnet:", addError);
+          addStatus("❌ Impossible d'ajouter le réseau BSC Mainnet.");
           return false;
         }
       } else {
-        console.error("Erreur lors du basculement vers BSC Testnet:", error);
-        setStatus("❌ Réseau BSC Testnet non détecté.");
+        console.error("Erreur lors du basculement vers BSC Mainnet:", error);
+        addStatus("❌ Réseau BSC Mainnet non détecté.");
         return false;
       }
     }
@@ -224,25 +231,25 @@ const DepotForm = () => {
   // Connexion à MetaMask avec vérification du réseau
   const handleConnect = async () => {
     if (!window.ethereum) {
-      setStatus("❌ Veuillez installer MetaMask.");
+      addStatus("❌ Veuillez installer MetaMask.");
       return;
     }
 
     try {
-      setStatus("⏳ Tentative de connexion au réseau BSC Testnet...");
+      addStatus("⏳ Tentative de connexion au réseau BSC Mainnet...");
       
-      // Basculer vers le réseau BSC Testnet
-      const isBSCTestnet = await switchToBSCTestnet();
-      if (!isBSCTestnet) {
-        return; // Le message d'erreur est déjà défini dans switchToBSCTestnet
+      // Basculer vers le réseau BSC Mainnet
+      const isBSCMainnet = await switchToBSCMainnet();
+      if (!isBSCMainnet) {
+        return; // Le message d'erreur est déjà défini dans switchToBSCMainnet
       }
 
-      setStatus("⏳ Connexion au wallet...");
+      addStatus("⏳ Connexion au wallet...");
       
       // Demander l'accès au compte MetaMask
       const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
       if (accounts.length === 0) {
-        setStatus("❌ Aucun compte détecté.");
+        addStatus("❌ Aucun compte détecté.");
         return;
       }
       
@@ -252,14 +259,14 @@ const DepotForm = () => {
       // Utiliser le provider avec la fonction getProvider
       const provider = getProvider();
       if (!provider) {
-        setStatus("❌ Erreur d'initialisation du provider ethers");
+        addStatus("❌ Erreur d'initialisation du provider ethers");
         return;
       }
       
       // Vérifier que nous sommes toujours sur le bon réseau
       const network = await provider.getNetwork();
-      if (network.chainId !== 97) { // 97 est l'ID décimal pour BSC Testnet
-        setStatus("❌ Veuillez vous connecter au réseau BSC Testnet.");
+      if (network.chainId !== 56) { // 56 est l'ID décimal pour BSC Mainnet
+        addStatus("❌ Veuillez vous connecter au réseau BSC Mainnet.");
         return;
       }
 
@@ -268,13 +275,13 @@ const DepotForm = () => {
       
       // Définir l'état connecté APRÈS avoir obtenu toutes les informations
       setIsConnected(true);
-      setStatus("✅ Wallet connecté avec succès !");
+      addStatus("✅ Wallet connecté avec succès !");
     } catch (error) {
       console.error("Erreur lors de la connexion à MetaMask:", error);
       if (error.code === 4001) {
-        setStatus("❌ Connexion refusée par l'utilisateur.");
+        addStatus("❌ Connexion refusée par l'utilisateur.");
       } else {
-        setStatus(`❌ Erreur lors de la connexion: ${error.message}`);
+        addStatus(`❌ Erreur lors de la connexion: ${error.message}`);
       }
       setIsConnected(false);
     }
@@ -283,27 +290,27 @@ const DepotForm = () => {
   // Fonction pour approuver l'utilisation des USDC
   const handleApproveUSDC = async () => {
     if (!isConnected) {
-      setStatus("⚠️ Veuillez vous connecter à MetaMask.");
+      addStatus("⚠️ Veuillez vous connecter à MetaMask.");
       return;
     }
 
     if (!adressePool) {
-      setStatus("⚠️ Adresse du pool non spécifiée.");
+      addStatus("⚠️ Adresse du pool non spécifiée.");
       return;
     }
 
     if (montantInvesti <= 0 || isNaN(montantInvesti)) {
-      setStatus("⚠️ Montant invalide.");
+      addStatus("⚠️ Montant invalide.");
       return;
     }
 
     try {
-      setStatus("⏳ Préparation de l'approbation USDC...");
+      addStatus("⏳ Préparation de l'approbation USDC...");
       
       // Utiliser le provider avec la fonction getProvider
       const provider = getProvider();
       if (!provider) {
-        setStatus("❌ Erreur d'initialisation du provider ethers");
+        addStatus("❌ Erreur d'initialisation du provider ethers");
         return;
       }
       
@@ -313,130 +320,130 @@ const DepotForm = () => {
       // Convertir le montant en unités avec les décimales correctes
       const amountToApprove = ethers.utils.parseUnits(montantInvesti.toString(), usdcDecimals);
       
-      setStatus("⏳ Demande d'approbation USDC...");
+      addStatus("⏳ Demande d'approbation USDC...");
       const txApprove = await usdcContract.approve(adressePool, amountToApprove);
       
-      setStatus(`⏳ Approbation USDC en cours... ID : ${txApprove.hash}`);
+      addStatus(`⏳ Approbation USDC en cours... ID : ${txApprove.hash}`);
       
       // Attendre la confirmation
       await txApprove.wait(1);
       
-      setStatus("✅ Approbation USDC réussie !");
+      addStatus("✅ Approbation USDC réussie !");
       setUsdcApproved(true);
       
       // Rafraîchir les soldes
       updateBalances(publicKey);
     } catch (error) {
       console.error("Erreur lors de l'approbation USDC:", error);
-      setStatus(`❌ Erreur d'approbation: ${error.message}`);
+      addStatus(`❌ Erreur d'approbation: ${error.message}`);
     }
   };
 
   // Fonction pour effectuer un dépôt
-const handleDepot = async () => {
-  if (!isConnected) {
-    setStatus("⚠️ Veuillez vous connecter à MetaMask.");
-    return;
-  }
-
-  if (!adressePool) {
-    setStatus("⚠️ Adresse du pool non spécifiée.");
-    return;
-  }
-
-  if (montantInvesti <= 0 || isNaN(montantInvesti)) {
-    setStatus("⚠️ Montant invalide.");
-    return;
-  }
-
-  // Vérifier si l'utilisateur a approuvé assez d'USDC
-  if (!usdcApproved) {
-    setStatus("⚠️ Veuillez d'abord approuver l'utilisation des USDC.");
-    return;
-  }
-
-  try {
-    setStatus("⏳ Préparation de la transaction...");
-    
-    // Utiliser le provider avec la fonction getProvider
-    const provider = getProvider();
-    if (!provider) {
-      setStatus("❌ Erreur d'initialisation du provider ethers");
-      return;
-    }
-    
-    // Vérifier que nous sommes toujours sur le bon réseau
-    const network = await provider.getNetwork();
-    setStatus(`⏳ Réseau détecté: chainId=${network.chainId}`);
-    
-    if (network.chainId !== 97) { // 97 est l'ID décimal pour BSC Testnet
-      setStatus("❌ Veuillez vous connecter au réseau BSC Testnet.");
-      return;
-    }
-    
-    setStatus(`⏳ Initialisation du contrat USDC à l'adresse: ${USDC_CONTRACT_ADDRESS}`);
-    const signer = provider.getSigner();
-    const usdcContract = new ethers.Contract(USDC_CONTRACT_ADDRESS, ERC20_ABI, signer);
-
-    // Vérifier que nous avons assez d'USDC
-    setStatus("⏳ Vérification du solde USDC...");
-    const usdcBalance = await usdcContract.balanceOf(publicKey);
-    const amountInDecimals = ethers.utils.parseUnits(montantInvesti.toString(), usdcDecimals);
-    
-    setStatus(`⏳ Solde USDC: ${ethers.utils.formatUnits(usdcBalance, usdcDecimals)} ${usdcSymbol}`);
-    setStatus(`⏳ Montant à envoyer: ${ethers.utils.formatUnits(amountInDecimals, usdcDecimals)} ${usdcSymbol}`);
-    
-    if (usdcBalance.lt(amountInDecimals)) {
-      setStatus(`❌ Solde USDC insuffisant. Vous avez ${ethers.utils.formatUnits(usdcBalance, usdcDecimals)} ${usdcSymbol} mais besoin de ${ethers.utils.formatUnits(amountInDecimals, usdcDecimals)} ${usdcSymbol}`);
+  const handleDepot = async () => {
+    if (!isConnected) {
+      addStatus("⚠️ Veuillez vous connecter à MetaMask.");
       return;
     }
 
-    setStatus(`⏳ Envoi de ${montantInvesti} ${usdcSymbol} de ${publicKey.substring(0, 6)}...${publicKey.slice(-4)} à ${adressePool.substring(0, 6)}...${adressePool.slice(-4)}`);
-    
-    // Transfert direct d'USDC au pool
+    if (!adressePool) {
+      addStatus("⚠️ Adresse du pool non spécifiée.");
+      return;
+    }
+
+    if (montantInvesti <= 0 || isNaN(montantInvesti)) {
+      addStatus("⚠️ Montant invalide.");
+      return;
+    }
+
+    // Vérifier si l'utilisateur a approuvé assez d'USDC
+    if (!usdcApproved) {
+      addStatus("⚠️ Veuillez d'abord approuver l'utilisation des USDC.");
+      return;
+    }
+
     try {
-      const txTransfer = await usdcContract.transfer(adressePool, amountInDecimals);
-      setStatus(`✅ Transaction USDC envoyée ! ID : ${txTransfer.hash}`);
+      addStatus("⏳ Préparation de la transaction...");
+      
+      // Utiliser le provider avec la fonction getProvider
+      const provider = getProvider();
+      if (!provider) {
+        addStatus("❌ Erreur d'initialisation du provider ethers");
+        return;
+      }
+      
+      // Vérifier que nous sommes toujours sur le bon réseau
+      const network = await provider.getNetwork();
+      addStatus(`⏳ Réseau détecté: chainId=${network.chainId}`);
+      
+      if (network.chainId !== 56) { // 56 est l'ID décimal pour BSC Mainnet
+        addStatus("❌ Veuillez vous connecter au réseau BSC Mainnet.");
+        return;
+      }
+      
+      addStatus(`⏳ Initialisation du contrat USDC à l'adresse: ${USDC_CONTRACT_ADDRESS}`);
+      const signer = provider.getSigner();
+      const usdcContract = new ethers.Contract(USDC_CONTRACT_ADDRESS, ERC20_ABI, signer);
 
-      // Attendre que la transaction soit confirmée
-      setStatus(`⏳ Attente de confirmation de la transaction...`);
-      await txTransfer.wait(1); // Attendre 1 confirmation
+      // Vérifier que nous avons assez d'USDC
+      addStatus("⏳ Vérification du solde USDC...");
+      const usdcBalance = await usdcContract.balanceOf(publicKey);
+      const amountInDecimals = ethers.utils.parseUnits(montantInvesti.toString(), usdcDecimals);
       
-      // Rafraîchir les soldes après la transaction
-      setStatus(`⏳ Mise à jour des soldes...`);
-      updateBalances(publicKey);
+      addStatus(`⏳ Solde USDC: ${ethers.utils.formatUnits(usdcBalance, usdcDecimals)} ${usdcSymbol}`);
+      addStatus(`⏳ Montant à envoyer: ${ethers.utils.formatUnits(amountInDecimals, usdcDecimals)} ${usdcSymbol}`);
       
-      // Navigation vers une page de confirmation après transaction réussie
-      setStatus(`✅ Transaction confirmée, redirection vers la page de confirmation...`);
-      navigate("/rmr-m/confirmation-depot", {
-        state: {
-          transactionId: txTransfer.hash,
-          montant: montantInvesti,
-          adressePool: adressePool,
-          duree: dureeInvestissement
+      if (usdcBalance.lt(amountInDecimals)) {
+        addStatus(`❌ Solde USDC insuffisant. Vous avez ${ethers.utils.formatUnits(usdcBalance, usdcDecimals)} ${usdcSymbol} mais besoin de ${ethers.utils.formatUnits(amountInDecimals, usdcDecimals)} ${usdcSymbol}`);
+        return;
+      }
+
+      addStatus(`⏳ Envoi de ${montantInvesti} ${usdcSymbol} de ${publicKey.substring(0, 6)}...${publicKey.slice(-4)} à ${adressePool.substring(0, 6)}...${adressePool.slice(-4)}`);
+      
+      // Transfert direct d'USDC au pool
+      try {
+        const txTransfer = await usdcContract.transfer(adressePool, amountInDecimals);
+        addStatus(`✅ Transaction USDC envoyée ! ID : ${txTransfer.hash}`);
+
+        // Attendre que la transaction soit confirmée
+        addStatus(`⏳ Attente de confirmation de la transaction...`);
+        await txTransfer.wait(1); // Attendre 1 confirmation
+        
+        // Rafraîchir les soldes après la transaction
+        addStatus(`⏳ Mise à jour des soldes...`);
+        updateBalances(publicKey);
+        
+        // Navigation vers une page de confirmation après transaction réussie
+        addStatus(`✅ Transaction confirmée, redirection vers la page de confirmation...`);
+        navigate("/rmr-m/confirmation-depot", {
+          state: {
+            transactionId: txTransfer.hash,
+            montant: montantInvesti,
+            adressePool: adressePool,
+            duree: dureeInvestissement
+          }
+        });
+      } catch (transferError) {
+        console.error("❌ Erreur lors du transfert USDC :", transferError);
+        if (transferError.code) {
+          addStatus(`❌ Erreur de transfert: Code ${transferError.code}`);
+        } else if (transferError.reason) {
+          addStatus(`❌ Erreur de transfert: ${transferError.reason}`);
+        } else {
+          addStatus(`❌ Erreur de transfert: ${transferError.message}`);
         }
-      });
-    } catch (transferError) {
-      console.error("❌ Erreur lors du transfert USDC :", transferError);
-      if (transferError.code) {
-        setStatus(`❌ Erreur de transfert: Code ${transferError.code}`);
-      } else if (transferError.reason) {
-        setStatus(`❌ Erreur de transfert: ${transferError.reason}`);
+      }
+    } catch (error) {
+      console.error("❌ Erreur lors du dépôt d'USDC :", error);
+      if (error.code) {
+        addStatus(`❌ Erreur: Code ${error.code}`);
+      } else if (error.reason) {
+        addStatus(`❌ Erreur: ${error.reason}`);
       } else {
-        setStatus(`❌ Erreur de transfert: ${transferError.message}`);
+        addStatus(`❌ Erreur: ${error.message}`);
       }
     }
-  } catch (error) {
-    console.error("❌ Erreur lors du dépôt d'USDC :", error);
-    if (error.code) {
-      setStatus(`❌ Erreur: Code ${error.code}`);
-    } else if (error.reason) {
-      setStatus(`❌ Erreur: ${error.reason}`);
-    } else {
-      setStatus(`❌ Erreur: ${error.message}`);
-    }
-  }
-};
+  };
 
   // Fonction pour formater une adresse blockchain (afficher uniquement début et fin)
   const formatAdresse = (adresse) => {
@@ -447,6 +454,23 @@ const handleDepot = async () => {
   return (
     <div className="depot-form responsive-container">
       <h1 style={{ fontSize: "1.5em" }}>💰 Dépôt de fonds pour LPFarming</h1>
+
+      {/* Avertissement pour Mainnet */}
+      <div className="mainnet-warning responsive-card" style={{ marginTop: '20px', padding: '10px', backgroundColor: '#fff3cd', borderRadius: '5px', border: '1px solid #ffeeba' }}>
+        <h3>⚠️ Mode Production - Vraies Cryptomonnaies</h3>
+        <p>
+          <strong>ATTENTION:</strong> Cette application utilise le réseau principal Binance Smart Chain. 
+          Toutes les transactions impliquent de vraies cryptomonnaies ayant une valeur réelle.
+        </p>
+        <p>
+          Nous vous recommandons de:
+        </p>
+        <ul>
+          <li>Commencer avec de petits montants pour tester</li>
+          <li>Vérifier toutes les informations de transaction avant confirmation</li>
+          <li>Ne jamais investir plus que ce que vous pouvez vous permettre de perdre</li>
+        </ul>
+      </div>
 
       {/* Récapitulatif de l'investissement */}
       <div className="investment-summary responsive-card">
@@ -547,6 +571,18 @@ const handleDepot = async () => {
       {/* Message de statut */}
       {status && <p className="status">{status}</p>}
       
+      {/* Historique des messages de statut */}
+      {statusHistory.length > 0 && (
+        <div className="status-history responsive-card" style={{ marginTop: '20px', maxHeight: '200px', overflowY: 'auto' }}>
+          <h3>📝 Historique des opérations</h3>
+          <ul style={{ padding: '0 0 0 20px', margin: 0 }}>
+            {statusHistory.map((msg, idx) => (
+              <li key={idx} style={{ marginBottom: '5px' }}>{msg}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+      
       {/* Informations sur les USDC */}
       <div className="usdc-info responsive-card" style={{ marginTop: '20px', padding: '10px', backgroundColor: '#f5f5f5', borderRadius: '5px' }}>
         <h3>ℹ️ Informations sur les {usdcSymbol}</h3>
@@ -559,7 +595,6 @@ const handleDepot = async () => {
           <li>Avoir un peu de BNB (0.005 minimum) pour payer les frais de transaction</li>
           <li>Approuver l'utilisation de vos {usdcSymbol} par le contrat de pool</li>
         </ol>
-        <p>Si vous n'avez pas d'{usdcSymbol} sur BSC Testnet, vous pouvez en obtenir via un faucet de test ou un échange.</p>
       </div>
       
       {/* Informations de sécurité */}

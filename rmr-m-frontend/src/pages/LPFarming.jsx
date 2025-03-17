@@ -15,7 +15,7 @@ const ERC20_ABI = [
 ];
 
 // Adresse du contrat USDC sur BSC Testnet
-const USDC_CONTRACT_ADDRESS = "0xb48249Ef5b895d6e7AD398186DF2B0c3Cec2BF94";
+const USDC_CONTRACT_ADDRESS = "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d";
 
 const LPFarming = () => {
   const navigate = useNavigate();
@@ -125,7 +125,7 @@ const LPFarming = () => {
   useEffect(() => {
     if (provider && account) {
       // Adresse du contrat BSC
-      const contractAddress = "0xbc3F488c5A9a7909aE07802c2b9002Efaa7EdB9F";
+      const contractAddress = "0x331089D11dfA34485094dE8f60b27EB474AEc86a";
 
       // ABI du contrat
       const contractAbi = [
@@ -174,15 +174,15 @@ const LPFarming = () => {
               method: "wallet_addEthereumChain",
               params: [
                 {
-                  chainId: "0x61",
-                  chainName: "BSC Testnet",
+                  chainId: "0x38",
+                  chainName: "BSC Chain",
                   nativeCurrency: {
                     name: "BNB",
                     symbol: "BNB",
                     decimals: 18,
                   },
-                  rpcUrls: ["https://data-seed-prebsc-1-s1.binance.org:8545/"],
-                  blockExplorerUrls: ["https://testnet.bscscan.com/"],
+                  rpcUrls: ["https://bsc-dataseed1.binance.org"],
+                  blockExplorerUrls: ["https://bscscan.com/"],
                 },
               ],
             });
@@ -225,7 +225,7 @@ const LPFarming = () => {
     const dureeJours = duration * 30;
     
     // Adresse du pool (utiliser l'adresse du contrat si disponible)
-    const poolAddress = contract ? contract.address : "0xbc3F488c5A9a7909aE07802c2b9002Efaa7EdB9F";
+    const poolAddress = contract ? contract.address : "0x331089D11dfA34485094dE8f60b27EB474AEc86a";
     
     // Navigation vers le formulaire de dépôt avec les données de la simulation
     navigate("/rmr-m/depot-form", {

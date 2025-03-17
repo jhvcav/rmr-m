@@ -20,8 +20,11 @@ const ERC20_ABI = [
   "function symbol() view returns (string)",
 ];
 
-// Adresse du contrat USDC sur BSC Testnet
-const USDC_CONTRACT_ADDRESS = "0xb48249Ef5b895d6e7AD398186DF2B0c3Cec2BF94";
+// Adresse du contrat USDC sur BSC Mainnet
+const USDC_CONTRACT_ADDRESS = "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d";
+
+// Adresse du contrat de pool sur Mainnet
+const POOL_CONTRACT_ADDRESS = "0xbc3F488c5A9a7909aE07802c2b9002Efaa7EdB9F"; // À remplacer par l'adresse réelle de votre pool
 
 const Dashboard = () => {
   // États pour le wallet et la connexion
@@ -32,6 +35,7 @@ const Dashboard = () => {
   const [usdcDecimals, setUsdcDecimals] = useState(18); // Par défaut 18, sera mis à jour
   const [usdcSymbol, setUsdcSymbol] = useState("USDC");
   const [status, setStatus] = useState("");
+  const [statusHistory, setStatusHistory] = useState([]);
 
   // États pour les données d'investissement
   const [totalInvested, setTotalInvested] = useState(0);
@@ -42,6 +46,12 @@ const Dashboard = () => {
   const [matureInvestments, setMatureInvestments] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [hasInvestments, setHasInvestments] = useState(true); // Nouvel état pour vérifier si l'utilisateur a des investissements
+
+  // Fonction pour ajouter un message de statut avec historique
+  const addStatus = (message) => {
+    setStatus(message);
+    setStatusHistory(prev => [...prev, `${new Date().toLocaleTimeString()}: ${message}`]);
+  };
 
   // Fonction pour créer un provider compatible avec plusieurs versions d'ethers
   const getProvider = () => {
@@ -64,27 +74,68 @@ const Dashboard = () => {
   useEffect(() => {
     const connectWallet = async () => {
       if (!window.ethereum) {
-        setStatus("❌ Veuillez installer MetaMask pour accéder au tableau de bord.");
+        addStatus("❌ Veuillez installer MetaMask pour accéder au tableau de bord.");
         setIsLoading(false);
         return;
       }
 
       try {
+        // Vérifier et changer le réseau si nécessaire
+        try {
+          const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+          if (chainId !== '0x38') { // 0x38 est l'ID de chaîne pour BSC Mainnet
+            addStatus("⏳ Changement vers le réseau BSC Mainnet...");
+            try {
+              await window.ethereum.request({
+                method: 'wallet_switchEthereumChain',
+                params: [{ chainId: '0x38' }],
+              });
+            } catch (switchError) {
+              // Si le réseau n'est pas configuré, l'ajouter
+              if (switchError.code === 4902) {
+                await window.ethereum.request({
+                  method: 'wallet_addEthereumChain',
+                  params: [
+                    {
+                      chainId: '0x38',
+                      chainName: 'Binance Smart Chain',
+                      nativeCurrency: {
+                        name: 'BNB',
+                        symbol: 'BNB',
+                        decimals: 18,
+                      },
+                      rpcUrls: ['https://bsc-dataseed.binance.org/'],
+                      blockExplorerUrls: ['https://bscscan.com/'],
+                    },
+                  ],
+                });
+              } else {
+                throw switchError;
+              }
+            }
+          }
+        } catch (networkError) {
+          addStatus(`❌ Erreur lors du changement de réseau: ${networkError.message}`);
+          setIsLoading(false);
+          return;
+        }
+
         // Demander l'accès au compte MetaMask
         const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
         if (accounts.length === 0) {
-          setStatus("❌ Aucun compte détecté.");
+          addStatus("❌ Aucun compte détecté.");
           setIsLoading(false);
           return;
         }
         
         const account = accounts[0];
         setPublicKey(account);
+        addStatus(`✅ Compte connecté: ${account.substring(0, 6)}...${account.substring(account.length - 4)}`);
         
         // Utiliser le provider 
         const provider = getProvider();
         if (!provider) {
-          setStatus("❌ Erreur d'initialisation du provider ethers");
+          addStatus("❌ Erreur d'initialisation du provider ethers");
           setIsLoading(false);
           return;
         }
@@ -100,7 +151,7 @@ const Dashboard = () => {
         
       } catch (error) {
         console.error("Erreur lors de la connexion au wallet:", error);
-        setStatus(`❌ Erreur: ${error.message}`);
+        addStatus(`❌ Erreur: ${error.message}`);
         setIsLoading(false);
       }
     };
@@ -113,6 +164,7 @@ const Dashboard = () => {
       window.ethereum.on('accountsChanged', async (accounts) => {
         if (accounts.length > 0) {
           setPublicKey(accounts[0]);
+          addStatus(`✅ Compte changé: ${accounts[0].substring(0, 6)}...${accounts[0].substring(accounts[0].length - 4)}`);
           // Utiliser le provider 
           const provider = getProvider();
           if (provider) {
@@ -124,7 +176,25 @@ const Dashboard = () => {
           setPublicKey(null);
           setBalanceBNB(null);
           setBalanceUSDC(null);
-          setStatus("⚠️ Déconnecté de MetaMask.");
+          addStatus("⚠️ Déconnecté de MetaMask.");
+        }
+      });
+      
+      // Écouter les changements de réseau
+      window.ethereum.on('chainChanged', (chainId) => {
+        if (chainId !== '0x38') { // BSC Mainnet
+          addStatus("⚠️ Veuillez vous connecter au réseau BSC Mainnet.");
+          setIsConnected(false);
+        } else {
+          addStatus("✅ Connecté au réseau BSC Mainnet.");
+          // Recharger les données si nous avons déjà un compte
+          if (publicKey) {
+            const provider = getProvider();
+            if (provider) {
+              updateBalances(publicKey, provider);
+              fetchInvestmentData(publicKey);
+            }
+          }
         }
       });
     }
@@ -133,6 +203,7 @@ const Dashboard = () => {
     return () => {
       if (window.ethereum) {
         window.ethereum.removeAllListeners('accountsChanged');
+        window.ethereum.removeAllListeners('chainChanged');
       }
     };
   }, []);
@@ -144,6 +215,7 @@ const Dashboard = () => {
       const balanceWei = await provider.getBalance(address);
       const balanceInBNB = ethers.utils.formatEther(balanceWei);
       setBalanceBNB(balanceInBNB);
+      addStatus(`💰 Solde BNB mis à jour: ${parseFloat(balanceInBNB).toFixed(4)} BNB`);
       
       // Récupérer les informations et le solde USDC
       const usdcContract = new ethers.Contract(USDC_CONTRACT_ADDRESS, ERC20_ABI, provider);
@@ -170,23 +242,28 @@ const Dashboard = () => {
       const usdcBalance = await usdcContract.balanceOf(address);
       const formattedUsdcBalance = ethers.utils.formatUnits(usdcBalance, usdcDecimals);
       setBalanceUSDC(formattedUsdcBalance);
+      addStatus(`💰 Solde ${usdcSymbol} mis à jour: ${parseFloat(formattedUsdcBalance).toFixed(2)} ${usdcSymbol}`);
       
     } catch (error) {
       console.error("Erreur lors de la mise à jour des soldes:", error);
+      addStatus(`❌ Erreur lors de la mise à jour des soldes: ${error.message}`);
     }
   };
 
   // Fonction pour récupérer les données d'investissement (simulation)
   const fetchInvestmentData = async (address) => {
     setIsLoading(true);
+    addStatus("⏳ Récupération des données d'investissement...");
     
     try {
       // En situation réelle, ces données seraient récupérées depuis un contrat smart ou une API
-      // Ici, on simule un délai de chargement
+      // Pour un projet Mainnet, vous devez remplacer cette simulation par des appels réels à votre contrat
+      
+      // Simulation d'un délai de chargement
       await new Promise(resolve => setTimeout(resolve, 1500));
       
       // Pour la démo, on peut choisir de simuler un utilisateur sans investissement
-      // Dans une vraie application, cela serait déterminé par les données réelles
+      // Dans une vraie application, cela serait déterminé par les données réelles du contrat
       
       // Pour simuler un utilisateur sans investissement, décommentez cette ligne et commentez le mockInvestments
       // const mockInvestments = [];
@@ -238,6 +315,7 @@ const Dashboard = () => {
         setDailyEarnings(0);
         setAvailableForWithdrawal(0);
         setMatureInvestments([]);
+        addStatus("📊 Aucun investissement actif trouvé");
       } else {
         // Mettre à jour les états avec les données
         setHasInvestments(true);
@@ -261,14 +339,15 @@ const Dashboard = () => {
         // Identifier les investissements arrivés à maturité
         const mature = mockInvestments.filter(inv => inv.status === "matured");
         setMatureInvestments(mature);
+        
+        addStatus(`📊 ${mockInvestments.length} investissements trouvés, total investi: ${total.toFixed(2)} ${usdcSymbol}`);
       }
       
-      setStatus("");
       setIsLoading(false);
       
     } catch (error) {
       console.error("Erreur lors de la récupération des données:", error);
-      setStatus("❌ Erreur lors du chargement des données d'investissement");
+      addStatus(`❌ Erreur lors du chargement des données d'investissement: ${error.message}`);
       setIsLoading(false);
       setHasInvestments(false); // En cas d'erreur, on suppose qu'il n'y a pas d'investissement
     }
@@ -295,63 +374,101 @@ const Dashboard = () => {
   // Fonction pour retirer les gains
   const handleWithdrawEarnings = async () => {
     if (availableForWithdrawal < 5) {
-      setStatus(`⚠️ Le minimum pour retirer est de 5 ${usdcSymbol}.`);
+      addStatus(`⚠️ Le minimum pour retirer est de 5 ${usdcSymbol}.`);
       return;
     }
     
-    setStatus("⏳ Traitement du retrait des gains...");
+    addStatus("⏳ Traitement du retrait des gains...");
     
-    // Simulation du retrait
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    setStatus(`✅ Retrait de ${availableForWithdrawal.toFixed(2)} ${usdcSymbol} effectué avec succès!`);
-    setAvailableForWithdrawal(0);
-    
-    // En situation réelle, appel au contrat smart pour retirer les gains
+    // En production, vous devez remplacer cette simulation par un appel au contrat
+    try {
+      // Simulation du retrait
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      addStatus(`✅ Retrait de ${availableForWithdrawal.toFixed(2)} ${usdcSymbol} effectué avec succès!`);
+      setAvailableForWithdrawal(0);
+      
+      // En situation réelle, appel au contrat smart pour retirer les gains
+      // Exemple:
+      // const provider = getProvider();
+      // const signer = provider.getSigner();
+      // const poolContract = new ethers.Contract(POOL_CONTRACT_ADDRESS, POOL_ABI, signer);
+      // const tx = await poolContract.withdrawEarnings(ethers.utils.parseUnits(availableForWithdrawal.toString(), usdcDecimals));
+      // await tx.wait(1);
+      // updateBalances(publicKey, provider);
+    } catch (error) {
+      console.error("Erreur lors du retrait des gains:", error);
+      addStatus(`❌ Erreur lors du retrait: ${error.message}`);
+    }
   };
 
   // Fonction pour réinvestir les gains
   const handleReinvestEarnings = async () => {
     if (totalEarnings <= 0) {
-      setStatus("⚠️ Aucun gain disponible à réinvestir.");
+      addStatus("⚠️ Aucun gain disponible à réinvestir.");
       return;
     }
     
-    setStatus("⏳ Réinvestissement des gains en cours...");
+    addStatus("⏳ Réinvestissement des gains en cours...");
     
-    // Simulation du réinvestissement
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    setStatus(`✅ Réinvestissement de ${totalEarnings.toFixed(2)} ${usdcSymbol} effectué avec succès!`);
-    setTotalInvested(totalInvested + totalEarnings);
-    setTotalEarnings(0);
-    setAvailableForWithdrawal(0);
-    
-    // En situation réelle, appel au contrat smart pour réinvestir les gains
+    try {
+      // Simulation du réinvestissement
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      addStatus(`✅ Réinvestissement de ${totalEarnings.toFixed(2)} ${usdcSymbol} effectué avec succès!`);
+      setTotalInvested(totalInvested + totalEarnings);
+      setTotalEarnings(0);
+      setAvailableForWithdrawal(0);
+      
+      // En situation réelle, appel au contrat smart pour réinvestir les gains
+      // Exemple:
+      // const provider = getProvider();
+      // const signer = provider.getSigner();
+      // const poolContract = new ethers.Contract(POOL_CONTRACT_ADDRESS, POOL_ABI, signer);
+      // const tx = await poolContract.reinvestEarnings();
+      // await tx.wait(1);
+      // fetchInvestmentData(publicKey);
+    } catch (error) {
+      console.error("Erreur lors du réinvestissement:", error);
+      addStatus(`❌ Erreur lors du réinvestissement: ${error.message}`);
+    }
   };
 
   // Fonction pour retirer les capitaux arrivés à maturité
   const handleWithdrawCapital = async () => {
     if (matureInvestments.length === 0) {
-      setStatus("⚠️ Aucun investissement arrivé à maturité.");
+      addStatus("⚠️ Aucun investissement arrivé à maturité.");
       return;
     }
     
     const totalMature = matureInvestments.reduce((sum, inv) => sum + inv.amount, 0);
     
-    setStatus(`⏳ Retrait du capital de ${totalMature.toFixed(2)} ${usdcSymbol} en cours...`);
+    addStatus(`⏳ Retrait du capital de ${totalMature.toFixed(2)} ${usdcSymbol} en cours...`);
     
-    // Simulation du retrait
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    setStatus(`✅ Capital de ${totalMature.toFixed(2)} ${usdcSymbol} retiré avec succès!`);
-    
-    // Mise à jour des listes
-    setInvestmentsList(investmentsList.filter(inv => inv.status !== "matured"));
-    setMatureInvestments([]);
-    setTotalInvested(totalInvested - totalMature);
-    
-    // En situation réelle, appel au contrat smart pour retirer le capital
+    try {
+      // Simulation du retrait
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      addStatus(`✅ Capital de ${totalMature.toFixed(2)} ${usdcSymbol} retiré avec succès!`);
+      
+      // Mise à jour des listes
+      setInvestmentsList(investmentsList.filter(inv => inv.status !== "matured"));
+      setMatureInvestments([]);
+      setTotalInvested(totalInvested - totalMature);
+      
+      // En situation réelle, appel au contrat smart pour retirer le capital
+      // Exemple:
+      // const provider = getProvider();
+      // const signer = provider.getSigner();
+      // const poolContract = new ethers.Contract(POOL_CONTRACT_ADDRESS, POOL_ABI, signer);
+      // const tx = await poolContract.withdrawMaturedCapital();
+      // await tx.wait(1);
+      // fetchInvestmentData(publicKey);
+      // updateBalances(publicKey, provider);
+    } catch (error) {
+      console.error("Erreur lors du retrait du capital:", error);
+      addStatus(`❌ Erreur lors du retrait du capital: ${error.message}`);
+    }
   };
 
   // Contenu du tableau de bord pour un utilisateur sans investissement
@@ -527,7 +644,7 @@ const Dashboard = () => {
                     <span className="detail-label">Total gagné:</span>
                     <span className="detail-value">{investment.totalEarned.toFixed(2)} {usdcSymbol}</span>
                   </div>
-                  
+
                   {investment.status === "active" && (
                     <div className="detail-item">
                       <span className="detail-label">Jours restants:</span>
@@ -552,6 +669,23 @@ const Dashboard = () => {
   return (
     <div className="dashboard-container responsive-container">
       <h1>📊 Tableau de Bord</h1>
+      
+      {/* Avertissement pour Mainnet */}
+      <div className="mainnet-warning responsive-card" style={{ marginTop: '20px', padding: '10px', backgroundColor: '#fff3cd', borderRadius: '5px', border: '1px solid #ffeeba' }}>
+        <h3>⚠️ Mode Production - Vraies Cryptomonnaies</h3>
+        <p>
+          <strong>ATTENTION:</strong> Cette application utilise le réseau principal Binance Smart Chain. 
+          Toutes les transactions impliquent de vraies cryptomonnaies ayant une valeur réelle.
+        </p>
+        <p>
+          Nous vous recommandons de:
+        </p>
+        <ul>
+          <li>Commencer avec de petits montants pour tester</li>
+          <li>Vérifier toutes les informations de transaction avant confirmation</li>
+          <li>Ne jamais investir plus que ce que vous pouvez vous permettre de perdre</li>
+        </ul>
+      </div>
       
       {isLoading ? (
         <div className="loading-container">
@@ -600,6 +734,18 @@ const Dashboard = () => {
       {status && (
         <div className="status-message">
           <p>{status}</p>
+        </div>
+      )}
+      
+      {/* Historique des messages de statut */}
+      {statusHistory.length > 0 && (
+        <div className="status-history responsive-card" style={{ marginTop: '20px', maxHeight: '200px', overflowY: 'auto' }}>
+          <h3>📝 Historique des opérations</h3>
+          <ul style={{ padding: '0 0 0 20px', margin: 0 }}>
+            {statusHistory.map((msg, idx) => (
+              <li key={idx} style={{ marginBottom: '5px' }}>{msg}</li>
+            ))}
+          </ul>
         </div>
       )}
     </div>
