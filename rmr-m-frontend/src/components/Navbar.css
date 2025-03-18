@@ -95,7 +95,7 @@
 
   /* Bouton de fermeture du menu (croix) - amélioration de la visibilité */
   .menu-close-btn {
-    display: block;
+    display: block !important;
     position: fixed !important; /* Position fixe pour rester visible */
     top: 15px !important;
     right: 15px !important; /* Aligné à droite du menu */
@@ -110,7 +110,7 @@
     align-items: center !important;
     justify-content: center !important;
     padding: 0 !important;
-    z-index: 1500 !important; /* Z-index très élevé */
+    z-index: 2000 !important; /* Z-index très élevé */
     box-shadow: 0 0 10px rgba(0,0,0,0.5) !important; /* Ombre pour le faire ressortir */
   }
 
@@ -124,12 +124,13 @@
     color: white;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    gap: 20px;
-    padding-top: 60px;
+    justify-content: flex-start; /* Alignement en haut au lieu de centre */
+    gap: 5px; /* Réduit l'espace entre les éléments */
+    padding-top: 60px; /* Espace en haut pour le bouton de fermeture */
     transition: left 0.3s ease-in-out;
     z-index: 1100;
     overflow-y: auto; /* Pour permettre le défilement si nécessaire */
+    padding-bottom: 30px; /* Espace en bas */
   }
 
   .nav-menu.open {
@@ -140,16 +141,18 @@
     width: 100%; /* Prend toute la largeur disponible */
     display: flex;
     justify-content: center;
+    margin: 0; /* Supprime les marges entre les items */
   }
 
   .nav-item a {
     color: white;
-    font-size: 16px;
+    font-size: 15px; /* Taille légèrement réduite */
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 10px;
-    width: 80%; /* Largeur du lien par rapport à l'élément parent */
+    padding: 8px; /* Réduit le padding */
+    width: 90%; /* Largeur du lien par rapport à l'élément parent */
     text-align: center;
+    margin: 2px 0; /* Marge minimale entre les items */
   }
 }
