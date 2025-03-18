@@ -1,44 +1,155 @@
-/* Modifications à apporter à votre Navbar.css */
+/* Styles généraux de la barre de navigation */
+.navbar {
+  position: fixed;
+  top: 80px; /* Espace pour le logo au-dessus */
+  left: 0;
+  width: 100%;
+  background-color: #343a40; /* Couleur de fond foncée, vous pouvez personnaliser */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px 20px;
+}
 
-/* Grossissement du bouton hamburger */
+/* Container avec positionnement flexible */
+.container {
+  width: 100%;
+  max-width: 1200px;
+  display: flex;
+  justify-content: center; /* Centre le menu horizontalement */
+  align-items: center;
+  position: relative;
+}
+
+/* Menu desktop */
+.nav-menu {
+  list-style: none;
+  display: flex;
+  justify-content: center; /* Centre les éléments du menu */
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+}
+
+/* Élément de menu */
+.nav-item {
+  display: flex;
+  justify-content: center; /* Centre le contenu de chaque élément */
+  align-items: center;
+}
+
+/* Liens de la barre de navigation avec texte centré */
+.nav-item a {
+  text-decoration: none;
+  color: white; /* Texte blanc sur fond foncé */
+  font-size: 0.9rem;
+  font-weight: bold;
+  padding: 8px 12px;
+  transition: 0.3s;
+  border-radius: 4px;
+  text-align: center; /* Centre le texte horizontalement */
+  display: flex;
+  justify-content: center; /* Centre le contenu */
+  align-items: center;
+  min-width: 100px; /* Largeur minimale pour un meilleur alignement */
+}
+
+.nav-item a:hover {
+  background-color: #007bff;
+  color: white;
+}
+
+/* Bouton hamburger */
+.menu-toggle {
+  display: none; /* Caché en mode desktop */
+  font-size: 24px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: white;
+}
+
+/* Menu mobile */
 @media (max-width: 768px) {
+  .navbar {
+    top: 80px; /* Espace réduit pour le logo sur mobile */
+    padding: 18px 25px;
+  }
+  
   .menu-open-btn {
-    display: block !important;
+    display: block;
     position: absolute;
     top: 50%;
     right: 15px;
     transform: translateY(-50%);
-    z-index: 995;
-    font-size: 32px !important; /* Taille augmentée */
-    padding: 10px;
-    width: 50px; /* Largeur fixe */
-    height: 50px; /* Hauteur fixe */
-    display: flex !important;
-    align-items: center;
-    justify-content: center;
-    background-color: rgba(0, 0, 0, 0.5); /* Fond sombre pour plus de contraste */
-    border-radius: 8px;
+    font-size: 36px !important; /* Bouton hamburger plus gros */
+    padding: 8px;
     color: white;
+    background: none;
+    border: none;
+    cursor: pointer;
+    z-index: 1200;
   }
 
-  /* Amélioration de la croix de fermeture */
+  /* Bouton de fermeture du menu (croix) - amélioration de la visibilité */
   .menu-close-btn {
-    display: block !important;
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    z-index: 1500 !important; /* z-index très élevé */
-    font-size: 32px !important; /* Taille augmentée */
-    padding: 10px;
-    background-color: #e74c3c !important; /* Fond rouge vif */
-    color: white !important; /* Texte blanc */
-    border-radius: 8px;
-    width: 50px; /* Largeur fixe */
-    height: 50px; /* Hauteur fixe */
+    display: block;
+    position: fixed !important; /* Position fixe pour rester visible */
+    top: 15px !important;
+    right: 15px !important; /* Aligné à droite du menu */
+    width: 40px !important;
+    height: 40px !important;
+    font-size: 28px !important;
+    background-color: #ff3333 !important; /* Rouge vif */
+    color: white !important;
+    border-radius: 50% !important;
+    border: 2px solid white !important;
     display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 !important;
+    z-index: 1500 !important; /* Z-index très élevé */
+    box-shadow: 0 0 10px rgba(0,0,0,0.5) !important; /* Ombre pour le faire ressortir */
+  }
+
+  .nav-menu {
+    position: fixed;
+    top: 0;
+    left: -100%; /* Caché par défaut */
+    width: 250px;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.9);
+    color: white;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); /* Ombre pour faire ressortir */
-    border: 2px solid white; /* Bordure blanche pour contraste */
+    gap: 20px;
+    padding-top: 60px;
+    transition: left 0.3s ease-in-out;
+    z-index: 1100;
+    overflow-y: auto; /* Pour permettre le défilement si nécessaire */
+  }
+
+  .nav-menu.open {
+    left: 0; /* Affichage du menu */
+  }
+
+  .nav-item {
+    width: 100%; /* Prend toute la largeur disponible */
+    display: flex;
+    justify-content: center;
+  }
+
+  .nav-item a {
+    color: white;
+    font-size: 16px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+    width: 80%; /* Largeur du lien par rapport à l'élément parent */
+    text-align: center;
   }
 }
