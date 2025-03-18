@@ -14,6 +14,9 @@
     text-align: center;
     overflow: visible;
     margin-top: 30px;
+    background: rgba(0, 0, 0, 0.5); /* Rétablissement du fond pour l'effet card */
+    border-radius: 15px; /* Rétablissement des bords arrondis */
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3); /* Rétablissement de l'ombre */
 }
 
 /* 🏷️ Styles du titre */
@@ -57,7 +60,7 @@
     padding: 8px 16px;
     border-radius: 6px;
     text-decoration: none;
-    transition: background 0.3s;
+    transition: background 0.3s, transform 0.3s;
     display: inline-block;
     width: auto;
     min-width: 120px;
@@ -138,6 +141,9 @@
         
         /* Préservation des styles visuels */
         margin-top: 25px;
+        background: rgba(0, 0, 0, 0.5); /* Rétablissement du fond pour l'effet card */
+        border-radius: 15px; /* Rétablissement des bords arrondis */
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3); /* Rétablissement de l'ombre */
     }
 
     .home-container h1 {
@@ -172,6 +178,10 @@
         
         /* Préservation des styles visuels */
         margin-top: 20px;
+        padding: 15px;
+        background: rgba(0, 0, 0, 0.5); /* Rétablissement du fond pour l'effet card */
+        border-radius: 15px; /* Rétablissement des bords arrondis */
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3); /* Rétablissement de l'ombre */
     }
 
     .home-container h1 {
