@@ -1,50 +1,57 @@
 /* 📌 Styles généraux */
 .lp-container {
-  max-width: 100%;
-  padding: 20px;
+  width: 100%;
+  box-sizing: border-box;
   text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
-/* 📌 Ajustement pour les smartphones */
-@media screen and (max-width: 500px) {
-  .lp-container {
-    padding: 1px;
-  }
+/* 📌 Styles des cartes */
+.wallet-connection, .simulator, .usdc-info {
+  width: 100%;
+  margin: 15px auto;
+  box-sizing: border-box;
 }
 
 /* 📌 Styles des boutons */
 .wallet-buttons, .simulator {
   width: 100%;
-  max-width: 400px;
-  margin: auto;
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
   gap: 15px;
+  align-items: center;
 }
 
 /* 📌 Boutons améliorés */
 .btn {
   width: 100%;
+  max-width: 400px;
   padding: 15px;
   font-size: 16px;
   border-radius: 8px;
+  margin: 0 auto;
+  display: block;
 }
 
 /* 📌 Champs de saisie */
 .simulator input {
   width: 100%;
+  max-width: 400px;
   padding: 12px;
   font-size: 16px;
   border: 1px solid #ccc;
   border-radius: 5px;
+  box-sizing: border-box;
+  margin: 8px auto 16px auto;
 }
 
 /* 📌 Validation */
 .validate-btn {
   width: 100%;
+  max-width: 400px;
   padding: 15px;
   font-size: 18px;
   background-color: #28a745;
@@ -52,6 +59,8 @@
   border: none;
   border-radius: 5px;
   cursor: pointer;
+  margin: 20px auto;
+  display: block;
 }
 
 .validate-btn:disabled {
@@ -61,18 +70,14 @@
 
 .wallet-connect-section {
   text-align: center;
-  margin-bottom: 20px;
+  margin: 0 auto 20px auto;
+  width: 100%;
 }
 
 .wallet-connect-section h3 {
   margin-bottom: 10px;
   font-size: 18px;
   font-weight: bold;
-}
-
-.solana-connect {
-  text-align: center;
-  margin-bottom: 20px;
 }
 
 .wallet-button {
@@ -85,6 +90,8 @@
   border-radius: 8px;
   cursor: pointer;
   gap: 10px;
+  margin: 0 auto;
+  max-width: 400px;
 }
 
 .wallet-logo {
@@ -92,12 +99,16 @@
   height: 24px;
 }
 
-@media screen and (max-width: 768px) {
-  .fixed-container {
-    position: relative;
-    bottom: auto;
-    width: 100%;
-    background: none;
-    padding: 1px;
-  }
+/* Ajouter une règle pour centrer le contenu de tous les éléments */
+h1, h2, h3, p, label {
+  width: 100%;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+/* S'assurer que les labels sont alignés correctement */
+.simulator label {
+  display: block;
+  text-align: center;
+  margin-top: 15px;
 }

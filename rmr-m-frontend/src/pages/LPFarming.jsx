@@ -273,7 +273,7 @@ const connectWallet = async () => {
       <div className="wallet-connection responsive-card">
         <h3>Connexion au Wallet</h3>
         {account ? (
-          <div>
+          <div className="wallet-info">
             <button className="wallet-button btn btn-success responsive-button">
               ✅ {account.substring(0, 6)}...{account.slice(-4)}
             </button>
@@ -311,7 +311,13 @@ const connectWallet = async () => {
           className="responsive-form"
         />
 
-        <button onClick={calculateProfit} className="responsive-button">Calculer</button>
+        <button 
+          onClick={calculateProfit} 
+          className="responsive-button btn btn-primary"
+        >
+          Calculer
+        </button>
+        
         <h3>Gains estimés : <span>{profit} {usdcSymbol}</span></h3>
       </div>
 
@@ -325,7 +331,7 @@ const connectWallet = async () => {
       </button>
 
       {/* Information sur USDC */}
-      <div className="usdc-info responsive-card" style={{ marginTop: '20px', padding: '10px', backgroundColor: '#f5f5f5', borderRadius: '5px' }}>
+      <div className="usdc-info responsive-card">
         <h3>ℹ️ Informations sur les {usdcSymbol}</h3>
         <p>
           Pour utiliser ce service, vous avez besoin de {usdcSymbol} sur le réseau BSC Testnet.

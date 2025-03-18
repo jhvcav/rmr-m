@@ -1,218 +1,99 @@
-/**
- * Copyright (c) 2025 Jean Hugues CAVALIE
- * Tous droits réservés.
- * Ce code ne peut pas être utilisé ou redistribué sans autorisation.
- */
-
-/* Styles responsifs pour toutes les pages */
-/* À ajouter dans un fichier ResponsiveStyles.css puis importer dans chaque composant */
-
-/* Styles de base communs */
+/* 📌 Responsive Styles */
 .responsive-container {
-    width: 100%;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 15px;
-    box-sizing: border-box;
-    position: static !important; /* Annuler les positionnements absolus */
-    left: auto !important;
-  }
-  
-  /* Styles pour les tableaux et les cartes */
-  .responsive-card {
-    width: 100%;
-    margin-bottom: 20px;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.responsive-card {
+  width: 100%;
+  max-width: 600px;
+  margin: 15px auto;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  background-color: #fff;
+}
+
+.responsive-button {
+  width: 100%;
+  max-width: 400px;
+  margin: 10px auto;
+  padding: 12px;
+  font-size: 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: block;
+}
+
+.responsive-form {
+  width: 100%;
+  padding: 12px;
+  margin: 8px 0 16px 0;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 16px;
+  box-sizing: border-box;
+}
+
+/* Ajustements pour les tablettes */
+@media screen and (min-width: 501px) and (max-width: 768px) {
+  .responsive-container {
     padding: 15px;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    max-width: 90%;
   }
   
-  .responsive-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 20px;
-  }
-  
-  /* Styles pour les formulaires */
-  .responsive-form {
-    width: 100%;
-    max-width: 800px;
-    margin: 0 auto;
-  }
-  
-  .responsive-form input,
-  .responsive-form select,
-  .responsive-form textarea,
-  .responsive-form button {
-    width: 100%;
-    padding: 12px;
-    margin-bottom: 15px;
-    border-radius: 4px;
-    border: 1px solid #ccc;
-    box-sizing: border-box;
+  .responsive-card {
+    max-width: 90%;
   }
   
   .responsive-button {
-    width: 100%;
-    padding: 12px 20px;
-    margin: 10px 0;
-    border-radius: 4px;
-    cursor: pointer;
-    font-weight: bold;
-    border: none;
+    max-width: 90%;
+  }
+}
+
+/* Ajustements pour les smartphones */
+@media screen and (max-width: 500px) {
+  .responsive-container {
+    padding: 10px;
+    width: 95%;
   }
   
-  /* Media queries pour différentes tailles d'écran */
-  
-  /* Grand mobile (portrait) et tablette (portrait) */
-  @media screen and (max-width: 768px) {
-    h1 {
-      font-size: 1.8rem !important;
-    }
-    
-    h2 {
-      font-size: 1.5rem !important;
-    }
-    
-    h3 {
-      font-size: 1.2rem !important;
-    }
-    
-    p, span, button, input, label {
-      font-size: 0.95rem !important;
-    }
-    
-    .dashboard-summary, 
-    .investment-options .options-grid {
-      grid-template-columns: 1fr 1fr;
-    }
-    
-    .investment-card {
-      width: 100%;
-    }
-    
-    .dashboard-actions {
-      flex-direction: column;
-    }
-    
-    .dashboard-actions button {
-      width: 100%;
-      margin: 5px 0;
-    }
-    
-    /* Ajustements spécifiques pour les tableaux de données */
-    .investments-list {
-      overflow-x: auto;
-    }
+  .responsive-card {
+    max-width: 100%;
+    padding: 15px;
   }
   
-  /* Petit mobile (portrait) */
-  @media screen and (max-width: 480px) {
-    h1 {
-      font-size: 1.5rem !important;
-    }
-    
-    h2 {
-      font-size: 1.3rem !important;
-    }
-    
-    h3 {
-      font-size: 1.1rem !important;
-    }
-    
-    p, span, button, input, label {
-      font-size: 0.9rem !important;
-    }
-    
-    .dashboard-summary, 
-    .investment-options .options-grid {
-      grid-template-columns: 1fr;
-    }
-    
-    .wallet-info-card,
-    .summary-card,
-    .option-card {
-      padding: 10px;
-    }
-    
-    /* Styles pour le formulaire de dépôt */
-    .investment-summary {
-      flex-direction: column;
-    }
-    
-    .input-container {
-      width: 100%;
-    }
-    
-    /* Ajustements spécifiques pour les informations de wallet */
-    .wallet-address {
-      font-size: 0.8rem !important;
-      word-break: break-all;
-    }
+  .responsive-button {
+    max-width: 100%;
+    font-size: 14px;
   }
   
-  /* Styles spécifiques pour DepotForm */
-  @media screen and (max-width: 768px) {
-    .depot-form {
-      width: 100%;
-      padding: 10px;
-    }
-    
-    .summary-item {
-      flex-direction: column;
-      align-items: flex-start;
-    }
-    
-    .form-actions {
-      flex-direction: column;
-    }
-    
-    .buttons-container {
-      flex-direction: column;
-    }
-    
-    .buttons-container button {
-      width: 100%;
-      margin: 5px 0;
-    }
+  h1 {
+    font-size: 24px;
   }
   
-  /* Styles spécifiques pour LPFarming */
-  @media screen and (max-width: 768px) {
-    .lp-container {
-      width: 100%;
-      padding: 10px;
-    }
-    
-    .simulator {
-      flex-direction: column;
-    }
-    
-    .simulator input,
-    .simulator button {
-      width: 100%;
-      margin: 5px 0;
-    }
-    
-    .wallet-connection {
-      flex-direction: column;
-    }
+  h2 {
+    font-size: 20px;
   }
   
-  /* Styles spécifiques pour Dashboard */
-  @media screen and (max-width: 768px) {
-    .dashboard-container {
-      width: 100%;
-      padding: 10px;
-    }
-    
-    .investment-details {
-      grid-template-columns: 1fr;
-    }
-    
-    .detail-item {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 8px;
-    }
+  h3 {
+    font-size: 18px;
   }
+}
+
+/* Assurer que les formulaires et boutons sont bien centrés */
+.wallet-connection, .simulator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+/* Style pour la div qui contient le solde */
+.balance-info {
+  margin-top: 10px;
+  text-align: center;
+  width: 100%;
+}
