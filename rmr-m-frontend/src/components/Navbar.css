@@ -6,7 +6,7 @@
   width: 100%;
   background-color: #343a40; /* Couleur de fond foncée, vous pouvez personnaliser */
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  z-index: 1000;
+  z-index: 100; /* Réduit légèrement pour que le menu mobile passe au-dessus */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -74,8 +74,8 @@
 /* Menu mobile */
 @media (max-width: 768px) {
   .navbar {
-    top: 80px; /* Espace réduit pour le logo sur mobile */
-    padding: 18px 25px;
+    top: 60px; /* Ajusté pour mobile */
+    padding: 10px 15px;
   }
   
   .menu-open-btn {
@@ -84,39 +84,47 @@
     top: 50%;
     transform: translateY(-50%);
     right: 10px;
-    z-index: 1200;
+    z-index: 120;
     padding: 5px;
-    font-size: 20px;
+    font-size: 24px;
     display: flex;
     align-items: center;
     justify-content: center;
   }
 
-  /* Bouton de fermeture du menu (croix) - positionné à gauche dans le menu ouvert */
+  /* Bouton de fermeture du menu (croix) - repositionné */
   .menu-close-btn {
     display: block;
-    position: fixed;
+    position: absolute;
     top: 15px;
-    left: 25px;
-    z-index: 1200;
+    right: 15px; /* Déplacé à droite pour être plus accessible */
+    z-index: 1500; /* z-index très élevé pour être au-dessus de tout */
     color: white;
+    font-size: 24px;
+    background: none;
+    border: none;
+    padding: 5px;
   }
 
   .nav-menu {
     position: fixed;
     top: 0;
     left: -100%; /* Caché par défaut */
-    width: 250px;
+    width: 80%; /* Largeur réduite pour être sûr qu'elle s'affiche correctement */
     height: 100vh;
-    background-color: rgba(0, 0, 0, 0.9);
+    background-color: rgba(0, 0, 0, 0.95); /* Légèrement plus opaque */
     color: white;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 20px;
+    align-items: flex-start; /* Aligné à gauche pour plus de lisibilité */
+    justify-content: flex-start; /* Commence en haut */
+    gap: 10px;
     padding-top: 60px;
-    transition: left 0.3s ease-in-out;
-    z-index: 1100;
+    padding-left: 20px;
+    padding-right: 20px;
+    transition: all 0.3s ease-in-out;
+    z-index: 1000;
+    overflow-y: auto; /* Permettre le défilement si le menu est trop long */
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.5); /* Ajouter une ombre pour le contraste */
   }
 
   .nav-menu.open {
@@ -126,17 +134,76 @@
   .nav-item {
     width: 100%; /* Prend toute la largeur disponible */
     display: flex;
-    justify-content: center;
+    justify-content: flex-start; /* Aligné à gauche */
+    margin-bottom: 10px;
   }
 
   .nav-item a {
     color: white;
     font-size: 16px;
     display: flex;
-    justify-content: center;
+    justify-content: flex-start; /* Aligné à gauche */
     align-items: center;
-    padding: 10px;
-    width: 80%; /* Largeur du lien par rapport à l'élément parent */
-    text-align: center;
+    padding: 12px 15px;
+    width: 100%; /* Prend toute la largeur */
+    text-align: left;
+    border-left: 3px solid transparent; /* Bordure invisible par défaut */
+  }
+  
+  .nav-item a:hover {
+    background-color: rgba(0, 123, 255, 0.2); /* Fond bleu subtil au survol */
+    border-left: 3px solid #007bff; /* Bordure visible au survol */
+  }
+}
+
+/* Styles additionnels à ajouter à votre Navbar.css */
+
+/* Masquer le bouton du menu quand il est ouvert */
+.menu-open-btn.hidden {
+  display: none;
+}
+
+/* Style pour s'assurer que le bouton de fermeture est bien visible */
+.menu-close-btn {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.5);
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* Animation du menu */
+.nav-menu {
+  transition: transform 0.3s ease-in-out, left 0.3s ease-in-out;
+}
+
+.nav-menu.open {
+  transform: translateX(0);
+}
+
+/* Assurer que les items du menu sont visibles sur tout type d'écran */
+@media (max-width: 768px) {
+  .nav-menu {
+    padding-top: 70px; /* Espace pour le bouton de fermeture */
+    overflow-y: auto;
+    /* Empêcher le contenu de passer sous la navbar */
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Amélioration pour la visibilité des liens */
+  .nav-item a {
+    display: block;
+    width: 100%;
+    padding: 15px;
+    font-size: 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  /* Le dernier item n'a pas de bordure en bas */
+  .nav-item:last-child a {
+    border-bottom: none;
   }
 }
