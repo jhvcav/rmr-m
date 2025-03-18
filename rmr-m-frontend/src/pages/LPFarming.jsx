@@ -255,14 +255,16 @@ const LPFarming = () => {
   };
 
   return (
-    <div className="responsive-container">
-      <div className="lp-container">
+    <div className="responsive-container" style={{backgroundColor: "#ffffff"}}>
+      <div className="lp-container" style={{backgroundColor: "#ffffff"}}>
         <h1>LP Farming - Génération de Rendement</h1>
         
-        <p className="responsive-card">
-          <b>Liquidity Provider (LP) Farming</b> vous permet d'investir des fonds dans des pools de liquidités et d'obtenir un rendement stable de
-          <b> 10% par mois</b>. Grâce à l'optimisation automatique, votre capital est réinvesti pour maximiser les gains.
-        </p>
+        <div className="responsive-card">
+          <p>
+            <b>Liquidity Provider (LP) Farming</b> vous permet d'investir des fonds dans des pools de liquidités et d'obtenir un rendement stable de
+            <b> 10% par mois</b>. Grâce à l'optimisation automatique, votre capital est réinvesti pour maximiser les gains.
+          </p>
+        </div>
 
         {/* Connexion au Wallet */}
         <div className="responsive-card">
