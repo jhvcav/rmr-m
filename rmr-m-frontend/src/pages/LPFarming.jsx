@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { ethers } from "ethers";
 import { useNavigate } from "react-router-dom";
 import "./LPFarming.css";
-import "./ResponsiveStyles.css";
 
 // ABI minimal pour un contrat ERC-20
 const ERC20_ABI = [
@@ -254,9 +253,22 @@ const LPFarming = () => {
     }
   };
 
+  // Styles inline pour forcer un fond blanc et éviter le débordement
+  const wrapperStyle = {
+    width: '100%',
+    maxWidth: '100%',
+    overflow: 'hidden',
+    backgroundColor: '#ffffff',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    margin: 0,
+    padding: 0
+  };
+
   return (
-    <div className="responsive-container" style={{backgroundColor: "#ffffff", overflow: "hidden", width: "100%"}}>
-      <div className="lp-container" style={{backgroundColor: "#ffffff", overflow: "hidden", width: "100%"}}>
+    <div style={wrapperStyle}>
+      <div className="lp-container">
         <h1>LP Farming - Génération de Rendement</h1>
         
         <div className="responsive-card">
