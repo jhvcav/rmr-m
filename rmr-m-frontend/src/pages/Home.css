@@ -1,27 +1,22 @@
-/* 🌟 Correction focalisée pour Home.css */
-
-/* Solution radicale pour le container principal */
+/* 🌟 Styles généraux - CENTRAGE CORRIGÉ AVEC PRÉSERVATION DES CARDS */
 .home-container {
-    /* Reset complet du positionnement */
+    /* Reset du positionnement pour le centrage */
     position: static !important;
     left: 0 !important;
     transform: none !important;
-    
-    /* Centrage explicite */
     width: 100% !important;
     max-width: 800px !important;
     margin-left: auto !important;
     margin-right: auto !important;
-    padding: 15px !important;
     
-    /* Autres styles */
+    /* Préservation des styles visuels */
+    padding: 15px;
     text-align: center;
-    overflow-x: hidden;
+    overflow: visible;
     margin-top: 30px;
-    box-sizing: border-box;
 }
 
-/* Reste du code CSS inchangé */
+/* 🏷️ Styles du titre */
 .home-container h1 {
     font-size: 2.5rem;
     font-weight: bold;
@@ -31,33 +26,195 @@
     margin-top: 10px;
 }
 
-/* Solution focalisée pour les media queries */
+.home-container .highlight {
+    color: #ffcc00;
+}
+
+/* 📝 Styles du texte */
+.home-container p {
+    font-size: 1.2rem;
+    color: #ffffff;
+    margin-bottom: 1rem;
+    width: 100%;
+}
+
+/* 🎨 Conteneur de boutons */
+.button-container {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 20px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+    width: 100%;
+}
+
+/* 🎨 Bouton à largeur fixe */
+.home-container .btn-dark {
+    background-color: black;
+    color: white;
+    font-size: 0.9rem;
+    padding: 8px 16px;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: background 0.3s;
+    display: inline-block;
+    width: auto;
+    min-width: 120px;
+    max-width: 200px;
+}
+
+.home-container .btn-dark:hover {
+    background-color: #333;
+    transform: translateY(-2px);
+}
+
+/* 🔹 Section des solutions de gains */
+.solutions {
+    margin-top: 30px;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    width: 100%;
+}
+
+/* 📌 Titre des solutions */
+.solutions h2 {
+    font-size: 2rem;
+    color: #ffcc00;
+    margin-bottom: 15px;
+}
+
+/* 📋 Liste des solutions */
+.solution-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 15px;
+    width: 100%;
+    margin-top: 10px;
+}
+
+/* 🏆 Cartes de solution */
+.solution-card {
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 12px;
+    border-radius: 10px;
+    width: calc(50% - 15px);
+    margin-bottom: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease-in-out;
+    text-align: center;
+}
+
+.solution-card:hover {
+    transform: translateY(-5px);
+}
+
+.solution-card h3 {
+    font-size: 1.5rem;
+    color: #ffcc00;
+    margin-bottom: 8px;
+}
+
+.solution-card p {
+    font-size: 1rem;
+    color: #ddd;
+    margin: 0;
+}
+
+/* 📱💡🔹 RESPONSIVITÉ - AVEC CENTRAGE CORRIGÉ */
 @media (max-width: 1024px) {
     .home-container {
-        /* Reset complet du positionnement */
+        /* Reset du positionnement pour le centrage */
         position: static !important;
         left: 0 !important;
         transform: none !important;
-        
-        /* Centrage explicite */
         max-width: 90% !important;
         margin-left: auto !important;
         margin-right: auto !important;
+        
+        /* Préservation des styles visuels */
         margin-top: 25px;
+    }
+
+    .home-container h1 {
+        font-size: 2.2rem;
+        margin-top: 10px;
+    }
+
+    .home-container p {
+        font-size: 1rem;
+    }
+
+    .solutions {
+        padding: 15px;
+        margin-top: 25px;
+    }
+
+    .solution-card {
+        width: calc(100% - 15px);
+        max-width: 400px;
     }
 }
 
 @media (max-width: 768px) {
     .home-container {
-        /* Reset complet du positionnement */
+        /* Reset du positionnement pour le centrage */
         position: static !important;
         left: 0 !important;
         transform: none !important;
-        
-        /* Centrage explicite */
         max-width: 95% !important;
         margin-left: auto !important;
         margin-right: auto !important;
+        
+        /* Préservation des styles visuels */
         margin-top: 20px;
+    }
+
+    .home-container h1 {
+        font-size: 2rem;
+        margin-top: 10px;
+    }
+
+    .home-container p {
+        font-size: 1rem;
+    }
+
+    .button-container {
+        flex-direction: column;
+        align-items: center;
+        width: auto;
+        margin-left: auto;
+        margin-right: auto;
+        margin-top: 10px;
+        gap: 10px;
+    }
+
+    .home-container .btn-dark {
+        font-size: 0.9rem;
+        padding: 8px 16px;
+        width: auto;
+        min-width: 120px;
+        max-width: 180px;
+    }
+
+    .solutions {
+        padding: 12px;
+        margin-top: 20px;
+    }
+
+    .solution-list {
+        flex-direction: column;
+        align-items: center;
+        margin-top: 10px;
+    }
+
+    .solution-card {
+        width: 100%;
+        max-width: 300px;
+        margin-bottom: 10px;
     }
 }
