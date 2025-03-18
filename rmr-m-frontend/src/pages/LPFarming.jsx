@@ -255,8 +255,8 @@ const LPFarming = () => {
   };
 
   return (
-    <div className="responsive-container" style={{backgroundColor: "#ffffff"}}>
-      <div className="lp-container" style={{backgroundColor: "#ffffff"}}>
+    <div className="responsive-container" style={{backgroundColor: "#ffffff", overflow: "hidden", width: "100%"}}>
+      <div className="lp-container" style={{backgroundColor: "#ffffff", overflow: "hidden", width: "100%"}}>
         <h1>LP Farming - Génération de Rendement</h1>
         
         <div className="responsive-card">

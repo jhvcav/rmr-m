@@ -5,12 +5,22 @@
   box-sizing: border-box;
 }
 
-body {
+html, body {
   margin: 0;
   padding: 0;
   background-color: #ffffff;
+  width: 100%;
+  overflow-x: hidden; /* Empêche le défilement horizontal */
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, 
     Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+}
+
+body, #root, .App {
+  min-height: 100vh;
+  background-color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 /* Container principal - assure que le contenu est centré sur tous les appareils */
@@ -24,6 +34,7 @@ body {
   flex-direction: column;
   align-items: center;
   background-color: #ffffff;
+  overflow-x: hidden; /* Empêche le défilement horizontal */
 }
 
 /* Styles des cartes responsives */
@@ -92,6 +103,13 @@ label {
   .responsive-container {
     max-width: 100%;
     padding: 10px;
+    margin: 0;
+    overflow-x: hidden;
+  }
+  
+  .lp-container {
+    width: 100%;
+    overflow-x: hidden;
   }
   
   .responsive-card {

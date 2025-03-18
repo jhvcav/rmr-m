@@ -9,6 +9,7 @@
   width: 100%;
   margin: 0 auto;
   background-color: #ffffff;
+  overflow-x: hidden; /* Empêche le défilement horizontal */
 }
 
 /* Styles des sections */
@@ -95,22 +96,42 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  width: 100%;
 }
 
 /* Espacement supplémentaire */
 h1, h2, h3 {
   margin-top: 20px;
   margin-bottom: 15px;
+  width: 100%;
+  text-align: center;
 }
 
 /* Assure que les paragraphes ont des marges cohérentes */
 p {
   margin: 10px 0;
   line-height: 1.5;
+  width: 100%;
+  text-align: center;
 }
 
 /* Styles spécifiques pour les montants et soldes */
 span, strong {
   font-weight: bold;
   color: #28a745;
+}
+
+/* Fix spécifique pour mobile */
+@media (max-width: 600px) {
+  .lp-container, 
+  .responsive-container,
+  .responsive-card,
+  .wallet-info,
+  .balance-info,
+  .simulator {
+    max-width: 100%;
+    width: 100%;
+    overflow-x: hidden;
+    box-sizing: border-box;
+  }
 }
