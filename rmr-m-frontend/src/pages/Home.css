@@ -1,5 +1,6 @@
-/* Corrections pour le positionnement et centrage */
+/* Corrections pour le positionnement et centrage AVEC PRÉSERVATION DES CARTES */
 .home-container {
+    /* Centrage correct */
     position: static !important;
     left: 0 !important; 
     transform: none !important;
@@ -7,21 +8,42 @@
     max-width: 800px !important;
     margin-left: auto !important;
     margin-right: auto !important;
+    
+    /* Préservation de l'apparence carte */
+    background: rgba(255, 255, 255, 0.1) !important;
+    border-radius: 10px !important;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3) !important;
+    overflow: visible !important;
+    padding: 15px !important;
+    text-align: center !important;
+    margin-top: 30px !important;
 }
 
+/* Préservation de l'apparence pour tablettes */
 @media (max-width: 1024px) {
     .home-container {
+        /* Centrage correct */
         position: static !important;
         left: 0 !important;
         transform: none !important;
         max-width: 90% !important;
         margin-left: auto !important;
         margin-right: auto !important;
+        
+        /* Préservation de l'apparence carte */
+        background: rgba(255, 255, 255, 0.1) !important;
+        border-radius: 10px !important;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3) !important;
+        overflow: visible !important;
+        padding: 15px !important;
+        margin-top: 25px !important;
     }
 }
 
+/* Préservation de l'apparence pour mobiles */
 @media (max-width: 768px) {
     .home-container {
+        /* Centrage correct */
         position: static !important;
         left: 0 !important;
         transform: none !important;
@@ -29,27 +51,13 @@
         margin-left: auto !important;
         margin-right: auto !important;
         
-        /* IMPORTANT: Préservez ces styles existants pour l'apparence card */
-        background: rgba(255, 255, 255, 0.1) !important; 
+        /* Préservation de l'apparence carte */
+        background: rgba(255, 255, 255, 0.1) !important;
         border-radius: 10px !important;
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3) !important;
-        
-        /* Assurez-vous que la carte reste visible */
         overflow: visible !important;
         padding: 15px !important;
-    }
-    
-    /* Correction pour les cartes de solution en mobile */
-    .solution-card {
-        width: 100% !important;
-        max-width: 300px !important;
-        margin-bottom: 10px !important;
-        
-        /* Forcer l'aspect card */
-        background: rgba(0, 0, 0, 0.7) !important;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2) !important;
-        border-radius: 10px !important;
-        padding: 12px !important;
+        margin-top: 20px !important;
     }
 }
 
