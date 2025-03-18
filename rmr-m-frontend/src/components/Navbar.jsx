@@ -11,7 +11,20 @@ import "./Navbar.css";
 const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   
-  // Fermer le menu en cas de redimensionnement de la fenêtre
+  // Désactiver le défilement quand le menu est ouvert
+  useEffect(() => {
+    if (menuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'auto';
+    }
+    
+    return () => {
+      document.body.style.overflow = 'auto';
+    };
+  }, [menuOpen]);
+  
+  // Fermer le menu si la fenêtre est redimensionnée
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth > 768 && menuOpen) {
@@ -20,31 +33,13 @@ const Navbar = () => {
     };
     
     window.addEventListener('resize', handleResize);
-    
-    // Nettoyer l'écouteur d'événement lors du démontage
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
-  }, [menuOpen]);
-  
-  // Empêcher le défilement du body lorsque le menu est ouvert
-  useEffect(() => {
-    if (menuOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'auto';
-    }
-    
-    // Nettoyer lors du démontage
-    return () => {
-      document.body.style.overflow = 'auto';
-    };
+    return () => window.removeEventListener('resize', handleResize);
   }, [menuOpen]);
 
   return (
     <nav className="navbar">
       <div className="container">
-        {/* Bouton hamburger pour mobile (visible uniquement quand le menu est fermé) */}
+        {/* Bouton hamburger */}
         <button 
           className={`menu-toggle menu-open-btn ${menuOpen ? 'hidden' : ''}`} 
           onClick={() => setMenuOpen(true)}
@@ -53,16 +48,21 @@ const Navbar = () => {
           ☰
         </button>
 
-        {/* Liste des menus - Menu latéral en mode mobile */}
+        {/* Menu latéral */}
         <ul className={`nav-menu ${menuOpen ? "open" : ""}`}>
-          {/* Bouton de fermeture - toujours présent dans le DOM mais affiché conditionnellement */}
+          {/* Bouton de fermeture avec ✕ au lieu de ✖ pour plus de clarté */}
           <button 
             className="menu-toggle menu-close-btn" 
             onClick={() => setMenuOpen(false)}
-            style={{ display: menuOpen ? 'block' : 'none' }}
             aria-label="Fermer le menu"
+            style={{
+              position: 'fixed', // Position fixe pour s'assurer qu'il reste visible
+              display: menuOpen ? 'flex' : 'none',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
           >
-            ✖
+            ✕
           </button>
           
           <li className="nav-item"><Link to="/rmr-m" onClick={() => setMenuOpen(false)}>Accueil</Link></li>
@@ -75,22 +75,21 @@ const Navbar = () => {
           <li className="nav-item"><Link to="/rmr-m/a-propos" onClick={() => setMenuOpen(false)}>À propos</Link></li>
         </ul>
         
-        {/* Fond sombre pour fermer le menu en cliquant à l'extérieur (mobile uniquement) */}
-        {menuOpen && (
-          <div 
-            className="menu-overlay" 
-            onClick={() => setMenuOpen(false)}
-            style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              backgroundColor: 'rgba(0,0,0,0.3)',
-              zIndex: 500
-            }}
-          />
-        )}
+        {/* Overlay pour fermer le menu en cliquant à l'extérieur */}
+        <div 
+          className={`menu-overlay ${menuOpen ? 'visible' : ''}`} 
+          onClick={() => setMenuOpen(false)}
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            zIndex: 995,
+            display: menuOpen ? 'block' : 'none'
+          }}
+        />
       </div>
     </nav>
   );
