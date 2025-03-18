@@ -1,11 +1,30 @@
-/* 📌 Responsive Styles */
-.responsive-container {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 20px;
+/* 📌 Styles Responsive pour LP Farming */
+
+/* Styles globaux de base */
+* {
   box-sizing: border-box;
 }
 
+body {
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, 
+    Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+}
+
+/* Container principal - assure que le contenu est centré sur tous les appareils */
+.responsive-container {
+  width: 100%;
+  max-width: 1200px;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Styles des cartes responsives */
 .responsive-card {
   width: 100%;
   max-width: 600px;
@@ -14,64 +33,81 @@
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   background-color: #fff;
+  text-align: center;
 }
 
+/* Boutons responsifs */
 .responsive-button {
   width: 100%;
-  max-width: 400px;
+  max-width: 300px;
   margin: 10px auto;
-  padding: 12px;
+  padding: 12px 15px;
   font-size: 16px;
   border-radius: 8px;
   cursor: pointer;
   display: block;
+  text-align: center;
 }
 
+/* Formulaires responsifs */
 .responsive-form {
   width: 100%;
+  max-width: 300px;
   padding: 12px;
-  margin: 8px 0 16px 0;
+  margin: 8px auto 16px auto;
   border: 1px solid #ddd;
   border-radius: 5px;
   font-size: 16px;
-  box-sizing: border-box;
 }
 
-/* Ajustements pour les tablettes */
-@media screen and (min-width: 501px) and (max-width: 768px) {
+/* Centrage des titres et textes */
+h1, h2, h3, p {
+  text-align: center;
+  width: 100%;
+}
+
+/* Alignement des labels */
+label {
+  display: block;
+  text-align: center;
+  width: 100%;
+}
+
+/* Tablettes (portrait et paysage) */
+@media (min-width: 601px) and (max-width: 1024px) {
   .responsive-container {
-    padding: 15px;
     max-width: 90%;
+    padding: 15px;
   }
   
   .responsive-card {
-    max-width: 90%;
-  }
-  
-  .responsive-button {
-    max-width: 90%;
+    max-width: 80%;
   }
 }
 
-/* Ajustements pour les smartphones */
-@media screen and (max-width: 500px) {
+/* Smartphones */
+@media (max-width: 600px) {
   .responsive-container {
+    max-width: 100%;
     padding: 10px;
-    width: 95%;
   }
   
   .responsive-card {
-    max-width: 100%;
+    max-width: 95%;
     padding: 15px;
+    margin: 10px auto;
   }
   
   .responsive-button {
     max-width: 100%;
-    font-size: 14px;
+  }
+  
+  .responsive-form {
+    max-width: 100%;
   }
   
   h1 {
-    font-size: 24px;
+    font-size: 22px;
   }
   
   h2 {
@@ -81,19 +117,4 @@
   h3 {
     font-size: 18px;
   }
-}
-
-/* Assurer que les formulaires et boutons sont bien centrés */
-.wallet-connection, .simulator {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-}
-
-/* Style pour la div qui contient le solde */
-.balance-info {
-  margin-top: 10px;
-  text-align: center;
-  width: 100%;
 }

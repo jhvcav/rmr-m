@@ -2,15 +2,12 @@ import React, { useState, useEffect } from "react";
 import { ethers } from "ethers";
 import { useNavigate } from "react-router-dom";
 import "./LPFarming.css";
-import "./ResponsiveStyles.css"; // Import des styles responsifs
+import "./ResponsiveStyles.css";
 
 // ABI minimal pour un contrat ERC-20
 const ERC20_ABI = [
-  // Récupérer le solde
   "function balanceOf(address owner) view returns (uint256)",
-  // Récupérer le nombre de décimales
   "function decimals() view returns (uint8)",
-  // Récupérer le symbole
   "function symbol() view returns (string)",
 ];
 
@@ -47,7 +44,7 @@ const LPFarming = () => {
     throw new Error("Version d'ethers non supportée");
   };
 
-  // Détection automatique du wallet (MetaMask ou autres)
+  // Détection automatique du wallet
   useEffect(() => {
     if (window.ethereum) {
       const web3Provider = getProvider();
@@ -147,52 +144,52 @@ const LPFarming = () => {
 
   // Calcul des gains
   const calculateProfit = () => {
-    const monthlyRate = 0.10; // Par exemple 10% par mois
+    const monthlyRate = 0.10; // 10% par mois
     const totalProfit = capital * Math.pow(1 + monthlyRate, duration) - capital;
     setProfit(totalProfit.toFixed(2));
   };
 
   // Connexion au wallet
-const connectWallet = async () => {
-  if (!window.ethereum) {
-    alert("Veuillez installer MetaMask ou un wallet compatible !");
-    return;
-  }
-
-  try {
-    // Basculer vers BSC Mainnet
-    try {
-      await window.ethereum.request({
-        method: "wallet_switchEthereumChain",
-        params: [{ chainId: "0x38" }], // Chaîne BSC Mainnet (56 en décimal)
-      });
-    } catch (switchError) {
-      // Si le réseau n'existe pas, l'ajouter
-      if (switchError.code === 4902) {
-        try {
-          await window.ethereum.request({
-            method: "wallet_addEthereumChain",
-            params: [
-              {
-                chainId: "0x38",
-                chainName: "Binance Smart Chain",
-                nativeCurrency: {
-                  name: "BNB",
-                  symbol: "BNB",
-                  decimals: 18,
-                },
-                rpcUrls: ["https://bsc-dataseed1.binance.org"],
-                blockExplorerUrls: ["https://bscscan.com/"],
-              },
-            ],
-          });
-        } catch (addError) {
-          console.error("Erreur lors de l'ajout du réseau:", addError);
-        }
-      } else {
-        console.error("Erreur lors du changement de réseau:", switchError);
-      }
+  const connectWallet = async () => {
+    if (!window.ethereum) {
+      alert("Veuillez installer MetaMask ou un wallet compatible !");
+      return;
     }
+
+    try {
+      // Basculer vers BSC Mainnet
+      try {
+        await window.ethereum.request({
+          method: "wallet_switchEthereumChain",
+          params: [{ chainId: "0x38" }], // Chaîne BSC Mainnet (56 en décimal)
+        });
+      } catch (switchError) {
+        // Si le réseau n'existe pas, l'ajouter
+        if (switchError.code === 4902) {
+          try {
+            await window.ethereum.request({
+              method: "wallet_addEthereumChain",
+              params: [
+                {
+                  chainId: "0x38",
+                  chainName: "Binance Smart Chain",
+                  nativeCurrency: {
+                    name: "BNB",
+                    symbol: "BNB",
+                    decimals: 18,
+                  },
+                  rpcUrls: ["https://bsc-dataseed1.binance.org"],
+                  blockExplorerUrls: ["https://bscscan.com/"],
+                },
+              ],
+            });
+          } catch (addError) {
+            console.error("Erreur lors de l'ajout du réseau:", addError);
+          }
+        } else {
+          console.error("Erreur lors du changement de réseau:", switchError);
+        }
+      }
 
       // Demande d'accès au compte
       const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
@@ -213,7 +210,7 @@ const connectWallet = async () => {
 
   // Fonction pour transférer vers le formulaire de dépôt
   const goToDepotForm = () => {
-    // Calculer les frais (par exemple, 2% du capital)
+    // Calculer les frais (2% du capital)
     const frais = capital * 0.02;
     
     // Calculer le rendement estimé si ce n'est pas déjà fait
@@ -221,13 +218,13 @@ const connectWallet = async () => {
       calculateProfit();
     }
     
-    // Convertir la durée de mois en jours pour la cohérence avec DepotForm
+    // Convertir la durée de mois en jours
     const dureeJours = duration * 30;
     
-    // Adresse du pool (utiliser l'adresse du contrat si disponible)
+    // Adresse du pool
     const poolAddress = contract ? contract.address : "0x331089D11dfA34485094dE8f60b27EB474AEc86a";
     
-    // Navigation vers le formulaire de dépôt avec les données de la simulation
+    // Navigation vers le formulaire de dépôt
     navigate("/rmr-m/depot-form", {
       state: {
         montant: capital,
@@ -248,11 +245,7 @@ const connectWallet = async () => {
 
     try {
       setLoading(true);
-      
-      // Au lieu d'interagir directement avec le contrat, 
-      // naviguer vers la page DepotForm
       goToDepotForm();
-      
     } catch (error) {
       console.error("Erreur:", error);
       alert("❌ Erreur lors de l'investissement !");
@@ -262,85 +255,90 @@ const connectWallet = async () => {
   };
 
   return (
-    <div className="lp-container responsive-container">
-      <h1>LP Farming - Génération de Rendement</h1>
-      <p>
-        <b>Liquidity Provider (LP) Farming</b> vous permet d'investir des fonds dans des pools de liquidités et d'obtenir un rendement stable de
-        <b> 10% par mois</b>. Grâce à l'optimisation automatique, votre capital est réinvesti pour maximiser les gains.
-      </p>
-
-      {/* Connexion au Wallet */}
-      <div className="wallet-connection responsive-card">
-        <h3>Connexion au Wallet</h3>
-        {account ? (
-          <div className="wallet-info">
-            <button className="wallet-button btn btn-success responsive-button">
-              ✅ {account.substring(0, 6)}...{account.slice(-4)}
-            </button>
-            {usdcBalance !== null && (
-              <div className="balance-info">
-                <p>Solde {usdcSymbol}: <strong>{parseFloat(usdcBalance).toFixed(2)} {usdcSymbol}</strong></p>
-              </div>
-            )}
-          </div>
-        ) : (
-          <button className="wallet-button btn btn-primary responsive-button" onClick={connectWallet}>
-            Connecter mon Wallet MetaMask
-          </button>
-        )}
-      </div>
-
-      {/* Simulateur de Gains */}
-      <h2>Simulateur de Gains en {usdcSymbol}</h2>
-      <div className="simulator responsive-card">
-        <label>Capital à investir ({usdcSymbol}) :</label>
-        <input
-          type="number"
-          min="1"
-          value={capital}
-          onChange={(e) => setCapital(Number(e.target.value))}
-          className="responsive-form"
-        />
-
-        <label>Durée (mois) :</label>
-        <input
-          type="number"
-          min="1"
-          value={duration}
-          onChange={(e) => setDuration(Number(e.target.value))}
-          className="responsive-form"
-        />
-
-        <button 
-          onClick={calculateProfit} 
-          className="responsive-button btn btn-primary"
-        >
-          Calculer
-        </button>
+    <div className="responsive-container">
+      <div className="lp-container">
+        <h1>LP Farming - Génération de Rendement</h1>
         
-        <h3>Gains estimés : <span>{profit} {usdcSymbol}</span></h3>
-      </div>
-
-      {/* Bouton Investir */}
-      <button 
-        className="validate-btn responsive-button" 
-        onClick={handleInvest} 
-        disabled={loading}
-      >
-        {loading ? "Transaction en cours..." : "Valider mon choix"}
-      </button>
-
-      {/* Information sur USDC */}
-      <div className="usdc-info responsive-card">
-        <h3>ℹ️ Informations sur les {usdcSymbol}</h3>
-        <p>
-          Pour utiliser ce service, vous avez besoin de {usdcSymbol} sur le réseau BSC Testnet.
-          Assurez-vous également d'avoir un peu de BNB pour payer les frais de transaction.
+        <p className="responsive-card">
+          <b>Liquidity Provider (LP) Farming</b> vous permet d'investir des fonds dans des pools de liquidités et d'obtenir un rendement stable de
+          <b> 10% par mois</b>. Grâce à l'optimisation automatique, votre capital est réinvesti pour maximiser les gains.
         </p>
-        <p>
-          Montant minimum recommandé : 1 {usdcSymbol}<br />
-          Pour des rendements optimaux : 250 {usdcSymbol} ou plus
-        </p>
+
+        {/* Connexion au Wallet */}
+        <div className="responsive-card">
+          <h3>Connexion au Wallet</h3>
+          {account ? (
+            <div className="wallet-info">
+              <button className="wallet-button btn btn-success">
+                ✅ {account.substring(0, 6)}...{account.slice(-4)}
+              </button>
+              {usdcBalance !== null && (
+                <div className="balance-info">
+                  <p>Solde {usdcSymbol}: <strong>{parseFloat(usdcBalance).toFixed(2)} {usdcSymbol}</strong></p>
+                </div>
+              )}
+            </div>
+          ) : (
+            <button className="wallet-button btn btn-primary" onClick={connectWallet}>
+              Connecter mon Wallet MetaMask
+            </button>
+          )}
+        </div>
+
+        {/* Simulateur de Gains */}
+        <h2>Simulateur de Gains en {usdcSymbol}</h2>
+        <div className="responsive-card">
+          <div className="simulator">
+            <label>Capital à investir ({usdcSymbol}) :</label>
+            <input
+              type="number"
+              min="1"
+              value={capital}
+              onChange={(e) => setCapital(Number(e.target.value))}
+              className="responsive-form"
+            />
+
+            <label>Durée (mois) :</label>
+            <input
+              type="number"
+              min="1"
+              value={duration}
+              onChange={(e) => setDuration(Number(e.target.value))}
+              className="responsive-form"
+            />
+
+            <button 
+              onClick={calculateProfit} 
+              className="responsive-button btn btn-primary"
+            >
+              Calculer
+            </button>
+            
+            <h3>Gains estimés : <span>{profit} {usdcSymbol}</span></h3>
+          </div>
+        </div>
+
+        {/* Bouton Investir */}
+        <button 
+          className="validate-btn responsive-button" 
+          onClick={handleInvest} 
+          disabled={loading}
+        >
+          {loading ? "Transaction en cours..." : "Valider mon choix"}
+        </button>
+
+        {/* Information sur USDC */}
+        <div className="responsive-card">
+          <h3>ℹ️ Informations sur les {usdcSymbol}</h3>
+          <p>
+            Pour utiliser ce service, vous avez besoin de {usdcSymbol} sur le réseau BSC Testnet.
+            Assurez-vous également d'avoir un peu de BNB pour payer les frais de transaction.
+          </p>
+          <p>
+            Montant minimum recommandé : 1 {usdcSymbol}<br />
+            Pour des rendements optimaux : 250 {usdcSymbol} ou plus
+          </p>
+        </div>
       </div>
     </div>
   );

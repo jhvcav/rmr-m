@@ -1,57 +1,67 @@
-/* 📌 Styles généraux */
+/* 📌 Styles pour LP Farming */
+
+/* Style du container principal */
 .lp-container {
-  width: 100%;
-  box-sizing: border-box;
-  text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
+  width: 100%;
+  margin: 0 auto;
 }
 
-/* 📌 Styles des cartes */
-.wallet-connection, .simulator, .usdc-info {
+/* Styles des sections */
+.wallet-connection, 
+.simulator, 
+.usdc-info {
   width: 100%;
   margin: 15px auto;
-  box-sizing: border-box;
-}
-
-/* 📌 Styles des boutons */
-.wallet-buttons, .simulator {
-  width: 100%;
-  margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 15px;
   align-items: center;
 }
 
-/* 📌 Boutons améliorés */
+/* Style des boutons standard */
 .btn {
-  width: 100%;
-  max-width: 400px;
-  padding: 15px;
-  font-size: 16px;
+  padding: 10px 15px;
   border-radius: 8px;
-  margin: 0 auto;
-  display: block;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: center;
+  border: none;
+  margin: 5px auto;
 }
 
-/* 📌 Champs de saisie */
-.simulator input {
+.btn-primary {
+  background-color: #007bff;
+  color: white;
+}
+
+.btn-success {
+  background-color: #28a745;
+  color: white;
+}
+
+/* Style spécifique pour le bouton wallet */
+.wallet-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 300px;
   width: 100%;
-  max-width: 400px;
-  padding: 12px;
+  margin: 10px auto;
+  padding: 12px 20px;
   font-size: 16px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  box-sizing: border-box;
-  margin: 8px auto 16px auto;
+  font-weight: bold;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: center;
 }
 
-/* 📌 Validation */
+/* Style du bouton de validation */
 .validate-btn {
   width: 100%;
-  max-width: 400px;
+  max-width: 300px;
   padding: 15px;
   font-size: 18px;
   background-color: #28a745;
@@ -61,54 +71,45 @@
   cursor: pointer;
   margin: 20px auto;
   display: block;
+  text-align: center;
 }
 
 .validate-btn:disabled {
-  background-color: gray;
+  background-color: #6c757d;
   cursor: not-allowed;
 }
 
-.wallet-connect-section {
-  text-align: center;
-  margin: 0 auto 20px auto;
+/* Style pour les conteneurs d'infos */
+.wallet-info, 
+.balance-info {
   width: 100%;
-}
-
-.wallet-connect-section h3 {
-  margin-bottom: 10px;
-  font-size: 18px;
-  font-weight: bold;
-}
-
-.wallet-button {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  padding: 12px 20px;
-  font-size: 16px;
+  margin: 5px auto;
+}
+
+/* Style pour les espaces de calcul */
+.simulator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Espacement supplémentaire */
+h1, h2, h3 {
+  margin-top: 20px;
+  margin-bottom: 15px;
+}
+
+/* Assure que les paragraphes ont des marges cohérentes */
+p {
+  margin: 10px 0;
+  line-height: 1.5;
+}
+
+/* Styles spécifiques pour les montants et soldes */
+span, strong {
   font-weight: bold;
-  border-radius: 8px;
-  cursor: pointer;
-  gap: 10px;
-  margin: 0 auto;
-  max-width: 400px;
-}
-
-.wallet-logo {
-  width: 24px;
-  height: 24px;
-}
-
-/* Ajouter une règle pour centrer le contenu de tous les éléments */
-h1, h2, h3, p, label {
-  width: 100%;
-  text-align: center;
-  box-sizing: border-box;
-}
-
-/* S'assurer que les labels sont alignés correctement */
-.simulator label {
-  display: block;
-  text-align: center;
-  margin-top: 15px;
+  color: #28a745;
 }
