@@ -183,27 +183,3 @@
 .nav-menu.open {
   transform: translateX(0);
 }
-
-/* Assurer que les items du menu sont visibles sur tout type d'écran */
-@media (max-width: 768px) {
-  .nav-menu {
-    padding-top: 70px; /* Espace pour le bouton de fermeture */
-    overflow-y: auto;
-    /* Empêcher le contenu de passer sous la navbar */
-    -webkit-overflow-scrolling: touch;
-  }
-  
-  /* Amélioration pour la visibilité des liens */
-  .nav-item a {
-    display: block;
-    width: 100%;
-    padding: 15px;
-    font-size: 16px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  }
-  
-  /* Le dernier item n'a pas de bordure en bas */
-  .nav-item:last-child a {
-    border-bottom: none;
-  }
-}
