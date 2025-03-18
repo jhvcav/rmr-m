@@ -153,46 +153,46 @@ const LPFarming = () => {
   };
 
   // Connexion au wallet
-  const connectWallet = async () => {
-    if (!window.ethereum) {
-      alert("Veuillez installer MetaMask ou un wallet compatible !");
-      return;
-    }
+const connectWallet = async () => {
+  if (!window.ethereum) {
+    alert("Veuillez installer MetaMask ou un wallet compatible !");
+    return;
+  }
 
+  try {
+    // Basculer vers BSC Mainnet
     try {
-      // Basculer vers BSC Testnet
-      try {
-        await window.ethereum.request({
-          method: "wallet_switchEthereumChain",
-          params: [{ chainId: "0x61" }], // Chaîne BSC Testnet (97 en décimal)
-        });
-      } catch (switchError) {
-        // Si le réseau n'existe pas, l'ajouter
-        if (switchError.code === 4902) {
-          try {
-            await window.ethereum.request({
-              method: "wallet_addEthereumChain",
-              params: [
-                {
-                  chainId: "0x38",
-                  chainName: "BSC Chain",
-                  nativeCurrency: {
-                    name: "BNB",
-                    symbol: "BNB",
-                    decimals: 18,
-                  },
-                  rpcUrls: ["https://bsc-dataseed1.binance.org"],
-                  blockExplorerUrls: ["https://bscscan.com/"],
+      await window.ethereum.request({
+        method: "wallet_switchEthereumChain",
+        params: [{ chainId: "0x38" }], // Chaîne BSC Mainnet (56 en décimal)
+      });
+    } catch (switchError) {
+      // Si le réseau n'existe pas, l'ajouter
+      if (switchError.code === 4902) {
+        try {
+          await window.ethereum.request({
+            method: "wallet_addEthereumChain",
+            params: [
+              {
+                chainId: "0x38",
+                chainName: "Binance Smart Chain",
+                nativeCurrency: {
+                  name: "BNB",
+                  symbol: "BNB",
+                  decimals: 18,
                 },
-              ],
-            });
-          } catch (addError) {
-            console.error("Erreur lors de l'ajout du réseau:", addError);
-          }
-        } else {
-          console.error("Erreur lors du changement de réseau:", switchError);
+                rpcUrls: ["https://bsc-dataseed1.binance.org"],
+                blockExplorerUrls: ["https://bscscan.com/"],
+              },
+            ],
+          });
+        } catch (addError) {
+          console.error("Erreur lors de l'ajout du réseau:", addError);
         }
+      } else {
+        console.error("Erreur lors du changement de réseau:", switchError);
       }
+    }
 
       // Demande d'accès au compte
       const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
