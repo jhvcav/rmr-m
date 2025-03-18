@@ -1,5 +1,62 @@
 /* 🌟 Version finale - Centrage corrigé avec couleur d'origine */
 
+/* Ajoutez ce code au début de votre fichier Home.css */
+
+/* Corrections pour le positionnement et centrage */
+.home-container {
+    position: static !important;
+    left: 0 !important; 
+    transform: none !important;
+    width: 100% !important;
+    max-width: 800px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+@media (max-width: 1024px) {
+    .home-container {
+        position: static !important;
+        left: 0 !important;
+        transform: none !important;
+        max-width: 90% !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .home-container {
+        position: static !important;
+        left: 0 !important;
+        transform: none !important;
+        max-width: 95% !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+        
+        /* IMPORTANT: Préservez ces styles existants pour l'apparence card */
+        background: rgba(255, 255, 255, 0.1) !important; 
+        border-radius: 10px !important;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3) !important;
+        
+        /* Assurez-vous que la carte reste visible */
+        overflow: visible !important;
+        padding: 15px !important;
+    }
+    
+    /* Correction pour les cartes de solution en mobile */
+    .solution-card {
+        width: 100% !important;
+        max-width: 300px !important;
+        margin-bottom: 10px !important;
+        
+        /* Forcer l'aspect card */
+        background: rgba(0, 0, 0, 0.7) !important;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2) !important;
+        border-radius: 10px !important;
+        padding: 12px !important;
+    }
+}
+
 /* IMPORTANT: À ajouter au début de Home.css sans changer le reste */
 .home-container {
     /* Reset du positionnement pour le centrage */
