@@ -75,7 +75,7 @@
 @media (max-width: 768px) {
   .navbar {
     top: 80px; /* Espace réduit pour le logo sur mobile */
-    padding: 18px 25px;
+    padding: 10px 15px;
   }
   
   .menu-open-btn {
@@ -93,16 +93,16 @@
     z-index: 1200;
   }
 
-  /* Bouton de fermeture du menu (croix) - amélioration de la visibilité */
+  /* Bouton de fermeture du menu (croix) très visible et contrasté */
   .menu-close-btn {
     display: block !important;
-    position: fixed !important; /* Position fixe pour rester visible */
-    top: 15px !important;
-    right: 15px !important; /* Aligné à droite du menu */
+    position: fixed !important;
+    top: 10px !important;
+    right: 10px !important;
     width: 40px !important;
     height: 40px !important;
     font-size: 28px !important;
-    background-color: #ff3333 !important; /* Rouge vif */
+    background-color: #ff3333 !important;
     color: white !important;
     border-radius: 50% !important;
     border: 2px solid white !important;
@@ -110,8 +110,8 @@
     align-items: center !important;
     justify-content: center !important;
     padding: 0 !important;
-    z-index: 2000 !important; /* Z-index très élevé */
-    box-shadow: 0 0 10px rgba(0,0,0,0.5) !important; /* Ombre pour le faire ressortir */
+    z-index: 9999 !important; /* Z-index extrêmement élevé */
+    box-shadow: 0 0 10px rgba(0,0,0,0.8) !important;
   }
 
   .nav-menu {
@@ -120,17 +120,17 @@
     left: -100%; /* Caché par défaut */
     width: 250px;
     height: 100vh;
-    background-color: rgba(0, 0, 0, 0.9);
+    background-color: rgba(0, 0, 0, 0.95); /* Plus sombre pour meilleur contraste */
     color: white;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-start; /* Alignement en haut au lieu de centre */
-    gap: 5px; /* Réduit l'espace entre les éléments */
-    padding-top: 60px; /* Espace en haut pour le bouton de fermeture */
+    justify-content: flex-start;
+    gap: 0 !important; /* Aucun espace entre les éléments */
+    padding-top: 50px; /* Réduit pour voir plus d'éléments */
     transition: left 0.3s ease-in-out;
     z-index: 1100;
-    overflow-y: auto; /* Pour permettre le défilement si nécessaire */
-    padding-bottom: 30px; /* Espace en bas */
+    overflow-y: auto;
+    padding-bottom: 20px;
   }
 
   .nav-menu.open {
@@ -138,21 +138,22 @@
   }
 
   .nav-item {
-    width: 100%; /* Prend toute la largeur disponible */
-    display: flex;
-    justify-content: center;
-    margin: 0; /* Supprime les marges entre les items */
+    width: 100%;
+    margin: 0 !important; /* Supprime les marges */
+    padding: 0 !important; /* Supprime le padding */
+    height: auto !important;
+    min-height: 0 !important;
   }
 
   .nav-item a {
     color: white;
-    font-size: 15px; /* Taille légèrement réduite */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 8px; /* Réduit le padding */
-    width: 90%; /* Largeur du lien par rapport à l'élément parent */
+    font-size: 14px; /* Taille réduite */
+    padding: 5px !important; /* Padding très réduit */
+    margin: 1px 0 !important; /* Marge minimale */
+    width: 100%;
     text-align: center;
-    margin: 2px 0; /* Marge minimale entre les items */
+    min-height: 0 !important;
+    display: block;
+    line-height: 1.2 !important; /* Interligne réduit */
   }
 }

@@ -4,30 +4,17 @@
  * Ce code ne peut pas être utilisé ou redistribué sans autorisation.
  */
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import "./Navbar.css";
 
 const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
 
-  // Bloquer le défilement de la page quand le menu est ouvert
-  useEffect(() => {
-    if (menuOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'auto';
-    }
-    
-    return () => {
-      document.body.style.overflow = 'auto'; // Nettoyage
-    };
-  }, [menuOpen]);
-
   return (
     <nav className="navbar">
       <div className="container">
-        {/* Bouton hamburger pour mobile (visible uniquement quand le menu est fermé) */}
+        {/* Bouton hamburger pour mobile */}
         {!menuOpen && (
           <button 
             className="menu-toggle menu-open-btn" 
@@ -39,11 +26,28 @@ const Navbar = () => {
 
         {/* Liste des menus - Menu latéral en mode mobile */}
         <ul className={`nav-menu ${menuOpen ? "open" : ""}`}>
-          {/* Bouton de fermeture - TOUJOURS DANS LE DOM mais affiché conditionnellement */}
+          {/* Bouton de fermeture - avec inline-style pour assurer qu'il est visible */}
           <button 
             className="menu-toggle menu-close-btn" 
             onClick={() => setMenuOpen(false)}
-            style={{ display: menuOpen ? 'flex' : 'none' }}
+            style={{ 
+              position: 'fixed',
+              top: '10px',
+              right: '10px',
+              zIndex: 9999,
+              backgroundColor: '#ff3333',
+              color: 'white',
+              width: '40px',
+              height: '40px',
+              borderRadius: '50%',
+              border: '2px solid white',
+              fontSize: '28px',
+              display: menuOpen ? 'flex' : 'none',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 0 10px rgba(0,0,0,0.8)',
+              padding: 0
+            }}
           >
             ✕
           </button>
@@ -57,23 +61,6 @@ const Navbar = () => {
           <li className="nav-item"><Link to="/rmr-m/contact" onClick={() => setMenuOpen(false)}>Contact</Link></li>
           <li className="nav-item"><Link to="/rmr-m/a-propos" onClick={() => setMenuOpen(false)}>À propos</Link></li>
         </ul>
-        
-        {/* Overlay pour faciliter la fermeture du menu */}
-        {menuOpen && (
-          <div 
-            onClick={() => setMenuOpen(false)}
-            style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              backgroundColor: 'rgba(0,0,0,0.3)',
-              zIndex: 1050,
-              display: 'block'
-            }}
-          />
-        )}
       </div>
     </nav>
   );
