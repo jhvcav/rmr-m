@@ -1,4 +1,4 @@
-/* App.css - Solution globale pour décaler les contenus vers la droite */
+/* App.css - Version corrigée pour centrer le contenu */
 
 /* Réinitialisation de base */
 * {
@@ -13,43 +13,34 @@ body {
   color: #333;
   background-color: #f8f9fa;
   overflow-x: hidden; /* Empêche le défilement horizontal */
+  width: 100%;
 }
 
 .app-wrapper {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  width: 100%;
+  overflow-x: hidden;
+  position: relative;
 }
 
-/* Solution pour décaler tous les contenus vers la droite */
+/* Container de contenu CENTRÉ */
 .content-container {
   flex: 1;
   padding-top: 140px; /* Espace pour le logo (80px) + navbar (60px) */
   width: 100%;
   max-width: 1200px;
-  /* Décalage vers la droite */
-  transform: translateX(-50%);
-  padding-left: 20px;
-  padding-right: 20px;
-  padding-bottom: 40px;
-  position: relative;
-}
-
-/* Alternative avec décalage plus précis - décommentez pour utiliser */
-/*
-.content-container {
-  flex: 1;
-  padding-top: 140px;
-  width: 100%;
-  max-width: 1200px;
-  position: relative;
-  left: 50px; /* Décalage direct vers la droite - à ajuster *//*
+  /* CENTRAGE au lieu de décalage */
   margin: 0 auto;
   padding-left: 20px;
   padding-right: 20px;
   padding-bottom: 40px;
+  position: relative;
+  /* Suppression du décalage vers la droite */
+  left: 0;
+  transform: none;
 }
-*/
 
 /* Styles des liens */
 a {
@@ -91,26 +82,30 @@ a:hover {
   background-color: #23272b;
 }
 
-/* Responsive adjustments */
+/* Responsive adjustments - CORRIGÉS */
 @media (max-width: 768px) {
   .content-container {
     padding-top: 110px; /* Espace réduit pour le logo (60px) + navbar (50px) */
     padding-left: 15px;
     padding-right: 15px;
     padding-bottom: 20px;
-    /* Ajustement du décalage pour mobile si nécessaire */
-    margin-left: calc(70% + 30px); /* Décalage réduit sur mobile */
+    /* Centrage au lieu de décalage */
+    margin: 0 auto;
+    left: 0;
   }
-  
-  /* Alternative avec décalage direct pour mobile */
-  /*
-  .content-container {
-    left: 30px; /* Décalage réduit sur mobile *//*
-  }
-  */
   
   .btn {
     padding: 8px 16px;
     font-size: 14px;
   }
+}
+
+/* Assurer que tous les contenus sont centrés */
+.centered-content {
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }

@@ -1,33 +1,20 @@
-/* CSS final pour LPFarming - Solution à la barre noire */
+/* LPFarming.css avec centrage corrigé pour tous les modes */
 
 /* Réinitialisation de base */
 * {
   box-sizing: border-box;
-  margin: 0;
-  padding: 0;
 }
 
-/* Corrections globales pour le body et html */
-html, body {
-  margin: 0;
-  padding: 0;
-  width: 100%;
-  max-width: 100%;
-  overflow-x: hidden;
-  background-color: #ffffff;
-}
-
-/* Structure de base */
+/* Structure de base avec centrage */
 .lp-container {
   width: 100%;
-  max-width: 100%;
+  max-width: 800px;
+  margin: 0 auto; /* Centrage horizontal */
+  padding: 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
   background-color: #ffffff;
-  overflow-x: hidden;
-  padding: 20px;
-  margin: 0 auto;
 }
 
 /* Cartes d'information */
@@ -168,18 +155,6 @@ span, strong {
   cursor: pointer;
   display: block;
   text-align: center;
-}
-
-/* Correction spéciale pour le conteneur entier pour éviter la barre noire */
-#root, 
-.App, 
-body > div, 
-body > [id^="root"], 
-body > [class^="App"] {
-  background-color: #ffffff !important;
-  overflow-x: hidden !important;
-  width: 100% !important;
-  max-width: 100% !important;
 }
 
 /* Media query pour mobile - simplifiée */

@@ -1,13 +1,15 @@
-/* 🌟 Styles généraux avec espaces réduits */
+/* 🌟 Styles généraux pour Home - CORRIGÉS */
 .home-container {
-    width: 800px;
-    position: relative;
-    left: calc(100% + 25px); /* Décalage de 25px vers la droite */
-    transform: translateX(-50%);
-    padding: 15px; /* Padding réduit (était 20px) */
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto; /* CENTRAGE au lieu de décalage */
+    padding: 15px;
     text-align: center;
-    overflow: visible;
-    margin-top: 30px; /* Décalage vers le bas réduit (était 50px) */
+    overflow: hidden; /* Empêche tout débordement */
+    margin-top: 30px;
+    /* Suppression des propriétés de décalage */
+    /* left: calc(100% + 25px); - SUPPRIMÉ */
+    /* transform: translateX(-50%); - SUPPRIMÉ */
 }
 
 /* 🏷️ Styles du titre */
@@ -15,9 +17,9 @@
     font-size: 2.5rem;
     font-weight: bold;
     color: #007bff;
-    margin-bottom: 0.8rem; /* Réduit (était 1rem) */
+    margin-bottom: 0.8rem;
     width: 100%;
-    margin-top: 10px; /* Réduit (était 30px) */
+    margin-top: 10px;
 }
 
 .home-container .highlight {
@@ -28,7 +30,7 @@
 .home-container p {
     font-size: 1.2rem;
     color: #ffffff;
-    margin-bottom: 1rem; /* Réduit (était 1.5rem) */
+    margin-bottom: 1rem;
     width: 100%;
 }
 
@@ -36,9 +38,9 @@
 .button-container {
     display: flex;
     justify-content: center;
-    gap: 15px; /* Espace entre les boutons */
-    margin-bottom: 20px; /* Réduit (était 30px) */
-    margin-top: 10px; /* Réduit (était 20px) */
+    gap: 15px;
+    margin-bottom: 20px;
+    margin-top: 10px;
     flex-wrap: wrap;
     width: 100%;
 }
@@ -53,9 +55,9 @@
     text-decoration: none;
     transition: background 0.3s;
     display: inline-block;
-    width: auto; /* Largeur automatique basée sur le contenu */
-    min-width: 120px; /* Largeur minimale pour l'alignement */
-    max-width: 200px; /* Largeur maximale pour éviter l'étirement */
+    width: auto;
+    min-width: 120px;
+    max-width: 200px;
 }
 
 .home-container .btn-dark:hover {
@@ -64,8 +66,8 @@
 
 /* 🔹 Section des solutions de gains */
 .solutions {
-    margin-top: 30px; /* Réduit (était 80px) */
-    padding: 15px; /* Réduit (était 25px) */
+    margin-top: 30px;
+    padding: 15px;
     background: rgba(255, 255, 255, 0.1);
     border-radius: 10px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
@@ -76,7 +78,7 @@
 .solutions h2 {
     font-size: 2rem;
     color: #ffcc00;
-    margin-bottom: 15px; /* Réduit (était 30px) */
+    margin-bottom: 15px;
 }
 
 /* 📋 Liste des solutions */
@@ -84,19 +86,19 @@
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 15px; /* Réduit (était 20px) */
+    gap: 15px;
     width: 100%;
-    margin-top: 10px; /* Réduit (était 20px) */
+    margin-top: 10px;
 }
 
 /* 🏆 Cartes de solution */
 .solution-card {
     background: rgba(0, 0, 0, 0.7);
     color: white;
-    padding: 12px; /* Réduit (était 15px) */
+    padding: 12px;
     border-radius: 10px;
-    width: calc(50% - 15px); /* Ajusté pour le gap réduit */
-    margin-bottom: 15px; /* Réduit (était 20px) */
+    width: calc(50% - 15px);
+    margin-bottom: 15px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     transition: transform 0.3s ease-in-out;
     text-align: center;
@@ -109,7 +111,7 @@
 .solution-card h3 {
     font-size: 1.5rem;
     color: #ffcc00;
-    margin-bottom: 8px; /* Réduit (était 10px) */
+    margin-bottom: 8px;
 }
 
 .solution-card p {
@@ -118,17 +120,17 @@
     margin: 0;
 }
 
-/* 📱💡🔹 RESPONSIVITÉ */
+/* 📱💡🔹 RESPONSIVITÉ - CORRIGÉE */
 @media (max-width: 1024px) {
     .home-container {
-        width: 90%; /* Modification de la largeur en pourcentage */
-        left: calc(50% + 20px); /* Ajustement du décalage pour écran moyen */
-        margin-top: 25px; /* Réduit (était 40px) */
+        max-width: 90%;
+        margin: 25px auto 0 auto; /* CENTRAGE au lieu de décalage */
+        /* left: calc(50% + 20px); - SUPPRIMÉ */
     }
 
     .home-container h1 {
         font-size: 2.2rem;
-        margin-top: 10px; /* Réduit (était 25px) */
+        margin-top: 10px;
     }
 
     .home-container p {
@@ -136,26 +138,26 @@
     }
 
     .solutions {
-        padding: 15px; /* Réduit (était 20px) */
-        margin-top: 25px; /* Réduit (était 60px) */
+        padding: 15px;
+        margin-top: 25px;
     }
 
     .solution-card {
-        width: calc(100% - 15px); /* Ajusté pour le gap réduit */
+        width: calc(100% - 15px);
         max-width: 400px;
     }
 }
 
 @media (max-width: 768px) {
     .home-container {
-        width: 95%; /* Modification de la largeur en pourcentage */
-        left: calc(50% + 15px); /* Ajustement du décalage pour petit écran */
-        margin-top: 20px; /* Réduit (était 30px) */
+        max-width: 95%;
+        margin: 20px auto 0 auto; /* CENTRAGE au lieu de décalage */
+        /* left: calc(50% + 15px); - SUPPRIMÉ */
     }
 
     .home-container h1 {
         font-size: 2rem;
-        margin-top: 10px; /* Réduit (était 20px) */
+        margin-top: 10px;
     }
 
     .home-container p {
@@ -165,35 +167,33 @@
     .button-container {
         flex-direction: column;
         align-items: center;
-        width: auto; /* Ne prend que l'espace nécessaire */
-        margin-left: auto;
-        margin-right: auto;
-        margin-top: 10px; /* Réduit (était 15px) */
-        gap: 10px; /* Réduit (était 15px) */
+        width: 100%;
+        margin: 10px auto;
+        gap: 10px;
     }
 
     .home-container .btn-dark {
         font-size: 0.9rem;
         padding: 8px 16px;
-        width: auto; /* Largeur basée sur le contenu */
+        width: auto;
         min-width: 120px;
         max-width: 180px;
     }
 
     .solutions {
-        padding: 12px; /* Réduit (était 15px) */
-        margin-top: 20px; /* Réduit (était 50px) */
+        padding: 12px;
+        margin-top: 20px;
     }
 
     .solution-list {
         flex-direction: column;
         align-items: center;
-        margin-top: 10px; /* Réduit (était 15px) */
+        margin-top: 10px;
     }
 
     .solution-card {
         width: 100%;
         max-width: 300px;
-        margin-bottom: 10px; /* Réduit (était 15px) */
+        margin-bottom: 10px;
     }
 }

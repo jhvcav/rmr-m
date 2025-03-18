@@ -253,106 +253,91 @@ const LPFarming = () => {
     }
   };
 
-  // Styles inline pour forcer un fond blanc et éviter le débordement
-  const wrapperStyle = {
-    width: '100%',
-    maxWidth: '100%',
-    overflow: 'hidden',
-    backgroundColor: '#ffffff',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    margin: 0,
-    padding: 0
-  };
-
   return (
-    <div style={wrapperStyle}>
-      <div className="lp-container">
-        <h1>LP Farming - Génération de Rendement</h1>
-        
-        <div className="responsive-card">
-          <p>
-            <b>Liquidity Provider (LP) Farming</b> vous permet d'investir des fonds dans des pools de liquidités et d'obtenir un rendement stable de
-            <b> 10% par mois</b>. Grâce à l'optimisation automatique, votre capital est réinvesti pour maximiser les gains.
-          </p>
-        </div>
+    <div className="lp-container">
+      <h1>LP Farming - Génération de Rendement</h1>
+      
+      <div className="responsive-card">
+        <p>
+          <b>Liquidity Provider (LP) Farming</b> vous permet d'investir des fonds dans des pools de liquidités et d'obtenir un rendement stable de
+          <b> 10% par mois</b>. Grâce à l'optimisation automatique, votre capital est réinvesti pour maximiser les gains.
+        </p>
+      </div>
 
-        {/* Connexion au Wallet */}
-        <div className="responsive-card">
-          <h3>Connexion au Wallet</h3>
-          {account ? (
-            <div className="wallet-info">
-              <button className="wallet-button btn btn-success">
-                ✅ {account.substring(0, 6)}...{account.slice(-4)}
-              </button>
-              {usdcBalance !== null && (
-                <div className="balance-info">
-                  <p>Solde {usdcSymbol}: <strong>{parseFloat(usdcBalance).toFixed(2)} {usdcSymbol}</strong></p>
-                </div>
-              )}
-            </div>
-          ) : (
-            <button className="wallet-button btn btn-primary" onClick={connectWallet}>
-              Connecter mon Wallet MetaMask
+      {/* Connexion au Wallet */}
+      <div className="responsive-card">
+        <h3>Connexion au Wallet</h3>
+        {account ? (
+          <div className="wallet-info">
+            <button className="wallet-button btn btn-success">
+              ✅ {account.substring(0, 6)}...{account.slice(-4)}
             </button>
-          )}
-        </div>
-
-        {/* Simulateur de Gains */}
-        <h2>Simulateur de Gains en {usdcSymbol}</h2>
-        <div className="responsive-card">
-          <div className="simulator">
-            <label>Capital à investir ({usdcSymbol}) :</label>
-            <input
-              type="number"
-              min="1"
-              value={capital}
-              onChange={(e) => setCapital(Number(e.target.value))}
-              className="responsive-form"
-            />
-
-            <label>Durée (mois) :</label>
-            <input
-              type="number"
-              min="1"
-              value={duration}
-              onChange={(e) => setDuration(Number(e.target.value))}
-              className="responsive-form"
-            />
-
-            <button 
-              onClick={calculateProfit} 
-              className="responsive-button btn btn-primary"
-            >
-              Calculer
-            </button>
-            
-            <h3>Gains estimés : <span>{profit} {usdcSymbol}</span></h3>
+            {usdcBalance !== null && (
+              <div className="balance-info">
+                <p>Solde {usdcSymbol}: <strong>{parseFloat(usdcBalance).toFixed(2)} {usdcSymbol}</strong></p>
+              </div>
+            )}
           </div>
-        </div>
+        ) : (
+          <button className="wallet-button btn btn-primary" onClick={connectWallet}>
+            Connecter mon Wallet MetaMask
+          </button>
+        )}
+      </div>
 
-        {/* Bouton Investir */}
-        <button 
-          className="validate-btn responsive-button" 
-          onClick={handleInvest} 
-          disabled={loading}
-        >
-          {loading ? "Transaction en cours..." : "Valider mon choix"}
-        </button>
+      {/* Simulateur de Gains */}
+      <h2>Simulateur de Gains en {usdcSymbol}</h2>
+      <div className="responsive-card">
+        <div className="simulator">
+          <label>Capital à investir ({usdcSymbol}) :</label>
+          <input
+            type="number"
+            min="1"
+            value={capital}
+            onChange={(e) => setCapital(Number(e.target.value))}
+            className="responsive-form"
+          />
 
-        {/* Information sur USDC */}
-        <div className="responsive-card">
-          <h3>ℹ️ Informations sur les {usdcSymbol}</h3>
-          <p>
-            Pour utiliser ce service, vous avez besoin de {usdcSymbol} sur le réseau BSC Testnet.
-            Assurez-vous également d'avoir un peu de BNB pour payer les frais de transaction.
-          </p>
-          <p>
-            Montant minimum recommandé : 1 {usdcSymbol}<br />
-            Pour des rendements optimaux : 250 {usdcSymbol} ou plus
-          </p>
+          <label>Durée (mois) :</label>
+          <input
+            type="number"
+            min="1"
+            value={duration}
+            onChange={(e) => setDuration(Number(e.target.value))}
+            className="responsive-form"
+          />
+
+          <button 
+            onClick={calculateProfit} 
+            className="responsive-button btn btn-primary"
+          >
+            Calculer
+          </button>
+          
+          <h3>Gains estimés : <span>{profit} {usdcSymbol}</span></h3>
         </div>
+      </div>
+
+      {/* Bouton Investir */}
+      <button 
+        className="validate-btn responsive-button" 
+        onClick={handleInvest} 
+        disabled={loading}
+      >
+        {loading ? "Transaction en cours..." : "Valider mon choix"}
+      </button>
+
+      {/* Information sur USDC */}
+      <div className="responsive-card">
+        <h3>ℹ️ Informations sur les {usdcSymbol}</h3>
+        <p>
+          Pour utiliser ce service, vous avez besoin de {usdcSymbol} sur le réseau BSC Testnet.
+          Assurez-vous également d'avoir un peu de BNB pour payer les frais de transaction.
+        </p>
+        <p>
+          Montant minimum recommandé : 1 {usdcSymbol}<br />
+          Pour des rendements optimaux : 250 {usdcSymbol} ou plus
+        </p>
       </div>
     </div>
   );
