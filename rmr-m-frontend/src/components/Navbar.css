@@ -75,7 +75,7 @@
 @media (max-width: 768px) {
   .navbar {
     top: 10px; /* Espace réduit pour le logo sur mobile */
-    padding: 30px 50px;
+    padding: 30px;
   }
   
   .menu-open-btn {
