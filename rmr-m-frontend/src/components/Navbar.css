@@ -74,11 +74,11 @@
 /* Menu mobile */
 @media (max-width: 768px) {
   .navbar {
-    top: 60px; /* CORRIGÉ: Remettre la valeur originale */
+    top: 65px; /* CORRIGÉ: Remettre la valeur originale */
     padding: 15px 20px; /* Padding modéré pour la barre */
     display: flex !important; /* Force l'affichage */
     background-color: black !important; /* Force la couleur de fond */
-    height: 80px; /* Hauteur fixe pour la barre de navigation */
+    height: 50px; /* Hauteur fixe pour la barre de navigation */
   }
   
   .container {
@@ -91,7 +91,7 @@
   .menu-open-btn {
     display: block !important; /* Force l'affichage */
     position: absolute !important;
-    top: 50% !important;
+    top: 40% !important;
     right: 15px !important;
     transform: translateY(-50%) !important;
     font-size: 38px !important; /* Taille du bouton hamburger */
@@ -101,7 +101,7 @@
     color: white !important;
     background-color: rgba(0, 0, 0, 0.3) !important; /* Fond légèrement visible */
     border-radius: 8px !important;
-    border: 1px solid white !important;
+    border: 1px solid black !important;
     cursor: pointer !important;
     z-index: 1200 !important;
     text-align: center !important;
