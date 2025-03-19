@@ -118,7 +118,7 @@
     position: fixed;
     top: 0;
     left: -100%; /* Caché par défaut */
-    width: 250px;
+    width: 300px;
     height: 100vh;
     background-color: rgba(0, 0, 0, 0.95); /* Plus sombre pour meilleur contraste */
     color: white;

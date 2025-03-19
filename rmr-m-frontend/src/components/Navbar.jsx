@@ -32,7 +32,7 @@ const Navbar = () => {
             onClick={() => setMenuOpen(false)}
             style={{ 
               position: 'center',
-              top: '20px',
+              top: '50px',
               right: '10px',
               zIndex: 9999,
               backgroundColor: '#ff3333',
