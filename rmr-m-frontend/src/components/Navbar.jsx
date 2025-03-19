@@ -39,11 +39,19 @@ const Navbar = () => {
         {/* Liste des menus - Menu latéral en mode mobile */}
         <ul className={`nav-menu ${menuOpen ? "open" : ""}`}>
           {/* Bouton de fermeture (visible uniquement quand le menu est ouvert) */}
-          {menuOpen && (
-            <button className="menu-toggle menu-close-btn" onClick={() => setMenuOpen(true)}>
-              ✕
-            </button>
-          )}
+          <button 
+            className="menu-toggle menu-close-btn" 
+            onClick={() => setMenuOpen(false)}
+            style={{ 
+              display: menuOpen ? 'flex' : 'none',
+              position: 'fixed',
+              top: '20px',
+              right: '20px',
+              zIndex: 9999
+            }}
+          >
+            ✕
+          </button>
           <li className="nav-item"><Link to="/rmr-m" onClick={() => setMenuOpen(false)}>Accueil</Link></li>
           <li className="nav-item"><Link to="/rmr-m/wallet-connect" onClick={() => setMenuOpen(false)}>Connexion Wallet</Link></li>
           <li className="nav-item"><Link to="/rmr-m/dashboard" onClick={() => setMenuOpen(false)}>Tableau de bord</Link></li>
