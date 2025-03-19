@@ -74,11 +74,11 @@
 /* Menu mobile */
 @media (max-width: 768px) {
   .navbar {
-    top: 65px; /* CORRIGÉ: Remettre la valeur originale */
+    top: 65px; /* Position ajustée */
     padding: 15px 20px; /* Padding modéré pour la barre */
     display: flex !important; /* Force l'affichage */
     background-color: black !important; /* Force la couleur de fond */
-    height: 50px; /* Hauteur fixe pour la barre de navigation */
+    height: 30px; /* Hauteur fixe pour la barre de navigation */
   }
   
   .container {
@@ -87,24 +87,32 @@
     justify-content: center !important;
   }
   
-  /* Bouton hamburger - ajusté pour meilleure visibilité */
+  /* Bouton hamburger - ajusté pour un centrage parfait */
   .menu-open-btn {
-    display: block !important; /* Force l'affichage */
+    display: flex !important; /* Utilise flexbox pour un centrage parfait */
+    align-items: center !important; /* Centre verticalement */
+    justify-content: center !important; /* Centre horizontalement */
     position: absolute !important;
-    top: 40% !important;
+    top: -10px !important; /* Ajusté pour être visible dans la barre de 30px */
     right: 15px !important;
-    transform: translateY(-50%) !important;
     font-size: 38px !important; /* Taille du bouton hamburger */
-    padding: 10px !important;
-    width: 60px !important; /* Largeur fixe pour le bouton */
+    padding: 0 !important; /* Supprime tout padding qui pourrait décentrer */
+    width: 50px !important; /* Largeur fixe pour le bouton */
     height: 50px !important; /* Hauteur fixe pour le bouton */
     color: white !important;
     background-color: rgba(0, 0, 0, 0.3) !important; /* Fond légèrement visible */
     border-radius: 8px !important;
-    border: 1px solid black !important;
+    border: 1px solid white !important; /* Changé à blanc pour meilleure visibilité */
     cursor: pointer !important;
     z-index: 1200 !important;
-    text-align: center !important;
+    line-height: 1 !important; /* Important pour le centrage vertical du texte */
+  }
+
+  /* Correction spécifique pour le symbole hamburger */
+  .menu-open-btn span {
+    display: inline-block !important;
+    line-height: 0.8 !important;
+    margin-top: -4px !important; /* Ajustement fin pour centrer visuellement */
   }
 
   /* Bouton de fermeture du menu (croix) */

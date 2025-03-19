@@ -14,13 +14,24 @@ const Navbar = () => {
   return (
     <nav className="navbar">
       <div className="container">
-        {/* Bouton hamburger pour mobile */}
+        {/* Bouton hamburger pour mobile avec span pour un meilleur centrage */}
         {!menuOpen && (
           <button 
             className="menu-toggle menu-open-btn" 
             onClick={() => setMenuOpen(true)}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
           >
-            ☰
+            <span style={{ 
+              display: 'inline-block', 
+              lineHeight: '0.8', 
+              marginTop: '-4px' 
+            }}>
+              ☰
+            </span>
           </button>
         )}
 
@@ -31,7 +42,7 @@ const Navbar = () => {
             className="menu-toggle menu-close-btn" 
             onClick={() => setMenuOpen(false)}
             style={{ 
-              position: 'center',
+              position: 'fixed',  // Changé de 'center' à 'fixed' pour un positionnement correct
               top: '50px',
               right: '10px',
               zIndex: 9999,
@@ -46,7 +57,7 @@ const Navbar = () => {
               alignItems: 'center',
               justifyContent: 'center',
               boxShadow: '0 0 10px rgba(0,0,0,0.8)',
-              padding: 10
+              padding: 0  // Changé de 10 à 0 pour un meilleur centrage
             }}
           >
             ✕
