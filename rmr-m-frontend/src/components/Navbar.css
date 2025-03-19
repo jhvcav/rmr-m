@@ -125,8 +125,8 @@
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
-    gap: 10 !important; /* Aucun espace entre les éléments */
-    padding-top: 80px; /* Réduit pour voir plus d'éléments */
+    gap: 40 !important; /* Aucun espace entre les éléments */
+    padding-top: 100px; /* Réduit pour voir plus d'éléments */
     transition: left 0.3s ease-in-out;
     z-index: 1100;
     overflow-y: auto;
