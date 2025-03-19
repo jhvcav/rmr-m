@@ -74,11 +74,11 @@
 /* Menu mobile */
 @media (max-width: 768px) {
   .navbar {
-    top: 65px; /* Position ajustée */
+    top: 55px; /* Position ajustée */
     padding: 15px 20px; /* Padding modéré pour la barre */
     display: flex !important; /* Force l'affichage */
     background-color: black !important; /* Force la couleur de fond */
-    height: 30px; /* Hauteur fixe pour la barre de navigation */
+    height: 40px; /* Hauteur fixe pour la barre de navigation */
   }
   
   .container {
