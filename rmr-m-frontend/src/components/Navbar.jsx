@@ -4,25 +4,38 @@
  * Ce code ne peut pas être utilisé ou redistribué sans autorisation.
  */
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import "./Navbar.css";
 
 const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
+  
+  // Empêcher le défilement quand le menu est ouvert
+  useEffect(() => {
+    if (menuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [menuOpen]);
 
   return (
     <nav className="navbar">
       <div className="container">
-        {/* Le logo a été supprimé d'ici et déplacé vers un composant séparé */}
+        {/* Bouton hamburger pour mobile */}
+        <button 
+          className="menu-toggle menu-open-btn" 
+          onClick={() => setMenuOpen(true)}
+          style={{ display: menuOpen ? 'none' : 'flex' }}
+        >
+          <span>☰</span>
+        </button>
         
-        {/* Bouton hamburger pour mobile avec span ajouté pour meilleur centrage */}
-        {!menuOpen && (
-          <button className="menu-toggle menu-open-btn" onClick={() => setMenuOpen(true)}>
-            <span>☰</span>
-          </button>
-        )}
-
         {/* Liste des menus - Menu latéral en mode mobile */}
         <ul className={`nav-menu ${menuOpen ? "open" : ""}`}>
           {/* Bouton de fermeture (visible uniquement quand le menu est ouvert) */}
