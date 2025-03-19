@@ -31,8 +31,8 @@ const Navbar = () => {
             className="menu-toggle menu-close-btn" 
             onClick={() => setMenuOpen(false)}
             style={{ 
-              position: 'fixed',
-              top: '10px',
+              position: 'center',
+              top: '20px',
               right: '10px',
               zIndex: 9999,
               backgroundColor: '#ff3333',
