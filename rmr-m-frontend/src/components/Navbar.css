@@ -77,7 +77,8 @@
     top: 80px; /* CORRIGÉ: Remettre la valeur originale */
     padding: 15px 20px; /* Padding modéré pour la barre */
     display: flex !important; /* Force l'affichage */
-    background-color: #343a40 !important; /* Force la couleur de fond */
+    background-color: black !important; /* Force la couleur de fond */
+    height: auto;
   }
   
   .container {
