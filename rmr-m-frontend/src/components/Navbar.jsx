@@ -14,7 +14,9 @@ const Navbar = () => {
   return (
     <nav className="navbar">
       <div className="container">
-        {/* Bouton hamburger pour mobile avec span pour un meilleur centrage */}
+        {/* Le logo a été supprimé d'ici et déplacé vers un composant séparé */}
+        
+        {/* Bouton hamburger pour mobile avec span ajouté pour meilleur centrage */}
         {!menuOpen && (
           <button className="menu-toggle menu-open-btn" onClick={() => setMenuOpen(true)}>
             <span>☰</span>
@@ -23,13 +25,12 @@ const Navbar = () => {
 
         {/* Liste des menus - Menu latéral en mode mobile */}
         <ul className={`nav-menu ${menuOpen ? "open" : ""}`}>
-          {/* Bouton de fermeture - utilise le CSS existant */}
+          {/* Bouton de fermeture (visible uniquement quand le menu est ouvert) */}
           {menuOpen && (
             <button className="menu-toggle menu-close-btn" onClick={() => setMenuOpen(false)}>
               ✕
             </button>
           )}
-          
           <li className="nav-item"><Link to="/rmr-m" onClick={() => setMenuOpen(false)}>Accueil</Link></li>
           <li className="nav-item"><Link to="/rmr-m/wallet-connect" onClick={() => setMenuOpen(false)}>Connexion Wallet</Link></li>
           <li className="nav-item"><Link to="/rmr-m/dashboard" onClick={() => setMenuOpen(false)}>Tableau de bord</Link></li>
@@ -39,16 +40,6 @@ const Navbar = () => {
           <li className="nav-item"><Link to="/rmr-m/contact" onClick={() => setMenuOpen(false)}>Contact</Link></li>
           <li className="nav-item"><Link to="/rmr-m/a-propos" onClick={() => setMenuOpen(false)}>À propos</Link></li>
         </ul>
-        
-        {/* Bouton de fermeture supplémentaire - visible en mode mobile uniquement */}
-        {menuOpen && (
-          <button 
-            className="alternate-close-btn"
-            onClick={() => setMenuOpen(false)}
-          >
-            ✕
-          </button>
-        )}
       </div>
     </nav>
   );

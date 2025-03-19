@@ -1,8 +1,123 @@
-/* Ajoutez ces styles à la fin de votre fichier Navbar.css */
+/* Styles généraux de la barre de navigation */
+.navbar {
+  position: fixed;
+  top: 80px; /* Espace pour le logo au-dessus */
+  left: 0;
+  width: 100%;
+  background-color: #343a40; /* Couleur de fond foncée, vous pouvez personnaliser */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px 20px;
+}
 
-/* Bouton de fermeture alternatif - visible uniquement en mode mobile */
+/* Container avec positionnement flexible */
+.container {
+  width: 100%;
+  max-width: 1200px;
+  display: flex;
+  justify-content: center; /* Centre le menu horizontalement */
+  align-items: center;
+  position: relative;
+}
+
+/* Menu desktop */
+.nav-menu {
+  list-style: none;
+  display: flex;
+  justify-content: center; /* Centre les éléments du menu */
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+}
+
+/* Élément de menu */
+.nav-item {
+  display: flex;
+  justify-content: center; /* Centre le contenu de chaque élément */
+  align-items: center;
+}
+
+/* Liens de la barre de navigation avec texte centré */
+.nav-item a {
+  text-decoration: none;
+  color: white; /* Texte blanc sur fond foncé */
+  font-size: 0.9rem;
+  font-weight: bold;
+  padding: 8px 12px;
+  transition: 0.3s;
+  border-radius: 4px;
+  text-align: center; /* Centre le texte horizontalement */
+  display: flex;
+  justify-content: center; /* Centre le contenu */
+  align-items: center;
+  min-width: 100px; /* Largeur minimale pour un meilleur alignement */
+}
+
+.nav-item a:hover {
+  background-color: #007bff;
+  color: white;
+}
+
+/* Bouton hamburger */
+.menu-toggle {
+  display: none; /* Caché en mode desktop */
+  font-size: 24px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: white;
+}
+
+/* Menu mobile */
 @media (max-width: 768px) {
-  .alternate-close-btn {
+  .navbar {
+    top: 65px; /* Position ajustée */
+    padding: 15px 20px; /* Padding modéré pour la barre */
+    display: flex !important; /* Force l'affichage */
+    background-color: black !important; /* Force la couleur de fond */
+    height: 30px; /* Hauteur fixe pour la barre de navigation */
+  }
+  
+  .container {
+    position: relative !important; /* S'assurer que la position est correcte */
+    display: flex !important; /* Force l'affichage */
+    justify-content: center !important;
+  }
+  
+  /* Bouton hamburger - ajusté pour un centrage parfait */
+  .menu-open-btn {
+    display: flex !important; /* Utilise flexbox pour un centrage parfait */
+    align-items: center !important; /* Centre verticalement */
+    justify-content: center !important; /* Centre horizontalement */
+    position: absolute !important;
+    top: -10px !important; /* Ajusté pour être visible dans la barre de 30px */
+    right: 15px !important;
+    font-size: 38px !important; /* Taille du bouton hamburger */
+    padding: 0 !important; /* Supprime tout padding qui pourrait décentrer */
+    width: 50px !important; /* Largeur fixe pour le bouton */
+    height: 50px !important; /* Hauteur fixe pour le bouton */
+    color: white !important;
+    background-color: rgba(0, 0, 0, 0.3) !important; /* Fond légèrement visible */
+    border-radius: 8px !important;
+    border: 1px solid white !important; /* Changé à blanc pour meilleure visibilité */
+    cursor: pointer !important;
+    z-index: 1200 !important;
+    line-height: 1 !important; /* Important pour le centrage vertical du texte */
+  }
+
+  /* Correction spécifique pour le symbole hamburger */
+  .menu-open-btn span {
+    display: inline-block !important;
+    line-height: 0.8 !important;
+    margin-top: -4px !important; /* Ajustement fin pour centrer visuellement */
+  }
+
+  /* Bouton de fermeture du menu (croix) */
+  .menu-close-btn {
+    display: block !important;
     position: fixed !important;
     top: 20px !important;
     right: 20px !important;
@@ -17,13 +132,48 @@
     align-items: center !important;
     justify-content: center !important;
     padding: 0 !important;
-    z-index: 10000 !important; /* Un z-index plus élevé que la croix principale */
+    z-index: 9999 !important;
     box-shadow: 0 0 10px rgba(0,0,0,0.8) !important;
-    cursor: pointer !important;
   }
-  
-  /* Réduction de l'espace en haut du menu pour éviter la superposition */
+
   .nav-menu {
-    padding-top: 70px !important; /* Réduit par rapport aux 100px actuels */
+    position: fixed;
+    top: 0;
+    left: -100%; /* Caché par défaut */
+    width: 300px; /* Largeur du menu latéral */
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.95);
+    color: white;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px !important; /* Espacement modéré entre éléments */
+    padding-top: 100px; /* Espace en haut */
+    transition: left 0.3s ease-in-out;
+    z-index: 1100;
+    overflow-y: auto;
+    padding-bottom: 20px;
+  }
+
+  .nav-menu.open {
+    left: 0; /* Affichage du menu */
+  }
+
+  .nav-item {
+    width: 100%;
+    margin: 2px 0 !important;
+    padding: 0 !important;
+    height: auto !important;
+  }
+
+  .nav-item a {
+    color: white;
+    font-size: 16px; /* Taille un peu plus grande pour meilleure lisibilité */
+    padding: 8px !important;
+    margin: 2px 0 !important;
+    width: 100%;
+    text-align: center;
+    display: block;
+    line-height: 1.4 !important;
   }
 }
