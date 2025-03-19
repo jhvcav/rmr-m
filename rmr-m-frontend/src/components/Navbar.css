@@ -74,7 +74,7 @@
 /* Menu mobile */
 @media (max-width: 768px) {
   .navbar {
-    top: 65px; /* Position ajustée */
+    top: 45px; /* Position ajustée */
     padding: 15px 20px; /* Padding modéré pour la barre */
     display: flex !important; /* Force l'affichage */
     background-color: black !important; /* Force la couleur de fond */

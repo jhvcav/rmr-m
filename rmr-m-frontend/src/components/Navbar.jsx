@@ -40,7 +40,7 @@ const Navbar = () => {
         <ul className={`nav-menu ${menuOpen ? "open" : ""}`}>
           {/* Bouton de fermeture (visible uniquement quand le menu est ouvert) */}
           {menuOpen && (
-            <button className="menu-toggle menu-close-btn" onClick={() => setMenuOpen(false)}>
+            <button className="menu-toggle menu-close-btn" onClick={() => setMenuOpen(true)}>
               ✕
             </button>
           )}
