@@ -74,7 +74,7 @@
 /* Menu mobile */
 @media (max-width: 768px) {
   .navbar {
-    top: 80px; /* Espace réduit pour le logo sur mobile */
+    top: 10px; /* Espace réduit pour le logo sur mobile */
     padding: 10px 20px;
   }
   
@@ -118,7 +118,7 @@
     position: fixed;
     top: 0;
     left: -100%; /* Caché par défaut */
-    width: 400x;
+    width: 400px;
     height: 100vh;
     background-color: rgba(0, 0, 0, 0.95); /* Plus sombre pour meilleur contraste */
     color: white;
