@@ -75,7 +75,7 @@
 @media (max-width: 768px) {
   .navbar {
     top: 80px; /* Espace réduit pour le logo sur mobile */
-    padding: 10px 15px;
+    padding: 10px 20px;
   }
   
   .menu-open-btn {
@@ -84,7 +84,7 @@
     top: 50%;
     right: 15px;
     transform: translateY(-50%);
-    font-size: 36px !important; /* Bouton hamburger plus gros */
+    font-size: 50px !important; /* Bouton hamburger plus gros */
     padding: 8px;
     color: white;
     background: none;

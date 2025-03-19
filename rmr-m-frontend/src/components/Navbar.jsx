@@ -46,7 +46,7 @@ const Navbar = () => {
               alignItems: 'center',
               justifyContent: 'center',
               boxShadow: '0 0 10px rgba(0,0,0,0.8)',
-              padding: 0
+              padding: 10
             }}
           >
             ✕
