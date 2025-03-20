@@ -13,11 +13,20 @@ const ERC20_ABI = [
 // Adresse du contrat USDC sur BSC Testnet
 const USDC_CONTRACT_ADDRESS = "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d";
 
+// Périodes et APR associés selon le contrat
+const PERIODS = [
+  { days: 30, apr: 8, label: "30 jours (8% APR)" },
+  { days: 90, apr: 12, label: "90 jours (12% APR)" },
+  { days: 180, apr: 15, label: "180 jours (15% APR)" }
+];
+
 const LPFarming = () => {
   const navigate = useNavigate();
   const [capital, setCapital] = useState(250);
-  const [duration, setDuration] = useState(1);
-  const [profit, setProfit] = useState(0);
+  const [selectedPeriod, setSelectedPeriod] = useState(PERIODS[0]);
+  const [dailyReturn, setDailyReturn] = useState(0);
+  const [monthlyReturn, setMonthlyReturn] = useState(0);
+  const [totalProfit, setTotalProfit] = useState(0);
   const [loading, setLoading] = useState(false);
   const [account, setAccount] = useState(null);
   const [provider, setProvider] = useState(null);
@@ -141,11 +150,22 @@ const LPFarming = () => {
     }
   }, [provider, account]);
 
-  // Calcul des gains
-  const calculateProfit = () => {
-    const monthlyRate = 0.10; // 10% par mois
-    const totalProfit = capital * Math.pow(1 + monthlyRate, duration) - capital;
-    setProfit(totalProfit.toFixed(2));
+  // Calcul des gains basé sur l'APR défini dans le contrat
+  const calculateReturns = () => {
+    // Calculer le taux journalier (APR divisé par 36500 pour obtenir le taux journalier)
+    const dailyRate = selectedPeriod.apr / 36500; // APR divisé par 365 jours * 100 (car APR est en %)
+    
+    // Rendement journalier
+    const dailyProfit = capital * dailyRate;
+    setDailyReturn(dailyProfit.toFixed(2));
+    
+    // Rendement mensuel (approximativement 30 jours)
+    const monthlyProfit = capital * dailyRate * 30;
+    setMonthlyReturn(monthlyProfit.toFixed(2));
+    
+    // Profit total sur la période complète
+    const totalPeriodProfit = capital * (selectedPeriod.apr / 100) * (selectedPeriod.days / 365);
+    setTotalProfit(totalPeriodProfit.toFixed(2));
   };
 
   // Connexion au wallet
@@ -212,14 +232,6 @@ const LPFarming = () => {
     // Calculer les frais (2% du capital)
     const frais = capital * 0.02;
     
-    // Calculer le rendement estimé si ce n'est pas déjà fait
-    if (profit === 0) {
-      calculateProfit();
-    }
-    
-    // Convertir la durée de mois en jours
-    const dureeJours = duration * 30;
-    
     // Adresse du pool
     const poolAddress = contract ? contract.address : "0x331089D11dfA34485094dE8f60b27EB474AEc86a";
     
@@ -228,8 +240,8 @@ const LPFarming = () => {
       state: {
         montant: capital,
         adressePool: poolAddress,
-        duree: dureeJours,
-        rendementEstime: parseFloat(profit),
+        duree: selectedPeriod.days,
+        rendementEstime: parseFloat(totalProfit),
         frais: frais
       }
     });
@@ -253,14 +265,20 @@ const LPFarming = () => {
     }
   };
 
+  // Gérer le changement de période
+  const handlePeriodChange = (e) => {
+    const selectedDays = parseInt(e.target.value);
+    const selectedPeriodObj = PERIODS.find(period => period.days === selectedDays);
+    setSelectedPeriod(selectedPeriodObj);
+  };
+
   return (
     <div className="lp-container">
       <h1>LP Farming - Génération de Rendement</h1>
       
       <div className="responsive-card">
         <p>
-          <b>Liquidity Provider (LP) Farming</b> vous permet d'investir des fonds dans des pools de liquidités et d'obtenir un rendement stable de
-          <b> 10% par mois</b>. Grâce à l'optimisation automatique, votre capital est réinvesti pour maximiser les gains.
+          <b>Liquidity Provider (LP) Farming</b> vous permet d'investir des fonds dans des pools de liquidités et d'obtenir un rendement stable selon la durée d'immobilisation choisie. Grâce à l'optimisation automatique, votre capital est géré pour maximiser les gains.
         </p>
       </div>
 
@@ -298,23 +316,31 @@ const LPFarming = () => {
             className="responsive-form"
           />
 
-          <label>Durée (mois) :</label>
-          <input
-            type="number"
-            min="1"
-            value={duration}
-            onChange={(e) => setDuration(Number(e.target.value))}
+          <label>Durée d'immobilisation :</label>
+          <select
+            value={selectedPeriod.days}
+            onChange={handlePeriodChange}
             className="responsive-form"
-          />
+          >
+            {PERIODS.map((period) => (
+              <option key={period.days} value={period.days}>
+                {period.label}
+              </option>
+            ))}
+          </select>
 
           <button 
-            onClick={calculateProfit} 
+            onClick={calculateReturns} 
             className="responsive-button btn btn-primary"
           >
             Calculer
           </button>
           
-          <h3>Gains estimés : <span>{profit} {usdcSymbol}</span></h3>
+          <div className="returns-summary">
+            <h3>Rendement journalier : <span>{dailyReturn} {usdcSymbol}</span></h3>
+            <h3>Rendement mensuel : <span>{monthlyReturn} {usdcSymbol}</span></h3>
+            <h3>Gain total estimé sur {selectedPeriod.days} jours : <span>{totalProfit} {usdcSymbol}</span></h3>
+          </div>
         </div>
       </div>
 
