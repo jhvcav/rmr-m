@@ -1,12 +1,5 @@
-/**
- * Copyright (c) 2025 Jean Hugues CAVALIE
- * Tous droits réservés.
- * Ce code ne peut pas être utilisé ou redistribué sans autorisation.
- */
-
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { CONTRACT_ADDRESSES } from '../config/contracts';
 import * as ethers from "ethers"; 
 import "./DepotForm.css";
 import "./ResponsiveStyles.css"; // Import des styles responsifs
@@ -30,6 +23,9 @@ const ERC20_ABI = [
 // Adresse du contrat USDC sur BSC Mainnet
 const USDC_CONTRACT_ADDRESS = "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d"; // Adresse réelle de l'USDC sur BSC Mainnet
 
+// Adresse du contrat LPFarming - utilisez une adresse par défaut
+const DEFAULT_LPFARMING_ADDRESS = "0x351e155c90d34A8E3C61288E510fb1c0b861046c"; // Remplacez par votre adresse LPFarming
+
 const DepotForm = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -39,7 +35,7 @@ const DepotForm = () => {
   const [dureeInvestissement, setDureeInvestissement] = useState("");
   const [rendementEstime, setRendementEstime] = useState(0);
   const [frais, setFrais] = useState(0);
-  const [adressePool, setAdressePool] = useState(CONTRACT_ADDRESSES?.LPFarming || "");
+  const [adressePool, setAdressePool] = useState(DEFAULT_LPFARMING_ADDRESS);
   
   // Paramètres MetaMask
   const [isConnected, setIsConnected] = useState(false);
@@ -131,7 +127,7 @@ const DepotForm = () => {
         window.ethereum.removeAllListeners('chainChanged');
       }
     };
-  }, [publicKey]); // Dépendance à publicKey pour la mise à jour correcte
+  }, [publicKey]);
 
   // Fonction pour mettre à jour les soldes BNB et USDC
   const updateBalances = async (address) => {
@@ -459,10 +455,160 @@ const DepotForm = () => {
   };
 
   return (
-    <div className="depot-form responsive-container">
+    <div className="depot-form">
       <h1 style={{ fontSize: "1.5em" }}>💰 Dépôt de fonds pour LPFarming</h1>
 
-      {/* ... reste du code inchangé ... */}
+      {/* Avertissement pour Mainnet */}
+      <div className="mainnet-warning" style={{ marginTop: '20px', padding: '10px', backgroundColor: '#fff3cd', borderRadius: '5px', border: '1px solid #ffeeba' }}>
+        <h3>⚠️ Mode Production - Vraies Cryptomonnaies</h3>
+        <p>
+          <strong>ATTENTION:</strong> Cette application utilise le réseau principal Binance Smart Chain. 
+          Toutes les transactions impliquent de vraies cryptomonnaies ayant une valeur réelle.
+        </p>
+        <p>
+          Nous vous recommandons de:
+        </p>
+        <ul>
+          <li>Commencer avec de petits montants pour tester</li>
+          <li>Vérifier toutes les informations de transaction avant confirmation</li>
+          <li>Ne jamais investir plus que ce que vous pouvez vous permettre de perdre</li>
+        </ul>
+      </div>
+
+      {/* Récapitulatif de l'investissement */}
+      <div className="investment-summary">
+        <h2>📋 Récapitulatif de votre investissement</h2>
+        <div className="summary-item">
+          <span>💵 Montant à investir:</span>
+          <span>{montantInvesti} {usdcSymbol}</span>
+        </div>
+        <div className="summary-item">
+          <span>⏱️ Durée d'investissement:</span>
+          <span>{dureeInvestissement} jours</span>
+        </div>
+        <div className="summary-item">
+          <span>📈 Rendement estimé:</span>
+          <span>{rendementEstime.toFixed(2)} {usdcSymbol}</span>
+        </div>
+        <div className="summary-item">
+          <span>💸 Frais de gestion:</span>
+          <span>{frais.toFixed(2)} {usdcSymbol}</span>
+        </div>
+        <div className="summary-item">
+          <span>🔗 Adresse du pool:</span>
+          <span title={adressePool}>{formatAdresse(adressePool)}</span>
+        </div>
+      </div>
+
+      {/* Vérification de la connexion au Wallet */}
+      <div className="wallet-status">
+        <h2>👛 Statut du wallet</h2>
+        {isConnected ? (
+          <>
+            <p>✅ Connecté avec l'adresse :</p>
+            <p className="wallet-address">{publicKey}</p>
+            <p>💰 Solde disponible : <strong>{balanceUSDC} {usdcSymbol}</strong></p>
+            <p>🔄 Solde BNB (pour frais) : <strong>{balanceBNB} BNB</strong></p>
+          </>
+        ) : (
+          <p>⚠️ Non connecté. Veuillez connecter votre wallet pour continuer.</p>
+        )}
+        <button className="connect-btn" onClick={handleConnect} disabled={isConnected}>
+          {isConnected ? "✅ Déjà connecté" : "🔗 Se connecter à MetaMask"}
+        </button>
+      </div>
+
+      {/* Montant à déposer */}
+      <div className="input-container">
+        <label>💸 Montant à déposer ({usdcSymbol}) :</label>
+        <input
+          type="number"
+          value={montantInvesti}
+          onChange={(e) => {
+            const newValue = parseFloat(e.target.value);
+            setMontantInvesti(newValue);
+            // Réinitialiser l'approbation si le montant change
+            if (newValue !== montantInvesti) {
+              setUsdcApproved(false);
+            }
+          }}
+          min="0.1"
+          step="0.1"
+        />
+        <small>Le montant minimum recommandé est de 1 {usdcSymbol}</small>
+      </div>
+
+      {/* Boutons d'approbation et d'envoi */}
+      <div className="buttons-container">
+        {isConnected && !usdcApproved && (
+          <button 
+            className="approve-btn connect-btn" 
+            onClick={handleApproveUSDC}
+            disabled={!isConnected || usdcApproved}
+          >
+            🔓 Approuver l'utilisation de {montantInvesti} {usdcSymbol}
+          </button>
+        )}
+        
+        <button 
+          className="deposit-btn" 
+          onClick={handleDepot} 
+          disabled={!isConnected || !usdcApproved}
+        >
+          🚀 Confirmer le dépôt de {montantInvesti} {usdcSymbol}
+        </button>
+      </div>
+
+      {/* Actions supplémentaires */}
+      <div className="form-actions">
+        <button 
+          type="button" 
+          className="btn-retour" 
+          onClick={() => navigate(-1)}
+        >
+          ↩️ Retour
+        </button>
+      </div>
+
+      {/* Message de statut */}
+      {status && <p className="status">{status}</p>}
+      
+      {/* Historique des messages de statut */}
+      {statusHistory.length > 0 && (
+        <div className="status-history" style={{ marginTop: '20px', maxHeight: '200px', overflowY: 'auto' }}>
+          <h3>📝 Historique des opérations</h3>
+          <ul style={{ padding: '0 0 0 20px', margin: 0 }}>
+            {statusHistory.map((msg, idx) => (
+              <li key={idx} style={{ marginBottom: '5px' }}>{msg}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+      
+      {/* Informations sur les USDC */}
+      <div className="usdc-info" style={{ marginTop: '20px', padding: '10px', backgroundColor: '#f5f5f5', borderRadius: '5px' }}>
+        <h3>ℹ️ Informations sur les {usdcSymbol}</h3>
+        <p>
+          Les {usdcSymbol} (USD Coin) sont des stablecoins dont la valeur est indexée sur le dollar américain (1 {usdcSymbol} = 1 USD).
+          Pour pouvoir effectuer un dépôt, vous devez :
+        </p>
+        <ol>
+          <li>Avoir suffisamment d'{usdcSymbol} dans votre portefeuille</li>
+          <li>Avoir un peu de BNB (0.005 minimum) pour payer les frais de transaction</li>
+          <li>Approuver l'utilisation de vos {usdcSymbol} par le contrat de pool</li>
+        </ol>
+      </div>
+      
+      {/* Informations de sécurité */}
+      <div className="security-info">
+        <h3>🔒 Sécurité de votre investissement</h3>
+        <p>
+          Votre dépôt sera sécurisé par contrat intelligent et vous pourrez suivre 
+          son évolution en temps réel depuis votre tableau de bord. Les rendements 
+          sont calculés quotidiennement et peuvent être réclamés à l'échéance ou 
+          réinvestis selon votre choix.
+        </p>
+      </div>
     </div>
   );
 };
