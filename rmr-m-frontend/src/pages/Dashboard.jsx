@@ -20,6 +20,22 @@ const ERC20_ABI = [
   "function symbol() view returns (string)",
 ];
 
+// ABI pour le contrat LPFarming
+const LPFARMING_ABI = [
+  // Récupérer les investissements d'un utilisateur
+  "function getUserInvestments(address user) view returns (uint256[] memory ids, uint256[] memory amounts, uint256[] memory startTimes, uint256[] memory endTimes, uint256[] memory periods, uint256[] memory aprs, bool[] memory activeStatus)",
+  // Récupérer le solde de l'utilisateur
+  "function getUserBalance(address user) view returns (uint256 totalInvested, uint256 pendingRewards, uint256 totalEarned, uint256 activeInvestments)",
+  // Récupérer le rendement quotidien
+  "function getDailyYield(address user) view returns (uint256)",
+  // Réclamer les récompenses
+  "function claimRewards() external",
+  // Réinvestir les récompenses
+  "function reinvestRewards(uint256 period) external",
+  // Retirer le capital
+  "function withdrawCapital(uint256 investmentId) external"
+];
+
 // Adresse du contrat USDC sur BSC Mainnet
 const USDC_CONTRACT_ADDRESS = "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d";
 
@@ -250,64 +266,50 @@ const Dashboard = () => {
     }
   };
 
-  // Fonction pour récupérer les données d'investissement (simulation)
+  // Fonction pour récupérer les données d'investissement (réelle)
   const fetchInvestmentData = async (address) => {
     setIsLoading(true);
     addStatus("⏳ Récupération des données d'investissement...");
     
     try {
-      // En situation réelle, ces données seraient récupérées depuis un contrat smart ou une API
-      // Pour un projet Mainnet, vous devez remplacer cette simulation par des appels réels à votre contrat
+      const provider = getProvider();
+      if (!provider) {
+        throw new Error("Provider non disponible");
+      }
       
-      // Simulation d'un délai de chargement
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Créer une instance du contrat LPFarming
+      const lpFarmingContract = new ethers.Contract(POOL_CONTRACT_ADDRESS, LPFARMING_ABI, provider);
       
-      // Pour la démo, on peut choisir de simuler un utilisateur sans investissement
-      // Dans une vraie application, cela serait déterminé par les données réelles du contrat
+      // Récupérer les investissements de l'utilisateur
+      const [ids, amounts, startTimes, endTimes, periods, aprs, activeStatus] = 
+        await lpFarmingContract.getUserInvestments(address);
       
-      // Pour simuler un utilisateur sans investissement, décommentez cette ligne et commentez le mockInvestments
-      // const mockInvestments = [];
+      // Récupérer le solde de l'utilisateur
+      const [totalInvested, pendingRewards, totalEarned, activeInvestmentsCount] = 
+        await lpFarmingContract.getUserBalance(address);
       
-      // Données simulées avec des investissements
-      const today = new Date();
-      const mockInvestments = [
-        {
-          id: "INV-001",
-          amount: 1000,
-          startDate: new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000),
-          duration: 90,
-          endDate: new Date(today.getTime() + 60 * 24 * 60 * 60 * 1000),
-          apr: 12,
-          dailyReturn: 0.328,
-          totalEarned: 9.84,
-          status: "active"
-        },
-        {
-          id: "INV-002",
-          amount: 500,
-          startDate: new Date(today.getTime() - 45 * 24 * 60 * 60 * 1000),
-          duration: 30,
-          endDate: new Date(today.getTime() - 15 * 24 * 60 * 60 * 1000),
-          apr: 8,
-          dailyReturn: 0.109,
-          totalEarned: 3.27,
-          status: "matured"
-        },
-        {
-          id: "INV-003",
-          amount: 2000,
-          startDate: new Date(today.getTime() - 10 * 24 * 60 * 60 * 1000),
-          duration: 180,
-          endDate: new Date(today.getTime() + 170 * 24 * 60 * 60 * 1000),
-          apr: 15,
-          dailyReturn: 0.821,
-          totalEarned: 8.21,
-          status: "active"
-        }
-      ];
+      // Récupérer le rendement quotidien
+      const dailyYield = await lpFarmingContract.getDailyYield(address);
+      
+      // Formater les données pour l'affichage
+      const investmentsData = [];
+      
+      for (let i = 0; i < ids.length; i++) {
+        investmentsData.push({
+          id: ids[i].toString(),
+          amount: parseFloat(ethers.utils.formatUnits(amounts[i], usdcDecimals)),
+          startDate: new Date(startTimes[i].toNumber() * 1000),
+          duration: periods[i].toNumber(),
+          endDate: new Date(endTimes[i].toNumber() * 1000),
+          apr: aprs[i].toNumber() / 100, // Convertir de points de base en pourcentage
+          dailyReturn: parseFloat(ethers.utils.formatUnits(amounts[i].mul(aprs[i]).div(36500), usdcDecimals)), // Calcul approximatif du rendement quotidien
+          totalEarned: 0, // Nous n'avons pas cette information par investissement
+          status: activeStatus[i] ? "active" : "matured"
+        });
+      }
       
       // Vérifier si l'utilisateur a des investissements
-      if (mockInvestments.length === 0) {
+      if (investmentsData.length === 0) {
         setHasInvestments(false);
         setInvestmentsList([]);
         setTotalInvested(0);
@@ -317,30 +319,28 @@ const Dashboard = () => {
         setMatureInvestments([]);
         addStatus("📊 Aucun investissement actif trouvé");
       } else {
-        // Mettre à jour les états avec les données
+        // Mettre à jour les états avec les données réelles
         setHasInvestments(true);
-        setInvestmentsList(mockInvestments);
+        setInvestmentsList(investmentsData);
         
-        // Calculer les montants totaux
-        const total = mockInvestments.reduce((sum, inv) => sum + inv.amount, 0);
-        setTotalInvested(total);
+        // Formater les montants
+        const formattedTotalInvested = parseFloat(ethers.utils.formatUnits(totalInvested, usdcDecimals));
+        const formattedPendingRewards = parseFloat(ethers.utils.formatUnits(pendingRewards, usdcDecimals));
+        const formattedTotalEarned = parseFloat(ethers.utils.formatUnits(totalEarned, usdcDecimals));
+        const formattedDailyYield = parseFloat(ethers.utils.formatUnits(dailyYield, usdcDecimals));
         
-        const earnings = mockInvestments.reduce((sum, inv) => sum + inv.totalEarned, 0);
-        setTotalEarnings(earnings);
+        setTotalInvested(formattedTotalInvested);
+        setTotalEarnings(formattedTotalEarned);
+        setDailyEarnings(formattedDailyYield);
         
-        const daily = mockInvestments
-          .filter(inv => inv.status === "active")
-          .reduce((sum, inv) => sum + inv.dailyReturn, 0);
-        setDailyEarnings(daily);
-        
-        // Définir les montants disponibles pour retrait
-        setAvailableForWithdrawal(earnings > 5 ? earnings : 0);
+        // Définir les montants disponibles pour retrait (récompenses en attente)
+        setAvailableForWithdrawal(formattedPendingRewards);
         
         // Identifier les investissements arrivés à maturité
-        const mature = mockInvestments.filter(inv => inv.status === "matured");
+        const mature = investmentsData.filter(inv => inv.status === "matured");
         setMatureInvestments(mature);
         
-        addStatus(`📊 ${mockInvestments.length} investissements trouvés, total investi: ${total.toFixed(2)} ${usdcSymbol}`);
+        addStatus(`📊 ${investmentsData.length} investissements trouvés, total investi: ${formattedTotalInvested.toFixed(2)} ${usdcSymbol}`);
       }
       
       setIsLoading(false);
@@ -371,7 +371,7 @@ const Dashboard = () => {
     return diffDays > 0 ? diffDays : 0;
   };
 
-  // Fonction pour retirer les gains
+  // Fonction pour retirer les gains (réelle)
   const handleWithdrawEarnings = async () => {
     if (availableForWithdrawal < 5) {
       addStatus(`⚠️ Le minimum pour retirer est de 5 ${usdcSymbol}.`);
@@ -380,95 +380,113 @@ const Dashboard = () => {
     
     addStatus("⏳ Traitement du retrait des gains...");
     
-    // En production, vous devez remplacer cette simulation par un appel au contrat
     try {
-      // Simulation du retrait
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      const provider = getProvider();
+      const signer = provider.getSigner();
+      const lpFarmingContract = new ethers.Contract(POOL_CONTRACT_ADDRESS, LPFARMING_ABI, signer);
+      
+      // Appel au contrat pour réclamer les récompenses
+      const tx = await lpFarmingContract.claimRewards();
+      addStatus(`✅ Transaction de retrait envoyée ! ID : ${tx.hash}`);
+      
+      // Attendre la confirmation
+      await tx.wait(1);
       
       addStatus(`✅ Retrait de ${availableForWithdrawal.toFixed(2)} ${usdcSymbol} effectué avec succès!`);
       setAvailableForWithdrawal(0);
       
-      // En situation réelle, appel au contrat smart pour retirer les gains
-      // Exemple:
-      // const provider = getProvider();
-      // const signer = provider.getSigner();
-      // const poolContract = new ethers.Contract(POOL_CONTRACT_ADDRESS, POOL_ABI, signer);
-      // const tx = await poolContract.withdrawEarnings(ethers.utils.parseUnits(availableForWithdrawal.toString(), usdcDecimals));
-      // await tx.wait(1);
-      // updateBalances(publicKey, provider);
+      // Mettre à jour les soldes et les données
+      updateBalances(publicKey, provider);
+      fetchInvestmentData(publicKey);
     } catch (error) {
       console.error("Erreur lors du retrait des gains:", error);
       addStatus(`❌ Erreur lors du retrait: ${error.message}`);
     }
   };
 
-  // Fonction pour réinvestir les gains
+  // Fonction pour réinvestir les gains (réelle)
   const handleReinvestEarnings = async () => {
-    if (totalEarnings <= 0) {
+    if (availableForWithdrawal <= 0) {
       addStatus("⚠️ Aucun gain disponible à réinvestir.");
+      return;
+    }
+    
+    // Demander à l'utilisateur la période pour le réinvestissement
+    // Dans une application réelle, cela pourrait être un formulaire ou un modal
+    const periodInDays = window.prompt("Entrez la période d'investissement en jours (30, 90 ou 180):", "90");
+    if (!periodInDays) return; // L'utilisateur a annulé
+    
+    // Convertir en nombre
+    const period = parseInt(periodInDays);
+    
+    // Vérifier que la période est valide
+    if (![30, 90, 180].includes(period)) {
+      addStatus("⚠️ Période invalide. Veuillez choisir 30, 90 ou 180 jours.");
       return;
     }
     
     addStatus("⏳ Réinvestissement des gains en cours...");
     
     try {
-      // Simulation du réinvestissement
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      const provider = getProvider();
+      const signer = provider.getSigner();
+      const lpFarmingContract = new ethers.Contract(POOL_CONTRACT_ADDRESS, LPFARMING_ABI, signer);
       
-      addStatus(`✅ Réinvestissement de ${totalEarnings.toFixed(2)} ${usdcSymbol} effectué avec succès!`);
-      setTotalInvested(totalInvested + totalEarnings);
-      setTotalEarnings(0);
-      setAvailableForWithdrawal(0);
+      // Appel au contrat pour réinvestir les récompenses
+      const tx = await lpFarmingContract.reinvestRewards(period);
+      addStatus(`✅ Transaction de réinvestissement envoyée ! ID : ${tx.hash}`);
       
-      // En situation réelle, appel au contrat smart pour réinvestir les gains
-      // Exemple:
-      // const provider = getProvider();
-      // const signer = provider.getSigner();
-      // const poolContract = new ethers.Contract(POOL_CONTRACT_ADDRESS, POOL_ABI, signer);
-      // const tx = await poolContract.reinvestEarnings();
-      // await tx.wait(1);
-      // fetchInvestmentData(publicKey);
+      // Attendre la confirmation
+      await tx.wait(1);
+      
+      addStatus(`✅ Réinvestissement pour ${period} jours effectué avec succès!`);
+      
+      // Mettre à jour les données
+      fetchInvestmentData(publicKey);
     } catch (error) {
       console.error("Erreur lors du réinvestissement:", error);
       addStatus(`❌ Erreur lors du réinvestissement: ${error.message}`);
     }
   };
 
-  // Fonction pour retirer les capitaux arrivés à maturité
+  // Fonction pour retirer les capitaux arrivés à maturité (réelle)
   const handleWithdrawCapital = async () => {
     if (matureInvestments.length === 0) {
       addStatus("⚠️ Aucun investissement arrivé à maturité.");
       return;
     }
     
-    const totalMature = matureInvestments.reduce((sum, inv) => sum + inv.amount, 0);
+    // Demander à l'utilisateur de confirmer le retrait
+    const confirmWithdraw = window.confirm(`Voulez-vous retirer le capital de ${matureInvestments.length} investissements arrivés à maturité?`);
+    if (!confirmWithdraw) return;
     
-    addStatus(`⏳ Retrait du capital de ${totalMature.toFixed(2)} ${usdcSymbol} en cours...`);
-    
-    try {
-      // Simulation du retrait
-      await new Promise(resolve => setTimeout(resolve, 2000));
+    // Boucle pour retirer chaque investissement arrivé à maturité
+    for (const investment of matureInvestments) {
+      addStatus(`⏳ Retrait du capital pour l'investissement ${investment.id} en cours...`);
       
-      addStatus(`✅ Capital de ${totalMature.toFixed(2)} ${usdcSymbol} retiré avec succès!`);
-      
-      // Mise à jour des listes
-      setInvestmentsList(investmentsList.filter(inv => inv.status !== "matured"));
-      setMatureInvestments([]);
-      setTotalInvested(totalInvested - totalMature);
-      
-      // En situation réelle, appel au contrat smart pour retirer le capital
-      // Exemple:
-      // const provider = getProvider();
-      // const signer = provider.getSigner();
-      // const poolContract = new ethers.Contract(POOL_CONTRACT_ADDRESS, POOL_ABI, signer);
-      // const tx = await poolContract.withdrawMaturedCapital();
-      // await tx.wait(1);
-      // fetchInvestmentData(publicKey);
-      // updateBalances(publicKey, provider);
-    } catch (error) {
-      console.error("Erreur lors du retrait du capital:", error);
-      addStatus(`❌ Erreur lors du retrait du capital: ${error.message}`);
+      try {
+        const provider = getProvider();
+        const signer = provider.getSigner();
+        const lpFarmingContract = new ethers.Contract(POOL_CONTRACT_ADDRESS, LPFARMING_ABI, signer);
+        
+        // Appel au contrat pour retirer le capital
+        const tx = await lpFarmingContract.withdrawCapital(investment.id);
+        addStatus(`✅ Transaction de retrait envoyée pour l'investissement ${investment.id} ! ID : ${tx.hash}`);
+        
+        // Attendre la confirmation
+        await tx.wait(1);
+        
+        addStatus(`✅ Capital de l'investissement ${investment.id} retiré avec succès!`);
+      } catch (error) {
+        console.error(`Erreur lors du retrait du capital pour l'investissement ${investment.id}:`, error);
+        addStatus(`❌ Erreur lors du retrait du capital pour l'investissement ${investment.id}: ${error.message}`);
+      }
     }
+    
+    // Mettre à jour les données après tous les retraits
+    const provider = getProvider();
+    updateBalances(publicKey, provider);
+    fetchInvestmentData(publicKey);
   };
 
   // Contenu du tableau de bord pour un utilisateur sans investissement
