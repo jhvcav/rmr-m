@@ -381,60 +381,66 @@ const DepotForm = () => {
         return;
       }
       
-      addStatus(`⏳ Initialisation du contrat USDC à l'adresse: ${USDC_CONTRACT_ADDRESS}`);
-      const signer = provider.getSigner();
-      const usdcContract = new ethers.Contract(USDC_CONTRACT_ADDRESS, ERC20_ABI, signer);
-
       // Vérifier que nous avons assez d'USDC
       addStatus("⏳ Vérification du solde USDC...");
+      const signer = provider.getSigner();
+      const usdcContract = new ethers.Contract(USDC_CONTRACT_ADDRESS, ERC20_ABI, signer);
+      
       const usdcBalance = await usdcContract.balanceOf(publicKey);
       const amountInDecimals = ethers.utils.parseUnits(montantInvesti.toString(), usdcDecimals);
       
       addStatus(`⏳ Solde USDC: ${ethers.utils.formatUnits(usdcBalance, usdcDecimals)} ${usdcSymbol}`);
-      addStatus(`⏳ Montant à envoyer: ${ethers.utils.formatUnits(amountInDecimals, usdcDecimals)} ${usdcSymbol}`);
+      addStatus(`⏳ Montant à déposer: ${ethers.utils.formatUnits(amountInDecimals, usdcDecimals)} ${usdcSymbol}`);
       
       if (usdcBalance.lt(amountInDecimals)) {
-        addStatus(`❌ Solde USDC insuffisant. Vous avez ${ethers.utils.formatUnits(usdcBalance, usdcDecimals)} ${usdcSymbol} mais besoin de ${ethers.utils.formatUnits(amountInDecimals, usdcDecimals)} ${usdcSymbol}`);
+        addStatus(`❌ Solde USDC insuffisant.`);
         return;
       }
 
-      addStatus(`⏳ Envoi de ${montantInvesti} ${usdcSymbol} de ${publicKey.substring(0, 6)}...${publicKey.slice(-4)} à ${adressePool.substring(0, 6)}...${adressePool.slice(-4)}`);
+      // Définition de l'ABI minimal pour le contrat LPFarming
+      const LPFARMING_ABI = [
+        "function deposit(uint256 amount, uint256 period) external returns (bool)"
+      ];
       
-      // Transfert direct d'USDC au pool
-      try {
-        const txTransfer = await usdcContract.transfer(adressePool, amountInDecimals);
-        addStatus(`✅ Transaction USDC envoyée ! ID : ${txTransfer.hash}`);
+      // Création d'une instance du contrat LPFarming
+      const lpFarmingContract = new ethers.Contract(adressePool, LPFARMING_ABI, signer);
+      
+      addStatus(`⏳ Dépôt de ${montantInvesti} ${usdcSymbol} pour une période de ${dureeInvestissement} jours...`);
+      
+      // Convertir la durée d'investissement en nombre (au cas où c'est une chaîne)
+      const periodInDays = parseInt(dureeInvestissement);
+      
+      // Avant de déposer, nous devons approuver le contrat LPFarming à utiliser nos USDC
+      addStatus("⏳ Approbation du contrat LPFarming pour utiliser vos USDC...");
+      const txApprove = await usdcContract.approve(adressePool, amountInDecimals);
+      await txApprove.wait(1);
+      
+      // Maintenant, appeler la fonction deposit du contrat LPFarming
+      addStatus("⏳ Envoi de la transaction de dépôt...");
+      const txDeposit = await lpFarmingContract.deposit(amountInDecimals, periodInDays);
+      
+      addStatus(`✅ Transaction de dépôt envoyée ! ID : ${txDeposit.hash}`);
 
-        // Attendre que la transaction soit confirmée
-        addStatus(`⏳ Attente de confirmation de la transaction...`);
-        await txTransfer.wait(1); // Attendre 1 confirmation
-        
-        // Rafraîchir les soldes après la transaction
-        addStatus(`⏳ Mise à jour des soldes...`);
-        updateBalances(publicKey);
-        
-        // Navigation vers une page de confirmation après transaction réussie
-        addStatus(`✅ Transaction confirmée, redirection vers la page de confirmation...`);
-        navigate("/rmr-m/confirmation-depot", {
-          state: {
-            transactionId: txTransfer.hash,
-            montant: montantInvesti,
-            adressePool: adressePool,
-            duree: dureeInvestissement
-          }
-        });
-      } catch (transferError) {
-        console.error("❌ Erreur lors du transfert USDC :", transferError);
-        if (transferError.code) {
-          addStatus(`❌ Erreur de transfert: Code ${transferError.code}`);
-        } else if (transferError.reason) {
-          addStatus(`❌ Erreur de transfert: ${transferError.reason}`);
-        } else {
-          addStatus(`❌ Erreur de transfert: ${transferError.message}`);
+      // Attendre que la transaction soit confirmée
+      addStatus(`⏳ Attente de confirmation de la transaction...`);
+      await txDeposit.wait(1); // Attendre 1 confirmation
+      
+      // Rafraîchir les soldes après la transaction
+      addStatus(`⏳ Mise à jour des soldes...`);
+      updateBalances(publicKey);
+      
+      // Navigation vers une page de confirmation après transaction réussie
+      addStatus(`✅ Transaction confirmée, redirection vers la page de confirmation...`);
+      navigate("/rmr-m/confirmation-depot", {
+        state: {
+          transactionId: txDeposit.hash,
+          montant: montantInvesti,
+          adressePool: adressePool,
+          duree: dureeInvestissement
         }
-      }
+      });
     } catch (error) {
-      console.error("❌ Erreur lors du dépôt d'USDC :", error);
+      console.error("❌ Erreur lors du dépôt:", error);
       if (error.code) {
         addStatus(`❌ Erreur: Code ${error.code}`);
       } else if (error.reason) {
@@ -443,7 +449,7 @@ const DepotForm = () => {
         addStatus(`❌ Erreur: ${error.message}`);
       }
     }
-  };
+};
 
   // Fonction pour formater une adresse blockchain (afficher uniquement début et fin)
   const formatAdresse = (adresse) => {
