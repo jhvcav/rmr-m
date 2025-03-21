@@ -377,6 +377,9 @@ const DepotForm = () => {
         addStatus("❌ Veuillez vous connecter au réseau BSC Mainnet.");
         return;
       }
+
+      if (![30, 90, 180].includes(periodInDays)) {
+        addStatus(`⚠️Attension: Période d'investissement invalide ${periodInDays} pourraisne pas être supportée par le contrat`);}
       
       // Vérifier que nous avons assez d'USDC
       addStatus("⏳ Vérification du solde USDC...");
