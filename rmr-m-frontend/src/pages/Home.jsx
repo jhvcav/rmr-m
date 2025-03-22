@@ -41,10 +41,7 @@ const Home = () => {
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5, delay: 1 }}
-      >
-        <Link to="rmr-m/dashboard" className="btn btn-dark">Je fais mon choix</Link>
-        <Link to="/rmr-m/depot-form" className="btn btn-dark">Commencer</Link>
-      </motion.div>
+      ></motion.div>
 
       {/* Section des solutions de gains */}
       <section className="solutions">
