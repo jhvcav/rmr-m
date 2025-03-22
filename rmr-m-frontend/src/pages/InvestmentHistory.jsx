@@ -496,8 +496,8 @@ const InvestmentHistory = () => {
                         <th>Date</th>
                         <th>Type</th>
                         <th>Montant</th>
-                        <th>Détails</th>
-                        <th>Hash</th>
+                        <th className="transaction-details">Détails</th>
+                        <th className="transaction-hash-cell">Hash</th>
                         <th>Statut</th>
                       </tr>
                     </thead>
@@ -517,10 +517,10 @@ const InvestmentHistory = () => {
                           <td className={`transaction-amount ${transaction.type}`}>
                             {transaction.type === "withdrawal" ? "-" : ""} {transaction.amount.toFixed(2)} USDT
                           </td>
-                          <td>
+                          <td className="transaction-details">
                             {transaction.plan || transaction.notes || "-"}
                           </td>
-                          <td>
+                          <td className="transaction-hash-cell">
                             <span 
                               className="transaction-hash"
                               onClick={() => openTxExplorer(transaction.txHash)}
