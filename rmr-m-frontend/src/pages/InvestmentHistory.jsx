@@ -31,11 +31,11 @@ const InvestmentHistory = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [displayedTransactions, setDisplayedTransactions] = useState([]);
 
-  // Style de décalage vers la droite - ajustez la valeur selon vos besoins
-  const containerStyle = {
-    position: 'relative',
-    left: '780px'
-  };
+  // Suppression du style de décalage vers la droite
+  // const containerStyle = {
+  //   position: 'relative',
+  //   left: '780px'
+  // };
 
   // Fonction pour créer un provider compatible avec plusieurs versions d'ethers
   const getProvider = () => {
@@ -394,7 +394,7 @@ const InvestmentHistory = () => {
   };
 
   return (
-    <div className="history-container" style={containerStyle}>
+    <div className="history-container">
       <h1>📜 Historique des Transactions</h1>
       
       {isLoading ? (
