@@ -689,7 +689,7 @@ const Dashboard = () => {
       
       {/* Avertissement pour Mainnet */}
       <div className="mainnet-warning responsive-card" style={{ marginTop: '20px', padding: '10px', backgroundColor: '#fff3cd', borderRadius: '5px', border: '1px solid #ffeeba' }}>
-        <h3>⚠️ Mode Production - Vraies Cryptomonnaies</h3>
+        <h3>⚠️</h3>
         <p>
           <strong>ATTENTION:</strong> Cette application utilise le réseau principal Binance Smart Chain. 
           Toutes les transactions impliquent de vraies cryptomonnaies ayant une valeur réelle.
