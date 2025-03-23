@@ -698,7 +698,7 @@ const Dashboard = () => {
           Nous vous recommandons de:
         </p>
         <ul>
-          <li>Commencer avec de petits montants pour tester</li>
+          <li>Commencer avec le montant minimum recquis pour tester</li>
           <li>Vérifier toutes les informations de transaction avant confirmation</li>
           <li>Ne jamais investir plus que ce que vous pouvez vous permettre de perdre</li>
         </ul>
