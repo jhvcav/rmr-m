@@ -599,7 +599,6 @@ const Dashboard = () => {
           <button 
             className={`action-btn reinvest-btn responsive-button ${totalEarnings <= 0 ? 'disabled' : ''}`}
             onClick={handleReinvestEarnings} 
-            disabled={totalEarnings <= 0}
           >
             🔁 Réinvestir mes gains
           </button>
