@@ -593,7 +593,7 @@ const Dashboard = () => {
             disabled={availableForWithdrawal < 5}
           >
             🔄 Retirer mes gains
-            {availableForWithdrawal < 5 && <span className="btn-note">(min. 5 {usdcSymbol})</span>}
+            {availableForWithdrawal > 0 && <span className="btn-note">(min. 0 {usdcSymbol})</span>}
           </button>
           
           <button 
@@ -604,9 +604,8 @@ const Dashboard = () => {
           </button>
           
           <button 
-            className={`action-btn capital-btn responsive-button ${matureInvestments.length === 0 ? 'disabled' : ''}`}
+            className={`action-btn capital-btn responsive-button`}
             onClick={handleWithdrawCapital} 
-            disabled={matureInvestments.length === 0}
           >
             💵 Retirer mes capitaux disponibles
           </button>
