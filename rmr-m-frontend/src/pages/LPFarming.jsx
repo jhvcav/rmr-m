@@ -130,7 +130,7 @@ const LPFarming = () => {
   useEffect(() => {
     if (provider && account) {
       // Adresse du contrat BSC
-      const contractAddress = "0x351e155c90d34A8E3C61288E510fb1c0b861046c";
+      const contractAddress = "0x83c3b836E6e45Fda04c01BF7d0c76B6068D40Fa0";
 
       // ABI du contrat
       const contractAbi = [
@@ -233,7 +233,7 @@ const LPFarming = () => {
     const frais = capital * 0.02;
     
     // Adresse du pool
-    const poolAddress = contract ? contract.address : "0x351e155c90d34A8E3C61288E510fb1c0b861046c";
+    const poolAddress = contract ? contract.address : "0x83c3b836E6e45Fda04c01BF7d0c76B6068D40Fa0";
     
     // Navigation vers le formulaire de dépôt
     navigate("/rmr-m/depot-form", {

@@ -40,7 +40,7 @@ const LPFARMING_ABI = [
 const USDC_CONTRACT_ADDRESS = "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d";
 
 // Adresse du contrat de pool sur Mainnet
-const POOL_CONTRACT_ADDRESS = "0x351e155c90d34A8E3C61288E510fb1c0b861046c"; // À remplacer par l'adresse réelle de votre pool
+const POOL_CONTRACT_ADDRESS = "0x83c3b836E6e45Fda04c01BF7d0c76B6068D40Fa0"; // À remplacer par l'adresse réelle de votre pool
 
 const Dashboard = () => {
   // États pour le wallet et la connexion
