@@ -357,11 +357,11 @@ const LPFarming = () => {
       <div className="responsive-card">
         <h3>ℹ️ Informations sur les {usdcSymbol}</h3>
         <p>
-          Pour utiliser ce service, vous avez besoin de {usdcSymbol} sur le réseau BSC Testnet.
+          Pour utiliser ce service, vous avez besoin de {usdcSymbol} du réseau BSC.
           Assurez-vous également d'avoir un peu de BNB pour payer les frais de transaction.
         </p>
         <p>
-          Montant minimum recommandé : 1 {usdcSymbol}<br />
+          Montant minimum recommandé : 10 {usdcSymbol}<br />
           Pour des rendements optimaux : 250 {usdcSymbol} ou plus
         </p>
       </div>
