@@ -24,7 +24,7 @@ const ERC20_ABI = [
 const USDC_CONTRACT_ADDRESS = "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d"; // Adresse réelle de l'USDC sur BSC Mainnet
 
 // Adresse du contrat LPFarming - utilisez une adresse par défaut
-const DEFAULT_LPFARMING_ADDRESS = "0x83c3b836E6e45Fda04c01BF7d0c76B6068D40Fa0"; // Remplacez par votre adresse LPFarming
+const DEFAULT_LPFARMING_ADDRESS = "0xeaD8c08aD5EaA23ebD2EC965725e260307e8f654"; // adresse LPFarming
 
 const DepotForm = () => {
   const location = useLocation();

@@ -40,7 +40,7 @@ const LPFARMING_ABI = [
 const USDC_CONTRACT_ADDRESS = "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d";
 
 // Adresse du contrat de pool sur Mainnet
-const POOL_CONTRACT_ADDRESS = "0x83c3b836E6e45Fda04c01BF7d0c76B6068D40Fa0"; // À remplacer par l'adresse réelle de votre pool
+const POOL_CONTRACT_ADDRESS = "0xeaD8c08aD5EaA23ebD2EC965725e260307e8f654"; // adresse réelle de mon pool LPFraming
 
 const Dashboard = () => {
   // États pour le wallet et la connexion
@@ -161,9 +161,14 @@ const Dashboard = () => {
         
         // Définir comme connecté
         setIsConnected(true);
+
+        //Réiniatilisation d'état des données
+        setInvestmentsList([]);
+        setTotalInvested(0);
         
         // Charger les données d'investissement
         fetchInvestmentData(account);
+        console.log("Connecté au contrat LPFarming à l'adresse:", POOL_CONTRACT_ADDRESS);
         
       } catch (error) {
         console.error("Erreur lors de la connexion au wallet:", error);
@@ -270,6 +275,7 @@ const Dashboard = () => {
   const fetchInvestmentData = async (address) => {
     setIsLoading(true);
     addStatus("⏳ Récupération des données d'investissement...");
+    console.log("Données brutes des investissements:", {ids, amounts, startTimes, endTimes, periods, aprs, activeStatus});
     
     try {
       const provider = getProvider();
@@ -322,6 +328,7 @@ const Dashboard = () => {
         // Mettre à jour les états avec les données réelles
         setHasInvestments(true);
         setInvestmentsList(investmentsData);
+        console.log("Connecté au contrat LPFarming à l'adresse:", POOL_CONTRACT_ADDRESS);
         
         // Formater les montants
         const formattedTotalInvested = parseFloat(ethers.utils.formatUnits(totalInvested, usdcDecimals));
