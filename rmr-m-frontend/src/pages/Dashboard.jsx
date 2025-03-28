@@ -161,10 +161,6 @@ const Dashboard = () => {
         
         // Définir comme connecté
         setIsConnected(true);
-
-        //Réiniatilisation d'état des données
-        setInvestmentsList([]);
-        setTotalInvested(0);
         
         // Charger les données d'investissement
         fetchInvestmentData(account);
