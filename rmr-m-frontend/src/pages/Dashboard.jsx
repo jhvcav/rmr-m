@@ -164,7 +164,6 @@ const Dashboard = () => {
         
         // Charger les données d'investissement
         fetchInvestmentData(account);
-        console.log("Connecté au contrat LPFarming à l'adresse:", POOL_CONTRACT_ADDRESS);
         
       } catch (error) {
         console.error("Erreur lors de la connexion au wallet:", error);
@@ -271,7 +270,6 @@ const Dashboard = () => {
   const fetchInvestmentData = async (address) => {
     setIsLoading(true);
     addStatus("⏳ Récupération des données d'investissement...");
-    console.log("Données brutes des investissements:", {ids, amounts, startTimes, endTimes, periods, aprs, activeStatus});
     
     try {
       const provider = getProvider();
