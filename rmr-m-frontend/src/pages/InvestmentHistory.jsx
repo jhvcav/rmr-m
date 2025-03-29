@@ -6,8 +6,12 @@
 
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { LPFarmingABI, DeFiStrategyABI } from "../utils/contractABIs";
+import { contractAddresses } from "../utils/contractAddresses";
 import * as ethers from "ethers";
 import "./InvestmentHistory.css";
+import { jsPDF } from "jspdf";
+import 'jspdf-autotable';
 
 const InvestmentHistory = () => {
   // États pour le wallet et la connexion
@@ -140,147 +144,110 @@ const InvestmentHistory = () => {
     }
   }, [filteredTransactions, currentPage, transactionsPerPage]);
 
-  // Fonction pour récupérer l'historique des transactions (simulation)
-  const fetchTransactionHistory = async (address) => {
-    setIsLoading(true);
-    
-    try {
-      // En situation réelle, ces données seraient récupérées depuis un contrat smart ou une API
-      // Ici, on simule un délai de chargement
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Données simulées
-      const today = new Date();
-      const mockTransactions = [
-        {
-          id: "TX-001",
-          type: "investment",
-          amount: 1000,
-          date: new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000),
-          plan: "Plan 90 jours - 12% APR",
-          txHash: "0xabc123...",
-          status: "completed"
-        },
-        {
-          id: "TX-002",
-          type: "investment",
-          amount: 500,
-          date: new Date(today.getTime() - 45 * 24 * 60 * 60 * 1000),
-          plan: "Plan 30 jours - 8% APR",
-          txHash: "0xdef456...",
-          status: "completed"
-        },
-        {
-          id: "TX-003",
-          type: "investment",
-          amount: 2000,
-          date: new Date(today.getTime() - 10 * 24 * 60 * 60 * 1000),
-          plan: "Plan 180 jours - 15% APR",
-          txHash: "0xghi789...",
-          status: "completed"
-        },
-        {
-          id: "TX-004",
-          type: "withdrawal",
-          amount: 25.75,
-          date: new Date(today.getTime() - 15 * 24 * 60 * 60 * 1000),
-          txHash: "0xjkl012...",
-          status: "completed",
-          notes: "Retrait de gains"
-        },
-        {
-          id: "TX-005",
-          type: "withdrawal",
-          amount: 500,
-          date: new Date(today.getTime() - 14 * 24 * 60 * 60 * 1000),
-          txHash: "0xmno345...",
-          status: "completed",
-          notes: "Retrait de capital à maturité"
-        },
-        {
-          id: "TX-006",
-          type: "reinvestment",
-          amount: 32.50,
-          date: new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000),
-          plan: "Plan 90 jours - 12% APR",
-          txHash: "0xpqr678...",
-          status: "completed",
-          notes: "Réinvestissement des gains"
-        },
-        {
-          id: "TX-007",
-          type: "withdrawal",
-          amount: 18.20,
-          date: new Date(today.getTime() - 5 * 24 * 60 * 60 * 1000),
-          txHash: "0xstu901...",
-          status: "completed",
-          notes: "Retrait de gains"
-        },
-        {
-          id: "TX-008",
-          type: "reinvestment",
-          amount: 45.75,
-          date: new Date(today.getTime() - 3 * 24 * 60 * 60 * 1000),
-          plan: "Plan 180 jours - 15% APR",
-          txHash: "0xvwx234...",
-          status: "completed",
-          notes: "Réinvestissement des gains"
-        },
-        {
-          id: "TX-009",
-          type: "investment",
-          amount: 750,
-          date: new Date(today.getTime() - 2 * 24 * 60 * 60 * 1000),
-          plan: "Plan 90 jours - 12% APR",
-          txHash: "0xyzA567...",
-          status: "completed"
-        },
-        {
-          id: "TX-010",
-          type: "withdrawal",
-          amount: 12.40,
-          date: new Date(today.getTime() - 1 * 24 * 60 * 60 * 1000),
-          txHash: "0xBCD890...",
-          status: "completed",
-          notes: "Retrait de gains"
-        },
-        {
-          id: "TX-011",
-          type: "investment",
-          amount: 1500,
-          date: new Date(today.getTime() - 60 * 24 * 60 * 60 * 1000),
-          plan: "Plan 180 jours - 15% APR",
-          txHash: "0xEFG123...",
-          status: "completed"
-        },
-        {
-          id: "TX-012",
-          type: "reinvestment",
-          amount: 60.25,
-          date: new Date(today.getTime() - 20 * 24 * 60 * 60 * 1000),
-          plan: "Plan 90 jours - 12% APR",
-          txHash: "0xHIJ456...",
-          status: "completed",
-          notes: "Réinvestissement des gains"
-        }
-      ];
-      
-      // Trier par date (du plus récent au plus ancien)
-      mockTransactions.sort((a, b) => b.date - a.date);
-      
-      // Mettre à jour les états
-      setTransactions(mockTransactions);
-      setFilteredTransactions(mockTransactions);
-      
-      setStatus("");
-      setIsLoading(false);
-      
-    } catch (error) {
-      console.error("Erreur lors de la récupération de l'historique:", error);
-      setStatus("❌ Erreur lors du chargement de l'historique des transactions");
-      setIsLoading(false);
+  // Fonction pour récupérer l'historique des transactions réelles
+const fetchTransactionHistory = async (address) => {
+  setIsLoading(true);
+  
+  try {
+    // Créer le provider et se connecter aux contrats
+    const provider = getProvider();
+    if (!provider) {
+      throw new Error("Impossible de se connecter au réseau blockchain");
     }
-  };
+    
+    const signer = provider.getSigner();
+    
+    // Initialiser les contrats
+    const lpFarmingContract = new ethers.Contract(
+      contractAddresses.lpFarming,
+      LPFarmingABI,
+      signer
+    );
+    
+    const defiStrategyContract = new ethers.Contract(
+      contractAddresses.defiStrategy,
+      DeFiStrategyABI,
+      signer
+    );
+    
+    // Récupérer les événements pertinents
+    // Remarque: ajustez les filtres et les blocs selon vos besoins
+    const fromBlock = 0; // ou une valeur appropriée pour limiter la recherche
+    const currentBlock = await provider.getBlockNumber();
+    
+    // Récupérer les événements d'investissement
+    const depositFilter = lpFarmingContract.filters.Deposit(address);
+    const depositEvents = await lpFarmingContract.queryFilter(depositFilter, fromBlock, currentBlock);
+    
+    // Récupérer les événements de retrait
+    const withdrawFilter = lpFarmingContract.filters.Withdraw(address);
+    const withdrawEvents = await lpFarmingContract.queryFilter(withdrawFilter, fromBlock, currentBlock);
+    
+    // Récupérer les événements de récompense récoltés
+    const harvestFilter = lpFarmingContract.filters.RewardPaid(address);
+    const harvestEvents = await lpFarmingContract.queryFilter(harvestFilter, fromBlock, currentBlock);
+    
+    // Transformer les événements en transactions
+    const processedTransactions = [
+      ...await Promise.all(depositEvents.map(async (event) => {
+        const block = await event.getBlock();
+        return {
+          id: `TX-DEP-${event.transactionHash.substring(0, 6)}`,
+          type: "investment",
+          amount: parseFloat(ethers.utils.formatUnits(event.args.amount, 6)), // USDC/USDT à 6 décimales
+          date: new Date(block.timestamp * 1000),
+          plan: "Investissement LP Farming",
+          txHash: event.transactionHash,
+          status: "completed"
+        };
+      })),
+      
+      ...await Promise.all(withdrawEvents.map(async (event) => {
+        const block = await event.getBlock();
+        return {
+          id: `TX-WIT-${event.transactionHash.substring(0, 6)}`,
+          type: "withdrawal",
+          amount: parseFloat(ethers.utils.formatUnits(event.args.amount, 6)), // USDC/USDT à 6 décimales
+          date: new Date(block.timestamp * 1000),
+          txHash: event.transactionHash,
+          status: "completed",
+          notes: "Retrait de capital"
+        };
+      })),
+      
+      ...await Promise.all(harvestEvents.map(async (event) => {
+        const block = await event.getBlock();
+        // Déterminer si c'est un réinvestissement automatique ou un retrait
+        const isReinvestment = event.args.reinvested && event.args.reinvested === true;
+        
+        return {
+          id: `TX-HAR-${event.transactionHash.substring(0, 6)}`,
+          type: isReinvestment ? "reinvestment" : "withdrawal",
+          amount: parseFloat(ethers.utils.formatUnits(event.args.reward, 6)), // USDC/USDT à 6 décimales
+          date: new Date(block.timestamp * 1000),
+          txHash: event.transactionHash,
+          status: "completed",
+          notes: isReinvestment ? "Réinvestissement des gains" : "Retrait de gains"
+        };
+      }))
+    ];
+    
+    // Trier par date (du plus récent au plus ancien)
+    processedTransactions.sort((a, b) => b.date - a.date);
+    
+    // Mettre à jour les états
+    setTransactions(processedTransactions);
+    setFilteredTransactions(processedTransactions);
+    
+    setStatus("");
+    setIsLoading(false);
+    
+  } catch (error) {
+    console.error("Erreur lors de la récupération de l'historique:", error);
+    setStatus("❌ Erreur lors du chargement de l'historique des transactions");
+    setIsLoading(false);
+  }
+};
 
   // Fonction pour filtrer les transactions
   const filterTransactions = () => {
@@ -370,28 +337,108 @@ const InvestmentHistory = () => {
     }
   };
 
-  // Fonction pour générer le PDF de l'historique
-  const generatePDF = () => {
-    setStatus("⏳ Génération du PDF en cours...");
+// Fonction pour générer le PDF de l'historique
+const generatePDF = () => {
+  setStatus("⏳ Génération du PDF en cours...");
+  
+  try {
+    const doc = new jsPDF();
     
-    // Simulation de génération de PDF
-    setTimeout(() => {
-      setStatus("✅ PDF téléchargé avec succès!");
+    // Ajouter le titre
+    doc.setFontSize(18);
+    doc.text("Historique des transactions", 14, 22);
+    
+    // Ajouter les informations du wallet
+    doc.setFontSize(12);
+    doc.text(`Wallet: ${publicKey ? `${publicKey.substring(0, 6)}...${publicKey.substring(publicKey.length - 4)}` : "-"}`, 14, 32);
+    doc.text(`Date d'export: ${new Date().toLocaleDateString('fr-FR')}`, 14, 40);
+    
+    // Filtrer les transactions selon les filtres actuels
+    let exportData = filteredTransactions.map(tx => [
+      tx.id,
+      formatDate(tx.date),
+      getTransactionTypeLabel(tx.type),
+      `${tx.type === "withdrawal" ? "-" : ""} ${tx.amount.toFixed(2)} USDT`,
+      tx.plan || tx.notes || "-",
+      tx.txHash,
+      tx.status === "completed" ? "Complété" : tx.status === "pending" ? "En cours" : "Échoué"
+    ]);
+    
+    // Créer le tableau
+    doc.autoTable({
+      head: [["ID", "Date", "Type", "Montant", "Détails", "Hash", "Statut"]],
+      body: exportData,
+      startY: 50,
+      styles: { fontSize: 8, cellPadding: 2 },
+      columnStyles: {
+        0: { cellWidth: 20 },
+        1: { cellWidth: 30 },
+        2: { cellWidth: 25 },
+        3: { cellWidth: 25 },
+        4: { cellWidth: 30 },
+        5: { cellWidth: 40 },
+        6: { cellWidth: 20 }
+      }
+    });
+    
+    // Ajouter les totaux
+    const totalInvestment = filteredTransactions
+      .filter(tx => tx.type === "investment")
+      .reduce((sum, tx) => sum + tx.amount, 0);
       
-      // Réinitialiser le message après quelques secondes
-      setTimeout(() => {
-        setStatus("");
-      }, 3000);
-    }, 2000);
+    const totalWithdrawal = filteredTransactions
+      .filter(tx => tx.type === "withdrawal")
+      .reduce((sum, tx) => sum + tx.amount, 0);
+      
+    const totalReinvestment = filteredTransactions
+      .filter(tx => tx.type === "reinvestment")
+      .reduce((sum, tx) => sum + tx.amount, 0);
     
-    // En situation réelle, appel à une bibliothèque de génération de PDF
-  };
+    doc.text(`Total des investissements: ${totalInvestment.toFixed(2)} USDT`, 14, doc.autoTable.previous.finalY + 10);
+    doc.text(`Total des retraits: ${totalWithdrawal.toFixed(2)} USDT`, 14, doc.autoTable.previous.finalY + 18);
+    doc.text(`Total des réinvestissements: ${totalReinvestment.toFixed(2)} USDT`, 14, doc.autoTable.previous.finalY + 26);
+    
+    // Sauvegarder le PDF
+    doc.save("historique-transactions.pdf");
+    
+    setStatus("✅ PDF téléchargé avec succès!");
+    
+    // Réinitialiser le message après quelques secondes
+    setTimeout(() => {
+      setStatus("");
+    }, 3000);
+  } catch (error) {
+    console.error("Erreur lors de la génération du PDF:", error);
+    setStatus("❌ Erreur lors de la génération du PDF");
+  }
+};
 
-  // Fonction pour ouvrir le hash de transaction dans l'explorateur
-  const openTxExplorer = (txHash) => {
-    // En situation réelle, ouvrir l'explorateur BSC Testnet avec le hash
-    alert(`Ouverture de la transaction ${txHash} dans l'explorateur (simulation)`);
-  };
+  // Fonction pour ouvrir le hash de transaction dans l'explorateur BSC
+const openTxExplorer = async (txHash) => {
+  // Utiliser l'explorateur BSC Mainnet
+  const explorerUrl = await getExplorerUrl();
+  window.open(`${explorerBaseUrl}/tx/${txHash}`, '_blank');
+};
+
+// Fonction pour obtenir l'URL de l'explorateur en fonction de la chaîne
+const getExplorerUrl = async () => {
+  if (!window.ethereum) return "https://bscscan.com";
+  
+  try {
+    const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+    switch (chainId) {
+      case '0x38': // BSC Mainnet
+        return "https://bscscan.com";
+      case '0x61': // BSC Testnet
+        return "https://bscscan.com";
+      default:
+        return "https://bscscan.com"; // Par défaut, renvoyer vers BSC Mainnet
+    }
+  } catch (error) {
+    console.error("Erreur lors de la récupération du chainId:", error);
+    return "https://bscscan.com";
+  }
+};
 
   return (
     <div className="history-container">
