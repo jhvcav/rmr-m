@@ -37,7 +37,7 @@ const LPFARMING_ABI = [
 ];
 
 // Adresse du contrat USDC sur BSC Mainnet
-const USDC_CONTRACT_ADDRESS = "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d";
+const USDC_CONTRACT_ADDRESS = "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d"; // Adresse Token USDC sur BSC Mainnet
 
 // Adresse du contrat de pool sur Mainnet
 const POOL_CONTRACT_ADDRESS = "0x405412D71847eCb8Fa5a98A1F91B90b1231A93dc"; // Adresse du pool LPFraming
