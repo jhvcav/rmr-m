@@ -1,17 +1,15 @@
-/* DepotForm.css avec centrage amélioré */
+/* DepotForm.css avec centrage amélioré et responsive */
 .depot-form {
   width: 100%;
   max-width: 800px;
-  margin: auto; /* Centre horizontalement */
+  margin: 0 auto; /* Centre horizontalement de façon plus simple */
   padding: 20px;
   background-color: #f9f9f9;
   border-radius: 10px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   box-sizing: border-box; /* Assure que le padding est inclus dans la largeur */
-  position: relative; /* Pour le positionnement du message de statut */
-  left: 50%;
-  transform: translateX(-50%); /* Force le centrage parfait */
+  /* Suppression du positionnement relatif et de transform qui causent des problèmes */
 }
 
 .depot-form h1 {
@@ -19,6 +17,7 @@
   margin-bottom: 20px;
   color: #333;
   width: 100%;
+  font-size: 1.5em; /* Taille cohérente */
 }
 
 .depot-form h2 {
@@ -27,7 +26,7 @@
   padding-bottom: 5px;
   border-bottom: 1px solid #ddd;
   color: #444;
-  text-align: center; /* Centre le texte */
+  text-align: center;
 }
 
 /* Récapitulatif de l'investissement */
@@ -68,7 +67,7 @@
   border-left: 4px solid #28a745;
   width: 100%;
   box-sizing: border-box;
-  text-align: center; /* Centre le contenu */
+  text-align: center;
 }
 
 .wallet-status h2 {
@@ -84,7 +83,7 @@
   border-radius: 4px;
   font-size: 0.9em;
   word-break: break-all;
-  margin: 10px auto; /* Centre horizontalement */
+  margin: 10px auto;
   display: inline-block;
   max-width: 100%;
 }
@@ -100,16 +99,16 @@
   display: block;
   margin-bottom: 5px;
   font-weight: bold;
-  text-align: center; /* Centre les labels */
+  text-align: center;
 }
 
 .input-container input {
-  width: 80%; /* Réduit légèrement la largeur */
+  width: 80%;
   padding: 10px;
   border: 1px solid #ddd;
   border-radius: 5px;
   font-size: 16px;
-  margin: 0 auto; /* Centre l'input */
+  margin: 0 auto;
   display: block;
 }
 
@@ -118,10 +117,19 @@
   color: #777;
   margin-top: 5px;
   font-style: italic;
-  text-align: center; /* Centre le texte d'aide */
+  text-align: center;
 }
 
 /* Boutons */
+.buttons-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  gap: 10px;
+  margin: 15px 0;
+}
+
 .depot-form button {
   padding: 12px 15px;
   border: none;
@@ -130,29 +138,31 @@
   font-size: 16px;
   font-weight: bold;
   transition: background-color 0.2s;
-  display: block; /* Bloc pour permettre le centrage */
-  margin-left: auto;
-  margin-right: auto; /* Centre le bouton */
+  display: block;
+  margin: 0 auto;
 }
 
 .connect-btn {
   background-color: #007bff;
   color: white;
-  width: 80%; /* Réduit légèrement la largeur */
-  max-width: 400px; /* Limite la largeur maximale */
-  margin-top: 10px;
+  width: 80%;
+  max-width: 400px;
 }
 
 .connect-btn:hover {
   background-color: #0069d9;
 }
 
+.approve-btn {
+  width: 100%;
+  max-width: 400px;
+}
+
 .deposit-btn {
   background-color: #28a745;
   color: white;
-  width: 80%; /* Réduit légèrement la largeur */
-  max-width: 400px; /* Limite la largeur maximale */
-  margin: 20px auto; /* Centre avec marge */
+  width: 80%;
+  max-width: 400px;
 }
 
 .deposit-btn:hover {
@@ -162,8 +172,8 @@
 .btn-retour {
   background-color: #6c757d;
   color: white;
-  width: 50%; /* Bouton retour plus petit */
-  max-width: 200px; /* Limite la largeur maximale */
+  width: 50%;
+  max-width: 200px;
 }
 
 .btn-retour:hover {
@@ -178,44 +188,66 @@ button:disabled {
 /* Messages de statut */
 .status {
   padding: 12px;
-  margin: 15px auto; /* Centre avec marge */
+  margin: 15px auto;
   border-radius: 5px;
   background-color: #f8f9fa;
   border-left: 4px solid #ffc107;
   text-align: center;
-  width: 90%; /* Légèrement plus petit que le conteneur */
-  max-width: 600px; /* Limite la largeur maximale */
+  width: 90%;
+  max-width: 600px;
   box-sizing: border-box;
 }
 
-/* Informations de sécurité */
-.security-info {
+/* Historique des statuts */
+.status-history {
+  background-color: #f8f9fa;
+  padding: 10px 15px;
+  border-radius: 8px;
+  margin: 15px auto;
+  width: 90%;
+  max-width: 600px;
+  box-sizing: border-box;
+}
+
+.status-history h3 {
+  text-align: center;
+  margin-top: 0;
+}
+
+/* Informations USDC */
+.usdc-info, .security-info, .mainnet-warning {
   background-color: #fff;
   padding: 15px;
   border-radius: 8px;
-  margin: 20px auto 0; /* Centre avec marge */
-  border-left: 4px solid #17a2b8;
+  margin: 20px auto;
   width: 100%;
   box-sizing: border-box;
-  text-align: center; /* Centre le texte */
+  text-align: center;
+}
+
+.usdc-info h3, .security-info h3, .mainnet-warning h3 {
+  text-align: center;
+  margin-top: 0;
+}
+
+.usdc-info ol, .mainnet-warning ul {
+  text-align: left;
+  max-width: 90%;
+  margin: 10px auto;
+}
+
+.security-info {
+  border-left: 4px solid #17a2b8;
 }
 
 .security-info h3 {
   color: #17a2b8;
-  margin-top: 0;
-  text-align: center; /* Centre le titre */
-}
-
-.security-info p {
-  margin-bottom: 0;
-  line-height: 1.5;
-  text-align: center; /* Centre le paragraphe */
 }
 
 .form-actions {
   margin: 20px auto;
   width: 100%;
-  text-align: center; /* Centre les actions */
+  text-align: center;
 }
 
 /* Styles pour mobiles */
@@ -224,17 +256,74 @@ button:disabled {
     padding: 15px;
     margin: 10px auto;
     width: 95%;
+    overflow-x: hidden; /* Empêcher le défilement horizontal */
+  }
+  
+  .depot-form h1 {
+    font-size: 1.3em;
+  }
+  
+  .depot-form h2 {
+    font-size: 1.1em;
   }
   
   .summary-item {
     flex-direction: column;
     gap: 5px;
-    align-items: center; /* Centre les éléments en colonne */
+    align-items: center;
+    padding: 10px 0;
   }
   
   .input-container input,
   .connect-btn,
-  .deposit-btn {
-    width: 90%; /* Plus large sur mobile */
+  .deposit-btn,
+  .approve-btn,
+  .status,
+  .status-history {
+    width: 95%;
+  }
+  
+  .btn-retour {
+    width: 70%;
+  }
+  
+  .usdc-info, .security-info, .mainnet-warning {
+    padding: 10px;
+  }
+  
+  .wallet-address {
+    font-size: 0.8em;
+    padding: 5px;
+  }
+  
+  /* Ajuster l'espacement des éléments */
+  .buttons-container {
+    gap: 8px;
+  }
+  
+  /* Réduire les marges pour les petits écrans */
+  .mainnet-warning, .investment-summary, .wallet-status {
+    margin-bottom: 15px;
+  }
+}
+
+/* Pour les très petits écrans */
+@media (max-width: 480px) {
+  .depot-form h1 {
+    font-size: 1.2em;
+  }
+  
+  .depot-form button {
+    padding: 10px;
+    font-size: 14px;
+  }
+  
+  .input-container input {
+    padding: 8px;
+    font-size: 14px;
+  }
+  
+  .usdc-info ol, .mainnet-warning ul {
+    padding-left: 25px;
   }
 }

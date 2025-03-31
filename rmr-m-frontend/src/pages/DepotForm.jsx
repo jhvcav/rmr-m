@@ -460,7 +460,7 @@ const DepotForm = () => {
 
       {/* Avertissement pour Mainnet */}
       <div className="mainnet-warning" style={{ marginTop: '20px', padding: '10px', backgroundColor: '#fff3cd', borderRadius: '5px', border: '1px solid #ffeeba' }}>
-        <h3>⚠️ Mode Production - Vraies Cryptomonnaies</h3>
+        <h3>⚠️</h3>
         <p>
           <strong>ATTENTION:</strong> Cette application utilise le réseau principal Binance Smart Chain. 
           Toutes les transactions impliquent de vraies cryptomonnaies ayant une valeur réelle.
@@ -469,7 +469,7 @@ const DepotForm = () => {
           Nous vous recommandons de:
         </p>
         <ul>
-          <li>Commencer avec de petits montants pour tester</li>
+          <li>Commencer avec le minimum recquis pour tester</li>
           <li>Vérifier toutes les informations de transaction avant confirmation</li>
           <li>Ne jamais investir plus que ce que vous pouvez vous permettre de perdre</li>
         </ul>
@@ -539,17 +539,17 @@ const DepotForm = () => {
       </div>
 
       {/* Boutons d'approbation et d'envoi */}
-      <div className="buttons-container">
-        {isConnected && !usdcApproved && (
-          <button 
-            className="approve-btn connect-btn" 
-            onClick={handleApproveUSDC}
-            disabled={!isConnected || usdcApproved}
-          >
-            🔓 Approuver l'utilisation de {montantInvesti} {usdcSymbol}
-          </button>
+    <div className="buttons-container">
+      {isConnected && !usdcApproved && (
+        <button 
+          className="approve-btn connect-btn" 
+          onClick={handleApproveUSDC}
+          disabled={!isConnected || usdcApproved}
+        >
+          🔓 Approuver l'utilisation de {montantInvesti} {usdcSymbol}
+        </button>
         )}
-        
+  
         <button 
           className="deposit-btn" 
           onClick={handleDepot} 
