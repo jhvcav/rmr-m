@@ -1,10 +1,17 @@
+import React from 'react';
+import './NFT.css';
+
 const NFT = () => {
-    return (
-      <div className="container text-center mt-5">
+  return (
+    <div className="nft-wrapper">
+      <div className="nft-container">
         <h1>Achat de NFT</h1>
         <p>Accédez à des services exclusifs grâce aux NFT.</p>
+        
+        {/* Vous pourrez ajouter du contenu supplémentaire ici */}
       </div>
-    );
-  };
-  
-  export default NFT;
+    </div>
+  );
+};
+
+export default NFT;
