@@ -1,15 +1,26 @@
-/* DepotForm.css avec centrage amélioré et responsive */
+/* DepotForm.css avec centrage corrigé pour éviter le décalage à gauche */
 .depot-form {
   width: 100%;
   max-width: 800px;
-  margin: 0 auto; /* Centre horizontalement de façon plus simple */
+  margin: 0 auto; /* Centre horizontalement */
   padding: 20px;
   background-color: #f9f9f9;
   border-radius: 10px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   box-sizing: border-box; /* Assure que le padding est inclus dans la largeur */
-  /* Suppression du positionnement relatif et de transform qui causent des problèmes */
+  /* IMPORTANT: Retirer complètement tout positionnement/transform qui pourrait causer des décalages */
+  position: static; /* Assurer que la position est statique */
+  transform: none; /* Retirer tout transform */
+  left: auto; /* Retirer tout positionnement horizontal */
+}
+
+/* Assurez-vous que le body et les éléments parents n'ont pas de styles qui pourraient affecter le centrage */
+body, #root, .app-container {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden; /* Empêcher le défilement horizontal qui pourrait être causé par un enfant trop large */
+  width: 100%;
 }
 
 .depot-form h1 {
@@ -17,7 +28,7 @@
   margin-bottom: 20px;
   color: #333;
   width: 100%;
-  font-size: 1.5em; /* Taille cohérente */
+  font-size: 1.5em;
 }
 
 .depot-form h2 {
