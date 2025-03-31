@@ -16,6 +16,8 @@ import LPFarming from "./pages/LPFarming";
 import DepotForm from "./pages/DepotForm";
 import InvestmentHistory from "./pages/InvestmentHistory";
 import ConfirmationDepot from "./pages/ConfirmationDepot";
+import APropos from "./pages/APropos";
+import NFT from "./pages/NFT";
 import "./App.css";
 
 const App = () => {
@@ -37,6 +39,8 @@ const App = () => {
             <Route path="/rmr-m/depot-form" element={<DepotForm />} />
             <Route path="/rmr-m/historique" element={<InvestmentHistory />} />
             <Route path="/rmr-m/confirmation-depot" element={<ConfirmationDepot />} />
+            <Route path="/rmr-m/a-propos" element={<APropos />} />
+            <Route path="/rmr-m/nft" element={<NFT />} />
             {/* Ajoutez d'autres routes selon vos besoins */}
           </Routes>
         </div>
