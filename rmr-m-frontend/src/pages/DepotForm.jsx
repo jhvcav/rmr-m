@@ -455,7 +455,8 @@ const DepotForm = () => {
   };
 
   return (
-    <div className="depot-form">
+    <div className="depot-form-wrapper">
+      <div className="depot-form">
       <h1 style={{ fontSize: "1.5em" }}>💰 Dépôt de fonds pour LPFarming</h1>
 
       {/* Avertissement pour Mainnet */}
@@ -609,6 +610,7 @@ const DepotForm = () => {
           réinvestis selon votre choix.
         </p>
       </div>
+    </div>
     </div>
   );
 };
