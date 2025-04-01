@@ -321,6 +321,10 @@ const Dashboard = () => {
       } else {
         // Mettre à jour les états avec les données réelles
         setHasInvestments(true);
+        investmentsData.forEach(investment => {
+          // Recalculer le rendement quotidien avec la formule correcte
+          investment.dailyReturn = (investment.amount * investment.apr / 100) / 365;
+        });
         setInvestmentsList(investmentsData);
         console.log("Connecté au contrat LPFarming à l'adresse:", POOL_CONTRACT_ADDRESS);
         
