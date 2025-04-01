@@ -302,7 +302,7 @@ const Dashboard = () => {
           duration: periods[i].toNumber(),
           endDate: new Date(endTimes[i].toNumber() * 1000),
           apr: aprs[i].toNumber() / 100, // Convertir de points de base en pourcentage
-          dailyReturn: parseFloat(ethers.utils.formatUnits(amounts[i].mul(aprs[i]).div(36500), usdcDecimals)), // Calcul approximatif du rendement quotidien
+          dailyReturn: (parseFloat(ethers.utils.formatUnits(amounts[i], usdcDecimals)) * aprs[i] / 100) / 365, // Calcul approximatif du rendement quotidien
           totalEarned: 0, // Nous n'avons pas cette information par investissement
           status: activeStatus[i] ? "active" : "matured"
         });
