@@ -182,7 +182,7 @@ const InvestmentHistory = () => {
     
     // Récupérer les événements pertinents
     // Remarque: ajustez les filtres et les blocs selon vos besoins
-    const fromBlock = 0; // ou une valeur appropriée pour limiter la recherche
+    const fromBlock = Math.max(0, currentBlock - 200000);  // ou une valeur appropriée pour limiter la recherche
     const currentBlock = await provider.getBlockNumber();
     
     // Récupérer les événements d'investissement
