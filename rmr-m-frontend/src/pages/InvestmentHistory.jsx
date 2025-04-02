@@ -13,6 +13,8 @@ import "./InvestmentHistory.css";
 import { jsPDF } from "jspdf";
 import 'jspdf-autotable';
 
+console.log("Contract Addresses:",contractAddresses);
+
 const InvestmentHistory = () => {
   // États pour le wallet et la connexion
   const [isConnected, setIsConnected] = useState(false);
@@ -140,30 +142,43 @@ const InvestmentHistory = () => {
   }, [filteredTransactions, currentPage, transactionsPerPage]);
 
   // Fonction pour récupérer l'historique des transactions réelles
-const fetchTransactionHistory = async (address) => {
-  setIsLoading(true);
+  const fetchTransactionHistory = async (address) => {
+    setIsLoading(true);
+    
+    try {
+      // Vérifier que le provider est disponible
+      const provider = getProvider();
+      if (!provider) {
+        throw new Error("Impossible de se connecter au réseau blockchain");
+      }
+      
+      // Récupérer le chainId actuel
+      const networkChainId = await window.ethereum.request({ method: 'eth_chainId' });
+      console.log("Chaîne actuelle:", networkChainId);
+      
+      // Récupérer les adresses de contrats pour la chaîne actuelle
+      const addresses = contractAddresses.get(networkChainId);
+      
+      if (!addresses || !addresses.lpFarming || !addresses.defiStrategy) {
+        throw new Error(`Adresses de contrats non disponibles pour la chaîne ${networkChainId}`);
+      }
   
-  try {
-    // Créer le provider et se connecter aux contrats
-    const provider = getProvider();
-    if (!provider) {
-      throw new Error("Impossible de se connecter au réseau blockchain");
-    }
-    
-    const signer = provider.getSigner();
-    
-    // Initialiser les contrats
-    const lpFarmingContract = new ethers.Contract(
-      contractAddresses.lpFarming,
-      LPFarmingABI,
-      signer
-    );
-    
-    const defiStrategyContract = new ethers.Contract(
-      contractAddresses.defiStrategy,
-      DeFiStrategyABI,
-      signer
-    );
+      console.log("Adresses de contrats:", addresses);
+      
+      const signer = provider.getSigner();
+      
+      // Initialiser les contrats avec les adresses correspondant à la chaîne
+      const lpFarmingContract = new ethers.Contract(
+        addresses.lpFarming,
+        LPFarmingABI,
+        signer
+      );
+      
+      const defiStrategyContract = new ethers.Contract(
+        addresses.defiStrategy,
+        DeFiStrategyABI,
+        signer
+      );
     
     // Récupérer les événements pertinents
     // Remarque: ajustez les filtres et les blocs selon vos besoins
