@@ -13,7 +13,7 @@ import "./InvestmentHistory.css";
 import { jsPDF } from "jspdf";
 import 'jspdf-autotable';
 
-console.log("Contract Addresses:",contractAddresses);
+console.log("Contract Addresses:", contractAddresses);
 
 const InvestmentHistory = () => {
   // États pour le wallet et la connexion
@@ -37,22 +37,50 @@ const InvestmentHistory = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [displayedTransactions, setDisplayedTransactions] = useState([]);
 
-  // Suppression du style de décalage vers la droite
-  // const containerStyle = {
-  //   position: 'relative',
-  //   left: '780px'
-  // };
-
   // Fonction pour créer un provider compatible avec plusieurs versions d'ethers
   const getProvider = () => {
     if (!window.ethereum) return null;
     
-    // Pour ethers v5
-    if (ethers.providers && ethers.providers.Web3Provider) {
-      return new ethers.providers.Web3Provider(window.ethereum);
+    try {
+      // Pour ethers v5
+      if (ethers.providers && ethers.providers.Web3Provider) {
+        return new ethers.providers.Web3Provider(window.ethereum);
+      }
+      
+      throw new Error("Version d'ethers non supportée");
+    } catch (error) {
+      console.error("Erreur lors de la création du provider:", error);
+      return null;
+    }
+  };
+
+  // Fonction pour récupérer les événements par lots pour éviter les timeouts
+  const queryFilterInBatches = async (contract, filter, fromBlock, toBlock, batchSize = 10000) => {
+    let results = [];
+    let current = fromBlock;
+    
+    while (current <= toBlock) {
+      const endBlock = Math.min(current + batchSize - 1, toBlock);
+      try {
+        console.log(`Requête des événements du bloc ${current} au bloc ${endBlock}`);
+        const batchResults = await contract.queryFilter(filter, current, endBlock);
+        results = [...results, ...batchResults];
+        current = endBlock + 1;
+      } catch (error) {
+        console.error(`Erreur pour la plage ${current}-${endBlock}:`, error);
+        
+        // Réduire la taille du lot en cas d'erreur
+        if (batchSize <= 1000) {
+          console.error("Impossible de récupérer les événements même avec un petit lot:", error);
+          break;  // On sort de la boucle au lieu de jeter une erreur
+        }
+        
+        batchSize = Math.floor(batchSize / 2);
+        console.log(`Réduction de la taille de lot à ${batchSize}`);
+      }
     }
     
-    throw new Error("Version d'ethers non supportée");
+    return results;
   };
 
   // Connexion au wallet et récupération des données
@@ -156,6 +184,13 @@ const InvestmentHistory = () => {
       const networkChainId = await window.ethereum.request({ method: 'eth_chainId' });
       console.log("Chaîne actuelle:", networkChainId);
       
+      // Vérifier si la chaîne est prise en charge
+      if (networkChainId !== '0x38') { // BSC Mainnet
+        setStatus(`⚠️ Vous êtes connecté à un réseau non supporté (${networkChainId}). Veuillez vous connecter à BSC Mainnet.`);
+        setIsLoading(false);
+        return;
+      }
+      
       // Récupérer les adresses de contrats pour la chaîne actuelle
       const addresses = contractAddresses.get(networkChainId);
       
@@ -180,99 +215,124 @@ const InvestmentHistory = () => {
         signer
       );
     
-    // Récupérer les événements pertinents
-    // Remarque: ajustez les filtres et les blocs selon vos besoins
-    const fromBlock = Math.max(0, currentBlock - 200000);  // ou une valeur appropriée pour limiter la recherche
-    const currentBlock = await provider.getBlockNumber();
-    
-    // Récupérer les événements d'investissement
-    const depositFilter = lpFarmingContract.filters.Deposit(address);
-    const depositEvents = await lpFarmingContract.queryFilter(depositFilter, fromBlock, currentBlock);
-    
-    // Récupérer les événements de retrait
-    const withdrawFilter = lpFarmingContract.filters.WithdrawCapital(address);
-    const withdrawEvents = await lpFarmingContract.queryFilter(withdrawFilter, fromBlock, currentBlock);
-    
-    // Récupérer les événements de réclamation de récompenses
-    const claimRewardsFilter = lpFarmingContract.filters.ClaimRewards(address);
-    const claimRewardsEvents = await lpFarmingContract.queryFilter(claimRewardsFilter, fromBlock, currentBlock);
-
-    // Récupérer les événements de réinvestissement de récompenses
-    const reinvestRewardsFilter = lpFarmingContract.filters.ReinvestRewards(address);
-    const reinvestRewardsEvents = await lpFarmingContract.queryFilter(reinvestRewardsFilter, fromBlock, currentBlock);
-
-    
-    // Transformer les événements en transactions
-    const processedTransactions = [
-      ...await Promise.all(depositEvents.map(async (event) => {
-        const block = await event.getBlock();
-        return {
-          id: `TX-DEP-${event.transactionHash.substring(0, 6)}`,
-          type: "investment",
-          amount: parseFloat(ethers.utils.formatUnits(event.args.amount, 6)), // USDC/USDT à 6 décimales
-          date: new Date(block.timestamp * 1000),
-          plan: "Investissement LP Farming",
-          txHash: event.transactionHash,
-          status: "completed"
-        };
-      })),
-
-      ...await Promise.all(claimRewardsEvents.map(async (event) => {
-        const block = await event.getBlock();
-        return {
-          id: `TX-CLA-${event.transactionHash.substring(0, 6)}`,
-          type: "withdrawal",
-          amount: parseFloat(ethers.utils.formatUnits(event.args.amount, 6)),
-          date: new Date(block.timestamp * 1000),
-          txHash: event.transactionHash,
-          status: "completed",
-          notes: "Retrait de récompenses"
-        };
-      })),
+      // Récupérer les événements pertinents
+      const currentBlock = await provider.getBlockNumber();
+      // Limiter à un nombre raisonnable de blocs pour éviter les timeouts
+      const fromBlock = Math.max(0, currentBlock - 200000);
       
-      ...await Promise.all(reinvestRewardsEvents.map(async (event) => {
-        const block = await event.getBlock();
-        return {
-          id: `TX-REI-${event.transactionHash.substring(0, 6)}`,
-          type: "reinvestment",
-          amount: parseFloat(ethers.utils.formatUnits(event.args.amount, 6)),
-          date: new Date(block.timestamp * 1000),
-          txHash: event.transactionHash,
-          status: "completed",
-          notes: "Réinvestissement des récompenses",
-          newInvestmentId: event.args.newInvestmentId ? event.args.newInvestmentId.toString() : null
-        };
-      })),
+      console.log(`Recherche des événements du bloc ${fromBlock} au bloc ${currentBlock}`);
+    
+      // Récupérer les événements d'investissement avec la pagination par lots
+      const depositFilter = lpFarmingContract.filters.Deposit(address);
+      const depositEvents = await queryFilterInBatches(lpFarmingContract, depositFilter, fromBlock, currentBlock);
       
-      ...await Promise.all(withdrawEvents.map(async (event) => {
-        const block = await event.getBlock();
-        return {
-          id: `TX-WIT-${event.transactionHash.substring(0, 6)}`,
-          type: "withdrawal",
-          amount: parseFloat(ethers.utils.formatUnits(event.args.amount, 6)), // USDC/USDT à 6 décimales
-          date: new Date(block.timestamp * 1000),
-          txHash: event.transactionHash,
-          status: "completed",
-          notes: "Retrait de capital"
-        };
-      }))];
-    
-    // Trier par date (du plus récent au plus ancien)
-    processedTransactions.sort((a, b) => b.date - a.date);
-    
-    // Mettre à jour les états
-    setTransactions(processedTransactions);
-    setFilteredTransactions(processedTransactions);
-    
-    setStatus("");
-    setIsLoading(false);
-    
-  } catch (error) {
-    console.error("Erreur détaillée lors de la récupération de l'historique:", error);
-    setStatus(`❌ Erreur: ${error.message}`);
-    setIsLoading(false);
-  }
-};
+      // Récupérer les événements de retrait - utiliser WithdrawCapital qui est le nom correct selon l'ABI
+      const withdrawFilter = lpFarmingContract.filters.WithdrawCapital(address);
+      const withdrawEvents = await queryFilterInBatches(lpFarmingContract, withdrawFilter, fromBlock, currentBlock);
+      
+      // Récupérer les événements de réclamation de récompenses
+      const claimRewardsFilter = lpFarmingContract.filters.ClaimRewards(address);
+      const claimRewardsEvents = await queryFilterInBatches(lpFarmingContract, claimRewardsFilter, fromBlock, currentBlock);
+  
+      // Récupérer les événements de réinvestissement de récompenses
+      const reinvestRewardsFilter = lpFarmingContract.filters.ReinvestRewards(address);
+      const reinvestRewardsEvents = await queryFilterInBatches(lpFarmingContract, reinvestRewardsFilter, fromBlock, currentBlock);
+  
+      console.log("Événements récupérés:",
+        `Deposit: ${depositEvents.length}`,
+        `WithdrawCapital: ${withdrawEvents.length}`,
+        `ClaimRewards: ${claimRewardsEvents.length}`,
+        `ReinvestRewards: ${reinvestRewardsEvents.length}`
+      );
+      
+      // Transformer les événements en transactions
+      const processedTransactions = [
+        ...await Promise.all(depositEvents.map(async (event) => {
+          const block = await event.getBlock();
+          return {
+            id: `TX-DEP-${event.transactionHash.substring(0, 6)}`,
+            type: "investment",
+            amount: parseFloat(ethers.utils.formatUnits(event.args.amount, 6)), // USDC/USDT à 6 décimales
+            date: new Date(block.timestamp * 1000),
+            plan: "Investissement LP Farming",
+            txHash: event.transactionHash,
+            status: "completed"
+          };
+        })),
+  
+        ...await Promise.all(claimRewardsEvents.map(async (event) => {
+          const block = await event.getBlock();
+          return {
+            id: `TX-CLA-${event.transactionHash.substring(0, 6)}`,
+            type: "withdrawal",
+            amount: parseFloat(ethers.utils.formatUnits(event.args.amount, 6)),
+            date: new Date(block.timestamp * 1000),
+            txHash: event.transactionHash,
+            status: "completed",
+            notes: "Retrait de récompenses"
+          };
+        })),
+        
+        ...await Promise.all(reinvestRewardsEvents.map(async (event) => {
+          const block = await event.getBlock();
+          return {
+            id: `TX-REI-${event.transactionHash.substring(0, 6)}`,
+            type: "reinvestment",
+            amount: parseFloat(ethers.utils.formatUnits(event.args.amount, 6)),
+            date: new Date(block.timestamp * 1000),
+            txHash: event.transactionHash,
+            status: "completed",
+            notes: "Réinvestissement des récompenses",
+            newInvestmentId: event.args.newInvestmentId ? event.args.newInvestmentId.toString() : null
+          };
+        })),
+        
+        ...await Promise.all(withdrawEvents.map(async (event) => {
+          const block = await event.getBlock();
+          return {
+            id: `TX-WIT-${event.transactionHash.substring(0, 6)}`,
+            type: "withdrawal",
+            amount: parseFloat(ethers.utils.formatUnits(event.args.amount, 6)), // USDC/USDT à 6 décimales
+            date: new Date(block.timestamp * 1000),
+            txHash: event.transactionHash,
+            status: "completed",
+            notes: "Retrait de capital"
+          };
+        }))
+      ];
+      
+      // Trier par date (du plus récent au plus ancien)
+      processedTransactions.sort((a, b) => b.date - a.date);
+      
+      console.log(`Transactions traitées: ${processedTransactions.length}`);
+      
+      // Mettre à jour les états
+      setTransactions(processedTransactions);
+      setFilteredTransactions(processedTransactions);
+      
+      setStatus("");
+      setIsLoading(false);
+      
+    } catch (error) {
+      // Extraction des détails de l'erreur pour un meilleur message
+      let errorMessage = "Erreur inconnue";
+      if (error.message) {
+        errorMessage = error.message;
+      }
+      if (error.error && error.error.message) {
+        errorMessage = error.error.message;
+      }
+      if (error.data && error.data.message) {
+        errorMessage = error.data.message;
+      }
+      
+      console.error("Erreur détaillée lors de la récupération de l'historique:", error);
+      console.error("Message d'erreur extrait:", errorMessage);
+      
+      setStatus(`❌ Erreur: ${errorMessage}`);
+      setIsLoading(false);
+    }
+  };
 
   // Fonction pour filtrer les transactions
   const filterTransactions = () => {
@@ -362,108 +422,108 @@ const InvestmentHistory = () => {
     }
   };
 
-// Fonction pour générer le PDF de l'historique
-const generatePDF = () => {
-  setStatus("⏳ Génération du PDF en cours...");
-  
-  try {
-    const doc = new jsPDF();
+  // Fonction pour générer le PDF de l'historique
+  const generatePDF = () => {
+    setStatus("⏳ Génération du PDF en cours...");
     
-    // Ajouter le titre
-    doc.setFontSize(18);
-    doc.text("Historique des transactions", 14, 22);
-    
-    // Ajouter les informations du wallet
-    doc.setFontSize(12);
-    doc.text(`Wallet: ${publicKey ? `${publicKey.substring(0, 6)}...${publicKey.substring(publicKey.length - 4)}` : "-"}`, 14, 32);
-    doc.text(`Date d'export: ${new Date().toLocaleDateString('fr-FR')}`, 14, 40);
-    
-    // Filtrer les transactions selon les filtres actuels
-    let exportData = filteredTransactions.map(tx => [
-      tx.id,
-      formatDate(tx.date),
-      getTransactionTypeLabel(tx.type),
-      `${tx.type === "withdrawal" ? "-" : ""} ${tx.amount.toFixed(2)} USDT`,
-      tx.plan || tx.notes || "-",
-      tx.txHash,
-      tx.status === "completed" ? "Complété" : tx.status === "pending" ? "En cours" : "Échoué"
-    ]);
-    
-    // Créer le tableau
-    doc.autoTable({
-      head: [["ID", "Date", "Type", "Montant", "Détails", "Hash", "Statut"]],
-      body: exportData,
-      startY: 50,
-      styles: { fontSize: 8, cellPadding: 2 },
-      columnStyles: {
-        0: { cellWidth: 20 },
-        1: { cellWidth: 30 },
-        2: { cellWidth: 25 },
-        3: { cellWidth: 25 },
-        4: { cellWidth: 30 },
-        5: { cellWidth: 40 },
-        6: { cellWidth: 20 }
-      }
-    });
-    
-    // Ajouter les totaux
-    const totalInvestment = filteredTransactions
-      .filter(tx => tx.type === "investment")
-      .reduce((sum, tx) => sum + tx.amount, 0);
+    try {
+      const doc = new jsPDF();
       
-    const totalWithdrawal = filteredTransactions
-      .filter(tx => tx.type === "withdrawal")
-      .reduce((sum, tx) => sum + tx.amount, 0);
+      // Ajouter le titre
+      doc.setFontSize(18);
+      doc.text("Historique des transactions", 14, 22);
       
-    const totalReinvestment = filteredTransactions
-      .filter(tx => tx.type === "reinvestment")
-      .reduce((sum, tx) => sum + tx.amount, 0);
-    
-    doc.text(`Total des investissements: ${totalInvestment.toFixed(2)} USDT`, 14, doc.autoTable.previous.finalY + 10);
-    doc.text(`Total des retraits: ${totalWithdrawal.toFixed(2)} USDT`, 14, doc.autoTable.previous.finalY + 18);
-    doc.text(`Total des réinvestissements: ${totalReinvestment.toFixed(2)} USDT`, 14, doc.autoTable.previous.finalY + 26);
-    
-    // Sauvegarder le PDF
-    doc.save("historique-transactions.pdf");
-    
-    setStatus("✅ PDF téléchargé avec succès!");
-    
-    // Réinitialiser le message après quelques secondes
-    setTimeout(() => {
-      setStatus("");
-    }, 3000);
-  } catch (error) {
-    console.error("Erreur lors de la génération du PDF:", error);
-    setStatus("❌ Erreur lors de la génération du PDF");
-  }
-};
+      // Ajouter les informations du wallet
+      doc.setFontSize(12);
+      doc.text(`Wallet: ${publicKey ? `${publicKey.substring(0, 6)}...${publicKey.substring(publicKey.length - 4)}` : "-"}`, 14, 32);
+      doc.text(`Date d'export: ${new Date().toLocaleDateString('fr-FR')}`, 14, 40);
+      
+      // Filtrer les transactions selon les filtres actuels
+      let exportData = filteredTransactions.map(tx => [
+        tx.id,
+        formatDate(tx.date),
+        getTransactionTypeLabel(tx.type),
+        `${tx.type === "withdrawal" ? "-" : ""} ${tx.amount.toFixed(2)} USDT`,
+        tx.plan || tx.notes || "-",
+        tx.txHash,
+        tx.status === "completed" ? "Complété" : tx.status === "pending" ? "En cours" : "Échoué"
+      ]);
+      
+      // Créer le tableau
+      doc.autoTable({
+        head: [["ID", "Date", "Type", "Montant", "Détails", "Hash", "Statut"]],
+        body: exportData,
+        startY: 50,
+        styles: { fontSize: 8, cellPadding: 2 },
+        columnStyles: {
+          0: { cellWidth: 20 },
+          1: { cellWidth: 30 },
+          2: { cellWidth: 25 },
+          3: { cellWidth: 25 },
+          4: { cellWidth: 30 },
+          5: { cellWidth: 40 },
+          6: { cellWidth: 20 }
+        }
+      });
+      
+      // Ajouter les totaux
+      const totalInvestment = filteredTransactions
+        .filter(tx => tx.type === "investment")
+        .reduce((sum, tx) => sum + tx.amount, 0);
+        
+      const totalWithdrawal = filteredTransactions
+        .filter(tx => tx.type === "withdrawal")
+        .reduce((sum, tx) => sum + tx.amount, 0);
+        
+      const totalReinvestment = filteredTransactions
+        .filter(tx => tx.type === "reinvestment")
+        .reduce((sum, tx) => sum + tx.amount, 0);
+      
+      doc.text(`Total des investissements: ${totalInvestment.toFixed(2)} USDT`, 14, doc.autoTable.previous.finalY + 10);
+      doc.text(`Total des retraits: ${totalWithdrawal.toFixed(2)} USDT`, 14, doc.autoTable.previous.finalY + 18);
+      doc.text(`Total des réinvestissements: ${totalReinvestment.toFixed(2)} USDT`, 14, doc.autoTable.previous.finalY + 26);
+      
+      // Sauvegarder le PDF
+      doc.save("historique-transactions.pdf");
+      
+      setStatus("✅ PDF téléchargé avec succès!");
+      
+      // Réinitialiser le message après quelques secondes
+      setTimeout(() => {
+        setStatus("");
+      }, 3000);
+    } catch (error) {
+      console.error("Erreur lors de la génération du PDF:", error);
+      setStatus("❌ Erreur lors de la génération du PDF");
+    }
+  };
 
   // Fonction pour ouvrir le hash de transaction dans l'explorateur BSC
-const openTxExplorer = async (txHash) => {
-  // Utiliser l'explorateur BSC Mainnet
-  const explorerUrl = await getExplorerUrl();
-  window.open(`${explorerUrl}/tx/${txHash}`, '_blank');
-};
+  const openTxExplorer = async (txHash) => {
+    // Utiliser l'explorateur BSC Mainnet
+    const explorerUrl = await getExplorerUrl();
+    window.open(`${explorerUrl}/tx/${txHash}`, '_blank');
+  };
 
-// Fonction pour obtenir l'URL de l'explorateur en fonction de la chaîne
-const getExplorerUrl = async () => {
-  if (!window.ethereum) return "https://bscscan.com";
-  
-  try {
-    const chainId = await window.ethereum.request({ method: 'eth_chainId' });
-    switch (chainId) {
-      case '0x38': // BSC Mainnet
-        return "https://bscscan.com";
-      case '0x61': // BSC Testnet
-        return "https://bscscan.com";
-      default:
-        return "https://bscscan.com"; // Par défaut, renvoyer vers BSC Mainnet
+  // Fonction pour obtenir l'URL de l'explorateur en fonction de la chaîne
+  const getExplorerUrl = async () => {
+    if (!window.ethereum) return "https://bscscan.com";
+    
+    try {
+      const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+      switch (chainId) {
+        case '0x38': // BSC Mainnet
+          return "https://bscscan.com";
+        case '0x61': // BSC Testnet
+          return "https://testnet.bscscan.com";
+        default:
+          return "https://bscscan.com"; // Par défaut, renvoyer vers BSC Mainnet
+      }
+    } catch (error) {
+      console.error("Erreur lors de la récupération du chainId:", error);
+      return "https://bscscan.com";
     }
-  } catch (error) {
-    console.error("Erreur lors de la récupération du chainId:", error);
-    return "https://bscscan.com";
-  }
-};
+  };
 
   return (
     <div className="history-container">
