@@ -295,6 +295,23 @@ const InvestmentHistory = () => {
           };
         }))
       ];
+
+      // Ajoutez après la récupération des événements
+console.log("Événements détaillés:", {
+  depositEvents,
+  withdrawEvents,
+  claimRewardsEvents,
+  reinvestRewardsEvents
+});
+
+// Si aucun événement n'est trouvé, vérifiez si les contrats sont correctement configurés
+if (depositEvents.length === 0 && withdrawEvents.length === 0 && 
+    claimRewardsEvents.length === 0 && reinvestRewardsEvents.length === 0) {
+  console.log("Aucun événement trouvé. Vérification des contrats:");
+  console.log("LP Farming Contract:", lpFarmingContract.address);
+  console.log("Méthodes disponibles:", Object.keys(lpFarmingContract.functions));
+  console.log("Filtres disponibles:", Object.keys(lpFarmingContract.filters));
+}
       
       // Trier par date (du plus récent au plus ancien)
       processedTransactions.sort((a, b) => b.date - a.date);
