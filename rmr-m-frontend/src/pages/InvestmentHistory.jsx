@@ -173,8 +173,6 @@ const InvestmentHistory = () => {
   const fetchTransactionHistory = async (address) => {
     setIsLoading(true);
     
-    console.log("Recherche des transactions pour l'adresse:",address);
-
     try {
       // Vérifier que le provider est disponible
       const provider = getProvider();
@@ -189,134 +187,112 @@ const InvestmentHistory = () => {
       // Récupérer les adresses de contrats pour la chaîne actuelle
       const addresses = contractAddresses.get(networkChainId);
       
-      if (!addresses || !addresses.lpFarming || !addresses.defiStrategy) {
+      if (!addresses || !addresses.lpFarming) {
         throw new Error(`Adresses de contrats non disponibles pour la chaîne ${networkChainId}`);
       }
-  
-      console.log("Adresses de contrats:", addresses);
+      
+      console.log("Adresse du contrat LP Farming:", addresses.lpFarming);
       
       const signer = provider.getSigner();
       
-      // Initialiser les contrats avec les adresses correspondant à la chaîne
+      // Initialiser le contrat
       const lpFarmingContract = new ethers.Contract(
         addresses.lpFarming,
         LPFarmingABI,
         signer
       );
       
-      const defiStrategyContract = new ethers.Contract(
-        addresses.defiStrategy,
-        DeFiStrategyABI,
-        signer
-      );
-    
-      // Récupérer les événements pertinents
-      const currentBlock = await provider.getBlockNumber();
-      // Limiter à un nombre raisonnable de blocs pour éviter les timeouts
-      const fromBlock = 0; // Rechercher depuis le debut de la blockchain
+      console.log("Récupération des investissements de l'utilisateur...");
       
-      console.log(`Recherche des événements du bloc ${fromBlock} au bloc ${currentBlock}`);
-    
-      // Récupérer les événements d'investissement avec la pagination par lots
-      const depositFilter = lpFarmingContract.filters.Deposit(address);
-      const depositEvents = await queryFilterInBatches(lpFarmingContract, depositFilter, fromBlock, currentBlock);
+      // Appeler directement la méthode de lecture du contrat qui retourne les investissements
+      const investmentsData = await lpFarmingContract.getUserInvestments(address);
+      console.log("Investissements récupérés:", investmentsData);
       
-      // Récupérer les événements de retrait - utiliser WithdrawCapital qui est le nom correct selon l'ABI
-      const withdrawFilter = lpFarmingContract.filters.WithdrawCapital(address);
-      const withdrawEvents = await queryFilterInBatches(lpFarmingContract, withdrawFilter, fromBlock, currentBlock);
+      // Déstructurer les données retournées
+      const {
+        ids,
+        amounts,
+        startTimes,
+        endTimes,
+        periods,
+        aprs,
+        activeStatus
+      } = investmentsData;
       
-      // Récupérer les événements de réclamation de récompenses
-      const claimRewardsFilter = lpFarmingContract.filters.ClaimRewards(address);
-      const claimRewardsEvents = await queryFilterInBatches(lpFarmingContract, claimRewardsFilter, fromBlock, currentBlock);
-  
-      // Récupérer les événements de réinvestissement de récompenses
-      const reinvestRewardsFilter = lpFarmingContract.filters.ReinvestRewards(address);
-      const reinvestRewardsEvents = await queryFilterInBatches(lpFarmingContract, reinvestRewardsFilter, fromBlock, currentBlock);
-  
-      console.log("Événements récupérés:",
-        `Deposit: ${depositEvents.length}`,
-        `WithdrawCapital: ${withdrawEvents.length}`,
-        `ClaimRewards: ${claimRewardsEvents.length}`,
-        `ReinvestRewards: ${reinvestRewardsEvents.length}`
-      );
+      console.log("Nombre d'investissements:", ids.length);
       
-      // Transformer les événements en transactions
-      const processedTransactions = [
-        ...await Promise.all(depositEvents.map(async (event) => {
-          const block = await event.getBlock();
-          return {
-            id: `TX-DEP-${event.transactionHash.substring(0, 6)}`,
-            type: "investment",
-            amount: parseFloat(ethers.utils.formatUnits(event.args.amount, 6)), // USDC/USDT à 6 décimales
-            date: new Date(block.timestamp * 1000),
-            plan: "Investissement LP Farming",
-            txHash: event.transactionHash,
-            status: "completed"
-          };
-        })),
-  
-        ...await Promise.all(claimRewardsEvents.map(async (event) => {
-          const block = await event.getBlock();
-          return {
-            id: `TX-CLA-${event.transactionHash.substring(0, 6)}`,
-            type: "withdrawal",
-            amount: parseFloat(ethers.utils.formatUnits(event.args.amount, 6)),
-            date: new Date(block.timestamp * 1000),
-            txHash: event.transactionHash,
-            status: "completed",
-            notes: "Retrait de récompenses"
-          };
-        })),
+      // Convertir les données en transactions
+      const processedTransactions = [];
+      
+      // Ajouter les investissements
+      for (let i = 0; i < ids.length; i++) {
+        // Créer une transaction pour l'investissement initial
+        processedTransactions.push({
+          id: `TX-INV-${ids[i].toString()}`,
+          type: "investment",
+          amount: parseFloat(ethers.utils.formatUnits(amounts[i], 6)),
+          date: new Date(startTimes[i].toNumber() * 1000),
+          plan: `Investissement LP ${periods[i].toString()} jours à ${aprs[i].toNumber() / 100}%`,
+          txHash: "", // Nous n'avons pas le hash de transaction ici
+          status: "completed",
+          investmentId: ids[i].toString(),
+          active: activeStatus[i]
+        });
         
-        ...await Promise.all(reinvestRewardsEvents.map(async (event) => {
-          const block = await event.getBlock();
-          return {
-            id: `TX-REI-${event.transactionHash.substring(0, 6)}`,
-            type: "reinvestment",
-            amount: parseFloat(ethers.utils.formatUnits(event.args.amount, 6)),
-            date: new Date(block.timestamp * 1000),
-            txHash: event.transactionHash,
-            status: "completed",
-            notes: "Réinvestissement des récompenses",
-            newInvestmentId: event.args.newInvestmentId ? event.args.newInvestmentId.toString() : null
-          };
-        })),
-        
-        ...await Promise.all(withdrawEvents.map(async (event) => {
-          const block = await event.getBlock();
-          return {
-            id: `TX-WIT-${event.transactionHash.substring(0, 6)}`,
+        // Si l'investissement n'est plus actif, ajouter également un retrait
+        if (!activeStatus[i]) {
+          processedTransactions.push({
+            id: `TX-WIT-${ids[i].toString()}`,
             type: "withdrawal",
-            amount: parseFloat(ethers.utils.formatUnits(event.args.amount, 6)), // USDC/USDT à 6 décimales
-            date: new Date(block.timestamp * 1000),
-            txHash: event.transactionHash,
+            amount: parseFloat(ethers.utils.formatUnits(amounts[i], 6)),
+            date: new Date(endTimes[i].toNumber() * 1000),
+            notes: "Retrait de capital",
+            txHash: "", // Nous n'avons pas le hash de transaction
             status: "completed",
-            notes: "Retrait de capital"
-          };
-        }))
-      ];
-
-      // Ajoutez après la récupération des événements
-console.log("Événements détaillés:", {
-  depositEvents,
-  withdrawEvents,
-  claimRewardsEvents,
-  reinvestRewardsEvents
-});
-
-// Si aucun événement n'est trouvé, vérifiez si les contrats sont correctement configurés
-if (depositEvents.length === 0 && withdrawEvents.length === 0 && 
-    claimRewardsEvents.length === 0 && reinvestRewardsEvents.length === 0) {
-  console.log("Aucun événement trouvé. Vérification des contrats:");
-  console.log("LP Farming Contract:", lpFarmingContract.address);
-  console.log("Méthodes disponibles:", Object.keys(lpFarmingContract.functions));
-  console.log("Filtres disponibles:", Object.keys(lpFarmingContract.filters));
-}
+            investmentId: ids[i].toString()
+          });
+        }
+      }
+      
+      // Récupérer d'autres données du solde de l'utilisateur
+      const balanceData = await lpFarmingContract.getUserBalance(address);
+      console.log("Données de solde:", balanceData);
+      
+      const totalEarned = parseFloat(ethers.utils.formatUnits(balanceData.totalEarned, 6));
+      const pendingRewards = parseFloat(ethers.utils.formatUnits(balanceData.pendingRewards, 6));
+      
+      // Si l'utilisateur a des récompenses, ajouter comme transaction en attente
+      if (pendingRewards > 0) {
+        processedTransactions.push({
+          id: `TX-REW-PENDING`,
+          type: "withdrawal",
+          amount: pendingRewards,
+          date: new Date(), // Date actuelle
+          notes: "Récompenses en attente",
+          txHash: "",
+          status: "pending"
+        });
+      }
+      
+      // Si l'utilisateur a des gains totaux supérieurs aux récompenses en attente,
+      // c'est qu'il a déjà retiré des récompenses ou réinvesti
+      const claimedRewards = totalEarned - pendingRewards;
+      if (claimedRewards > 0) {
+        processedTransactions.push({
+          id: `TX-REW-CLAIMED`,
+          type: "withdrawal",
+          amount: claimedRewards,
+          date: new Date(Date.now() - 86400000), // Estimé à 1 jour avant (approximation)
+          notes: "Récompenses réclamées",
+          txHash: "",
+          status: "completed"
+        });
+      }
       
       // Trier par date (du plus récent au plus ancien)
       processedTransactions.sort((a, b) => b.date - a.date);
       
-      console.log(`Transactions traitées: ${processedTransactions.length}`);
+      console.log(`Total des transactions traitées: ${processedTransactions.length}`);
       
       // Mettre à jour les états
       setTransactions(processedTransactions);
@@ -326,22 +302,8 @@ if (depositEvents.length === 0 && withdrawEvents.length === 0 &&
       setIsLoading(false);
       
     } catch (error) {
-      // Extraction des détails de l'erreur pour un meilleur message
-      let errorMessage = "Erreur inconnue";
-      if (error.message) {
-        errorMessage = error.message;
-      }
-      if (error.error && error.error.message) {
-        errorMessage = error.error.message;
-      }
-      if (error.data && error.data.message) {
-        errorMessage = error.data.message;
-      }
-      
-      console.error("Erreur détaillée lors de la récupération de l'historique:", error);
-      console.error("Message d'erreur extrait:", errorMessage);
-      
-      setStatus(`❌ Erreur: ${errorMessage}`);
+      console.error("Erreur détaillée lors de la récupération des données:", error);
+      setStatus(`❌ Erreur: ${error.message}`);
       setIsLoading(false);
     }
   };
