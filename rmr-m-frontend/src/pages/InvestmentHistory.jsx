@@ -240,24 +240,7 @@ const fetchTransactionHistory = async (address) => {
           status: "completed",
           notes: "Retrait de capital"
         };
-      })),
-      
-      ...await Promise.all(harvestEvents.map(async (event) => {
-        const block = await event.getBlock();
-        // Déterminer si c'est un réinvestissement automatique ou un retrait
-        const isReinvestment = event.args.reinvested && event.args.reinvested === true;
-        
-        return {
-          id: `TX-HAR-${event.transactionHash.substring(0, 6)}`,
-          type: isReinvestment ? "reinvestment" : "withdrawal",
-          amount: parseFloat(ethers.utils.formatUnits(event.args.reward, 6)), // USDC/USDT à 6 décimales
-          date: new Date(block.timestamp * 1000),
-          txHash: event.transactionHash,
-          status: "completed",
-          notes: isReinvestment ? "Réinvestissement des gains" : "Retrait de gains"
-        };
-      }))
-    ];
+      }))]
     
     // Trier par date (du plus récent au plus ancien)
     processedTransactions.sort((a, b) => b.date - a.date);
