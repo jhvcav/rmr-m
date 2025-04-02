@@ -173,6 +173,8 @@ const InvestmentHistory = () => {
   const fetchTransactionHistory = async (address) => {
     setIsLoading(true);
     
+    console.log("Recherche des transactions pour l'adresse:",address);
+    
     try {
       // Vérifier que le provider est disponible
       const provider = getProvider();
@@ -218,7 +220,7 @@ const InvestmentHistory = () => {
       // Récupérer les événements pertinents
       const currentBlock = await provider.getBlockNumber();
       // Limiter à un nombre raisonnable de blocs pour éviter les timeouts
-      const fromBlock = Math.max(0, currentBlock - 200000);
+      const fromBlock = 0; // Rechercher depuis le debut de la blockchain
       
       console.log(`Recherche des événements du bloc ${fromBlock} au bloc ${currentBlock}`);
     
