@@ -183,9 +183,14 @@ const fetchTransactionHistory = async (address) => {
     const withdrawFilter = lpFarmingContract.filters.Withdraw(address);
     const withdrawEvents = await lpFarmingContract.queryFilter(withdrawFilter, fromBlock, currentBlock);
     
-    // Récupérer les événements de récompense récoltés
-    const harvestFilter = lpFarmingContract.filters.RewardPaid(address);
-    const harvestEvents = await lpFarmingContract.queryFilter(harvestFilter, fromBlock, currentBlock);
+    // Récupérer les événements de réclamation de récompenses
+    const claimRewardsFilter = lpFarmingContract.filters.ClaimRewards(address);
+    const claimRewardsEvents = await lpFarmingContract.queryFilter(claimRewardsFilter, fromBlock, currentBlock);
+
+    // Récupérer les événements de réinvestissement de récompenses
+    const reinvestRewardsFilter = lpFarmingContract.filters.ReinvestRewards(address);
+    const reinvestRewardsEvents = await lpFarmingContract.queryFilter(reinvestRewardsFilter, fromBlock, currentBlock);
+
     
     // Transformer les événements en transactions
     const processedTransactions = [
@@ -199,6 +204,33 @@ const fetchTransactionHistory = async (address) => {
           plan: "Investissement LP Farming",
           txHash: event.transactionHash,
           status: "completed"
+        };
+      })),
+
+      ...await Promise.all(claimRewardsEvents.map(async (event) => {
+        const block = await event.getBlock();
+        return {
+          id: `TX-CLA-${event.transactionHash.substring(0, 6)}`,
+          type: "withdrawal",
+          amount: parseFloat(ethers.utils.formatUnits(event.args.amount, 6)),
+          date: new Date(block.timestamp * 1000),
+          txHash: event.transactionHash,
+          status: "completed",
+          notes: "Retrait de récompenses"
+        };
+      })),
+      
+      ...await Promise.all(reinvestRewardsEvents.map(async (event) => {
+        const block = await event.getBlock();
+        return {
+          id: `TX-REI-${event.transactionHash.substring(0, 6)}`,
+          type: "reinvestment",
+          amount: parseFloat(ethers.utils.formatUnits(event.args.amount, 6)),
+          date: new Date(block.timestamp * 1000),
+          txHash: event.transactionHash,
+          status: "completed",
+          notes: "Réinvestissement des récompenses",
+          newInvestmentId: event.args.newInvestmentId ? event.args.newInvestmentId.toString() : null
         };
       })),
       
