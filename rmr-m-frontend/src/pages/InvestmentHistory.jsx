@@ -174,7 +174,7 @@ const InvestmentHistory = () => {
     setIsLoading(true);
     
     console.log("Recherche des transactions pour l'adresse:",address);
-    
+
     try {
       // Vérifier que le provider est disponible
       const provider = getProvider();
@@ -185,13 +185,6 @@ const InvestmentHistory = () => {
       // Récupérer le chainId actuel
       const networkChainId = await window.ethereum.request({ method: 'eth_chainId' });
       console.log("Chaîne actuelle:", networkChainId);
-      
-      // Vérifier si la chaîne est prise en charge
-      if (networkChainId !== '0x38') { // BSC Mainnet
-        setStatus(`⚠️ Vous êtes connecté à un réseau non supporté (${networkChainId}). Veuillez vous connecter à BSC Mainnet.`);
-        setIsLoading(false);
-        return;
-      }
       
       // Récupérer les adresses de contrats pour la chaîne actuelle
       const addresses = contractAddresses.get(networkChainId);
