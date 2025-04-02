@@ -240,7 +240,7 @@ const fetchTransactionHistory = async (address) => {
           status: "completed",
           notes: "Retrait de capital"
         };
-      }))]
+      }))];
     
     // Trier par date (du plus récent au plus ancien)
     processedTransactions.sort((a, b) => b.date - a.date);
