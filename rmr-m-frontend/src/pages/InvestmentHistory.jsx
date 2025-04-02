@@ -175,7 +175,7 @@ const fetchTransactionHistory = async (address) => {
     const depositEvents = await lpFarmingContract.queryFilter(depositFilter, fromBlock, currentBlock);
     
     // Récupérer les événements de retrait
-    const withdrawFilter = lpFarmingContract.filters.Withdraw(address);
+    const withdrawFilter = lpFarmingContract.filters.WithdrawCapital(address);
     const withdrawEvents = await lpFarmingContract.queryFilter(withdrawFilter, fromBlock, currentBlock);
     
     // Récupérer les événements de réclamation de récompenses
@@ -253,8 +253,8 @@ const fetchTransactionHistory = async (address) => {
     setIsLoading(false);
     
   } catch (error) {
-    console.error("Erreur lors de la récupération de l'historique:", error);
-    setStatus("❌ Erreur lors du chargement de l'historique des transactions");
+    console.error("Erreur détaillée lors de la récupération de l'historique:", error);
+    setStatus(`❌ Erreur: ${error.message}`);
     setIsLoading(false);
   }
 };
@@ -427,7 +427,7 @@ const generatePDF = () => {
 const openTxExplorer = async (txHash) => {
   // Utiliser l'explorateur BSC Mainnet
   const explorerUrl = await getExplorerUrl();
-  window.open(`${explorerBaseUrl}/tx/${txHash}`, '_blank');
+  window.open(`${explorerUrl}/tx/${txHash}`, '_blank');
 };
 
 // Fonction pour obtenir l'URL de l'explorateur en fonction de la chaîne
