@@ -221,19 +221,51 @@ const InvestmentHistory = () => {
       
       console.log("Nombre d'investissements:", ids.length);
       
+      // Pour récupérer les hashes de transaction, nous allons interroger directement BSCScan
+      // Sans clé API, nous sommes limités à 5 requêtes par seconde
+      const baseURL = networkChainId === '0x38' ? 
+        "https://api.bscscan.com/api" : 
+        "https://api-testnet.bscscan.com/api";
+      
+      // Récupérer les transactions récentes de l'utilisateur avec le contrat (sans clé API)
+      const txListURL = `${baseURL}?module=account&action=txlist&address=${address}&startblock=0&endblock=99999999&sort=desc`;
+      const txResponse = await fetch(txListURL);
+      const txData = await txResponse.json();
+      
+      // Créer un mapping des hash de transactions par date approximative (timestamp)
+      const txHashesByTimestamp = {};
+      if (txData.status === "1" && txData.result) {
+        // Filtrer pour garder uniquement les transactions avec notre contrat
+        const contractTxs = txData.result.filter(tx => 
+          tx.to.toLowerCase() === addresses.lpFarming.toLowerCase()
+        );
+        
+        // Organiser par timestamp
+        contractTxs.forEach(tx => {
+          const timestamp = parseInt(tx.timeStamp);
+          txHashesByTimestamp[timestamp] = tx.hash;
+        });
+      }
+      
       // Convertir les données en transactions
       const processedTransactions = [];
       
       // Ajouter les investissements
       for (let i = 0; i < ids.length; i++) {
+        const startTime = startTimes[i].toNumber();
+        const endTime = endTimes[i].toNumber();
+        
+        // Chercher le hash de transaction proche du temps de départ
+        const depositHash = findClosestTxHash(txHashesByTimestamp, startTime) || "";
+        
         // Créer une transaction pour l'investissement initial
         processedTransactions.push({
           id: `TX-INV-${ids[i].toString()}`,
           type: "investment",
-          amount: parseFloat(ethers.utils.formatUnits(amounts[i], 6)),
-          date: new Date(startTimes[i].toNumber() * 1000),
+          amount: parseFloat(ethers.utils.formatUnits(amounts[i], 6)),  // USDC utilise 6 décimales
+          date: new Date(startTime * 1000),
           plan: `Investissement LP ${periods[i].toString()} jours à ${aprs[i].toNumber() / 100}%`,
-          txHash: "", // Nous n'avons pas le hash de transaction ici
+          txHash: depositHash,
           status: "completed",
           investmentId: ids[i].toString(),
           active: activeStatus[i]
@@ -241,13 +273,16 @@ const InvestmentHistory = () => {
         
         // Si l'investissement n'est plus actif, ajouter également un retrait
         if (!activeStatus[i]) {
+          // Chercher le hash de transaction proche du temps de fin
+          const withdrawHash = findClosestTxHash(txHashesByTimestamp, endTime) || "";
+          
           processedTransactions.push({
             id: `TX-WIT-${ids[i].toString()}`,
             type: "withdrawal",
-            amount: parseFloat(ethers.utils.formatUnits(amounts[i], 6)),
-            date: new Date(endTimes[i].toNumber() * 1000),
+            amount: parseFloat(ethers.utils.formatUnits(amounts[i], 6)),  // USDC utilise 6 décimales
+            date: new Date(endTime * 1000),
             notes: "Retrait de capital",
-            txHash: "", // Nous n'avons pas le hash de transaction
+            txHash: withdrawHash,
             status: "completed",
             investmentId: ids[i].toString()
           });
@@ -258,8 +293,8 @@ const InvestmentHistory = () => {
       const balanceData = await lpFarmingContract.getUserBalance(address);
       console.log("Données de solde:", balanceData);
       
-      const totalEarned = parseFloat(ethers.utils.formatUnits(balanceData.totalEarned, 6));
-      const pendingRewards = parseFloat(ethers.utils.formatUnits(balanceData.pendingRewards, 6));
+      const totalEarned = parseFloat(ethers.utils.formatUnits(balanceData.totalEarned, 6));  // USDC utilise 6 décimales
+      const pendingRewards = parseFloat(ethers.utils.formatUnits(balanceData.pendingRewards, 6));  // USDC utilise 6 décimales
       
       // Si l'utilisateur a des récompenses, ajouter comme transaction en attente
       if (pendingRewards > 0) {
@@ -278,13 +313,17 @@ const InvestmentHistory = () => {
       // c'est qu'il a déjà retiré des récompenses ou réinvesti
       const claimedRewards = totalEarned - pendingRewards;
       if (claimedRewards > 0) {
+        // Chercher le hash de transaction le plus récent pour les récompenses
+        const recentHash = Object.keys(txHashesByTimestamp).length > 0 ? 
+          txHashesByTimestamp[Math.max(...Object.keys(txHashesByTimestamp).map(k => parseInt(k)))] : "";
+        
         processedTransactions.push({
           id: `TX-REW-CLAIMED`,
           type: "withdrawal",
           amount: claimedRewards,
           date: new Date(Date.now() - 86400000), // Estimé à 1 jour avant (approximation)
           notes: "Récompenses réclamées",
-          txHash: "",
+          txHash: recentHash,
           status: "completed"
         });
       }
@@ -306,6 +345,32 @@ const InvestmentHistory = () => {
       setStatus(`❌ Erreur: ${error.message}`);
       setIsLoading(false);
     }
+  };
+  
+  // Fonction utilitaire pour trouver le hash de transaction le plus proche d'un timestamp donné
+  const findClosestTxHash = (txHashesByTimestamp, targetTimestamp) => {
+    if (Object.keys(txHashesByTimestamp).length === 0) {
+      return null;
+    }
+    
+    // Convertir les clés en nombres et trier
+    const timestamps = Object.keys(txHashesByTimestamp).map(ts => parseInt(ts)).sort((a, b) => a - b);
+    
+    // Trouver le timestamp le plus proche
+    let closest = timestamps[0];
+    let closestDiff = Math.abs(targetTimestamp - closest);
+    
+    for (let i = 1; i < timestamps.length; i++) {
+      const diff = Math.abs(targetTimestamp - timestamps[i]);
+      if (diff < closestDiff) {
+        closest = timestamps[i];
+        closestDiff = diff;
+      }
+    }
+    
+    // Retourner le hash correspondant au timestamp le plus proche
+    // Mais seulement si la différence est inférieure à 1 jour (86400 secondes)
+    return closestDiff <= 86400 ? txHashesByTimestamp[closest] : null;
   };
 
   // Fonction pour filtrer les transactions
