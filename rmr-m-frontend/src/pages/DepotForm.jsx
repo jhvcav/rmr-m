@@ -76,11 +76,6 @@ const DepotForm = () => {
       return new ethers.providers.Web3Provider(window.ethereum);
     }
     
-    // Pour ethers v6
-    if (ethers.BrowserProvider) {
-      return new ethers.BrowserProvider(window.ethereum);
-    }
-    
     throw new Error("Version d'ethers non supportée");
   };
 
