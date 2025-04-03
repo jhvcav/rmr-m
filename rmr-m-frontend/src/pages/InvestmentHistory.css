@@ -443,12 +443,23 @@
   
   .transactions-table th.transaction-details,
   .transactions-table td.transaction-details {
-    display: none; /* Cache la colonne "Détails" sur mobile */
+    max-width: 80px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   
   .transactions-table th.transaction-hash-cell,
   .transactions-table td.transaction-hash-cell {
-    display: none; /* Cache la colonne "Hash" sur mobile */
+    max-width: 70px;
+  }
+  
+  .transaction-hash {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+    max-width: 70px;
   }
   
   .responsive-table {
