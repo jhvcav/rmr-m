@@ -300,8 +300,8 @@ const InvestmentHistory = () => {
       const balanceData = await lpFarmingContract.getUserBalance(address);
       console.log("Données de solde:", balanceData);
       
-      const totalEarned = parseFloat(ethers.utils.formatUnits(balanceData.totalEarned, 6));  // USDC utilise 6 décimales
-      const pendingRewards = parseFloat(ethers.utils.formatUnits(balanceData.pendingRewards, 6));  // USDC utilise 6 décimales
+      const totalEarned = parseFloat(ethers.utils.formatUnits(balanceData.totalEarned, 18));  // USDC utilise 6 décimales
+      const pendingRewards = parseFloat(ethers.utils.formatUnits(balanceData.pendingRewards, 18));  // USDC utilise 6 décimales
       
       // Si l'utilisateur a des récompenses, ajouter comme transaction en attente
       if (pendingRewards > 0) {
