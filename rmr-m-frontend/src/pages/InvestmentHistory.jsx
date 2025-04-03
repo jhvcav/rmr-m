@@ -254,6 +254,10 @@ const InvestmentHistory = () => {
       for (let i = 0; i < ids.length; i++) {
         const startTime = startTimes[i].toNumber();
         const endTime = endTimes[i].toNumber();
+
+        console.log("BigNumber original:", amounts[i].toString());
+        console.log("Après formatUnits(x, 6):", ethers.utils.formatUnits(amounts[i], 6));
+        console.log("Après parseFloat:", parseFloat(ethers.utils.formatUnits(amounts[i], 6)));
         
         // Conversion correcte du montant (USDC a 6 décimales, pas 18)
         const amount = parseFloat(ethers.utils.formatUnits(amounts[i], 6));
