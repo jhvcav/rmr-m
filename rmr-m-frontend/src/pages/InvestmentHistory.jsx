@@ -255,6 +255,9 @@ const InvestmentHistory = () => {
         const startTime = startTimes[i].toNumber();
         const endTime = endTimes[i].toNumber();
         
+        // Conversion correcte du montant (USDC a 6 décimales, pas 18)
+        const amount = parseFloat(ethers.utils.formatUnits(amounts[i], 6));
+        
         // Chercher le hash de transaction proche du temps de départ
         const depositHash = findClosestTxHash(txHashesByTimestamp, startTime) || "";
         
@@ -262,7 +265,7 @@ const InvestmentHistory = () => {
         processedTransactions.push({
           id: `TX-INV-${ids[i].toString()}`,
           type: "investment",
-          amount: parseFloat(ethers.utils.formatUnits(amounts[i], 6)),  // USDC utilise 6 décimales
+          amount: amount, // Utilisation de la variable convertie correctement
           date: new Date(startTime * 1000),
           plan: `Investissement LP ${periods[i].toString()} jours à ${aprs[i].toNumber() / 100}%`,
           txHash: depositHash,
@@ -279,7 +282,7 @@ const InvestmentHistory = () => {
           processedTransactions.push({
             id: `TX-WIT-${ids[i].toString()}`,
             type: "withdrawal",
-            amount: parseFloat(ethers.utils.formatUnits(amounts[i], 6)),  // USDC utilise 6 décimales
+            amount: amount, // Utilisation de la variable convertie correctement
             date: new Date(endTime * 1000),
             notes: "Retrait de capital",
             txHash: withdrawHash,
