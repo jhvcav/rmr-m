@@ -655,61 +655,65 @@ const InvestmentHistory = () => {
             </button>
           </div>
           
-          {/* Transactions */}
-          {filteredTransactions.length > 0 ? (
-            <>
-              <div className="transactions-list">
-                <div className="responsive-table">
-                  <table className="transactions-table">
-                    <thead>
-                      <tr>
-                        <th>ID</th>
-                        <th>Date</th>
-                        <th>Type</th>
-                        <th>Montant</th>
-                        <th className="transaction-details">Détails</th>
-                        <th className="transaction-hash-cell">Hash</th>
-                        <th>Statut</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {displayedTransactions.map((transaction) => (
-                        <tr key={transaction.id}>
-                          <td className="transaction-id">{transaction.id}</td>
-                          <td>{formatDate(transaction.date)}</td>
-                          <td>
-                            <div className="transaction-type">
-                              <span className="transaction-type-icon">
-                                {getTransactionIcon(transaction.type)}
-                              </span>
-                              <span>{getTransactionTypeLabel(transaction.type)}</span>
-                            </div>
-                          </td>
-                          <td className={`transaction-amount ${transaction.type}`}>
-                            {transaction.type === "withdrawal" ? "-" : ""} {transaction.amount.toFixed(2)} USDT
-                          </td>
-                          <td className="transaction-details">
-                            {transaction.plan || transaction.notes || "-"}
-                          </td>
-                          <td className="transaction-hash-cell">
-                            <span 
-                              className="transaction-hash"
-                              onClick={() => openTxExplorer(transaction.txHash)}
-                            >
-                              {transaction.txHash}
-                            </span>
-                          </td>
-                          <td>
-                            <span className={`transaction-status ${transaction.status}`}>
-                              {transaction.status === "completed" ? "Complété" : transaction.status === "pending" ? "En cours" : "Échoué"}
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
+{/* Transactions */}
+{filteredTransactions.length > 0 ? (
+  <>
+    <div className="transactions-list">
+      <div className="responsive-table">
+        <table className="transactions-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Date</th>
+              <th>Type</th>
+              <th>Montant</th>
+              <th className="transaction-details">Détails</th>
+              <th className="transaction-hash-cell">Hash</th>
+              <th>Statut</th>
+            </tr>
+          </thead>
+          <tbody>
+            {displayedTransactions.map((transaction) => (
+              <tr key={transaction.id}>
+                <td className="transaction-id">{transaction.id}</td>
+                <td>{formatDate(transaction.date)}</td>
+                <td>
+                  <div className="transaction-type">
+                    <span className="transaction-type-icon">
+                      {getTransactionIcon(transaction.type)}
+                    </span>
+                    <span>{getTransactionTypeLabel(transaction.type)}</span>
+                  </div>
+                </td>
+                <td className={`transaction-amount ${transaction.type}`}>
+                  {transaction.type === "withdrawal" ? "-" : ""} {transaction.amount.toFixed(2)} USDC
+                </td>
+                <td className="transaction-details">
+                  {transaction.plan || transaction.notes || "-"}
+                </td>
+                <td className="transaction-hash-cell">
+                  {transaction.txHash ? (
+                    <span 
+                      className="transaction-hash"
+                      onClick={() => openTxExplorer(transaction.txHash)}
+                    >
+                      {`${transaction.txHash.substring(0, 6)}...${transaction.txHash.substring(transaction.txHash.length - 4)}`}
+                    </span>
+                  ) : (
+                    "-"
+                  )}
+                </td>
+                <td>
+                  <span className={`transaction-status ${transaction.status}`}>
+                    {transaction.status === "completed" ? "Complété" : transaction.status === "pending" ? "En cours" : "Échoué"}
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
 
               {/* Pagination */}
               {totalPages > 1 && (
