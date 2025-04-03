@@ -260,7 +260,7 @@ const InvestmentHistory = () => {
         console.log("Après parseFloat:", parseFloat(ethers.utils.formatUnits(amounts[i], 6)));
         
         // Conversion correcte du montant (USDC a 6 décimales, pas 18)
-        const amount = parseFloat(ethers.utils.formatUnits(amounts[i], 6));
+        const amount = parseFloat(ethers.utils.formatUnits(amounts[i], 18));
         
         // Chercher le hash de transaction proche du temps de départ
         const depositHash = findClosestTxHash(txHashesByTimestamp, startTime) || "";
