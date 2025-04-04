@@ -373,8 +373,8 @@ const Dashboard = () => {
 
   // Fonction pour retirer les gains (réelle)
   const handleWithdrawEarnings = async () => {
-    if (availableForWithdrawal > 0) {
-      addStatus(`⚠️ Le minimum pour retirer est de 5 ${usdcSymbol}.`);
+    if (availableForWithdrawal >= 0) {
+      addStatus(`⚠️ Le minimum pour retirer est de 0.1 ${usdcSymbol}.`);
       return;
     }
     
@@ -590,7 +590,7 @@ const Dashboard = () => {
           <button 
             className={`action-btn withdraw-btn responsive-button ${availableForWithdrawal <= 0  ? 'disabled' : ''}`}
             onClick={handleWithdrawEarnings} 
-            disabled={availableForWithdrawal < 0}
+            //disabled={availableForWithdrawal < 0}
           >
             🔄 Retirer mes gains
             {availableForWithdrawal > 0 && <span className="btn-note">(min. 0 {usdcSymbol})</span>}
