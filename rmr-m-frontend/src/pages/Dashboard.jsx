@@ -588,9 +588,9 @@ const Dashboard = () => {
         {/* Actions rapides */}
         <div className="dashboard-actions">
           <button 
-            className={`action-btn withdraw-btn responsive-button ${availableForWithdrawal > 1  ? 'disabled' : ''}`}
+            className={`action-btn withdraw-btn responsive-button ${availableForWithdrawal < 1  ? 'disabled' : ''}`}
             onClick={handleWithdrawEarnings} 
-            //disabled={availableForWithdrawal < 0}
+            disabled={availableForWithdrawal < 1}
           >
             🔄 Retirer mes gains
             {availableForWithdrawal > 1 && <span className="btn-note">(min. 1 {usdcSymbol})</span>}
