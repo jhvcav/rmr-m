@@ -48,7 +48,7 @@ const Home = () => {
         <h2>Nos solutions pour générer des gains</h2>
         <div className="solution-list">
           <Link to="/rmr-m/lpfarming" className="solution-card">
-            <h3>📈 Investissements</h3>
+            <h3>📈 LPFarming</h3>
             <p>Placer des fonds dans des pools et obtenir un rendement stable.</p>
           </Link>
           <div className="solution-card">

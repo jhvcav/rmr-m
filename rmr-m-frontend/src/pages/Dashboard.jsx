@@ -593,7 +593,7 @@ const Dashboard = () => {
             //disabled={availableForWithdrawal < 0}
           >
             🔄 Retirer mes gains
-            {availableForWithdrawal <= 0 && <span className="btn-note">(min. 0.1 {usdcSymbol})</span>}
+            {availableForWithdrawal > 1 && <span className="btn-note">(min. 1 {usdcSymbol})</span>}
           </button>
           
           <button 
