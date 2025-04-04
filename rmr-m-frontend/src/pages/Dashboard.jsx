@@ -593,11 +593,11 @@ const Dashboard = () => {
             disabled={availableForWithdrawal < 1}
           >
             🔄 Retirer mes gains
-            {availableForWithdrawal > 1 && <span className="btn-note">(min. 1 {usdcSymbol})</span>}
+            {availableForWithdrawal < 1 && <span className="btn-note">(min. 1 {usdcSymbol})</span>}
           </button>
           
           <button 
-            className={`action-btn reinvest-btn responsive-button ${totalEarnings <= 0 ? 'disabled' : ''}`}
+            className={`action-btn reinvest-btn responsive-button ${totalEarnings < 1 ? 'disabled' : ''}`}
             onClick={handleReinvestEarnings} 
           >
             🔁 Réinvestir mes gains
