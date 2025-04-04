@@ -373,8 +373,8 @@ const Dashboard = () => {
 
   // Fonction pour retirer les gains (réelle)
   const handleWithdrawEarnings = async () => {
-    if (availableForWithdrawal <= 0) {
-      addStatus(`⚠️ Le minimum pour retirer est de 0.1 ${usdcSymbol}.`);
+    if (availableForWithdrawal > 1) {
+      addStatus(`⚠️ Le minimum pour retirer est de 1 ${usdcSymbol}.`);
       return;
     }
     
